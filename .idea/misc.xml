@@ -5,12 +5,15 @@
       <map>
         <entry key="app/src/main/res/drawable/ic_corn_black.xml" value="0.1385" />
         <entry key="app/src/main/res/drawable/ic_corn_emoji.xml" value="0.1385" />
+        <entry key="app/src/main/res/drawable/ic_globe_black.xml" value="0.1385" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1385" />
+        <entry key="app/src/main/res/drawable/ic_smiley_face.xml" value="0.1385" />
         <entry key="app/src/main/res/layout/activity_farmer_signup.xml" value="0.30842391304347827" />
         <entry key="app/src/main/res/layout/activity_locavore_signup.xml" value="0.20416666666666666" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.28583984375000004" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.115911865234375" />
         <entry key="app/src/main/res/layout/activity_signup.xml" value="0.19630192502532928" />
+        <entry key="app/src/main/res/layout/fragment_map.xml" value="0.7807291666666667" />
         <entry key="app/src/main/res/layout/fragment_orders.xml" value="0.1894630192502533" />
         <entry key="app/src/main/res/menu/menu_bottom_navigation.xml" value="0.17953016493055562" />
         <entry key="app/src/main/res/menu/menu_main.xml" value="0.25092592592592594" />
