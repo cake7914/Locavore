@@ -6,4 +6,14 @@
     <string name="login">Login</string>
     <string name="signup">Signup</string>
     <string name="email_address">email address</string>
+    <string name="username">username</string>
+    <string name="logout">logout</string>
+    <string name="not_a_user_yet">Not a user yet?</string>
+    <string name="signup_as_farmer">Signup as Farmer</string>
+    <string name="signup_as_locavore">Signup as Locavore</string>
+    <string name="name">Name</string>
+    <string name="radius">radius</string>
+    <string name="farm_name">Farm Name</string>
+    <string name="brief_farm_bio">brief farm bio</string>
+    <string name="address">address</string>
 </resources>
