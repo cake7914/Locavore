@@ -4,7 +4,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".LoginActivity">
+    tools:context=".FarmerSignupActivity">
+
+    <EditText
+        android:id="@+id/etName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="@string/farm_name"
+        android:inputType="textPersonName"
+        android:autofillHints="farm name" />
+
+    <EditText
+        android:id="@+id/etEmailAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="@string/email_address"
+        android:ems="10"
+        android:hint="@string/email_address"
+        android:inputType="textEmailAddress" />
 
     <EditText
         android:id="@+id/etUsername"
@@ -24,29 +42,28 @@
         android:hint="@string/password"
         android:inputType="textPassword" />
 
-    <Button
-        android:id="@+id/btnLogin"
+    <EditText
+        android:id="@+id/etBio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/login" />
+        android:ems="10"
+        android:hint="@string/brief_farm_bio"
+        android:inputType="textMultiLine"
+        android:autofillHints="farm bio" />
 
-    <TextView
-        android:id="@+id/textView"
+    <EditText
+        android:id="@+id/etLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/not_a_user_yet"
-        android:textAlignment="center" />
+        android:ems="10"
+        android:hint="@string/address"
+        android:inputType="textPostalAddress"
+        android:autofillHints="farm address" />
 
     <Button
         android:id="@+id/btnFarmerSignup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/signup_as_farmer" />
-
-    <Button
-        android:id="@+id/btnLocavoreSignup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/signup_as_locavore" />
+        android:text="@string/signup" />
 
 </LinearLayout>
