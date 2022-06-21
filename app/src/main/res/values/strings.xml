@@ -16,4 +16,12 @@
     <string name="farm_name">Farm Name</string>
     <string name="brief_farm_bio">brief farm bio</string>
     <string name="address">address</string>
+    <string name="corn">🌽</string>
+    <string name="map">🗺️</string>
+    <string name="smile">😁</string>
+    <string name="tractor">🚜</string>
+    <string name="map_screen">map</string>
+    <string name="order_screen">order</string>
+    <string name="feed_screen">feed</string>
+    <string name="profile">profile</string>
 </resources>

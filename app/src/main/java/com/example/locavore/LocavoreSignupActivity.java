@@ -53,7 +53,7 @@ public class LocavoreSignupActivity extends AppCompatActivity {
         user.setUsername(username);
         user.setPassword(password);
         user.put(MyUser.KEY_USER_TYPE, "locavore");
-        user.put(MyUser.KEY_RADIUS, radius);
+        //user.put(MyUser.KEY_RADIUS, radius);
         //user.put(MyUser.KEY_PUSH_NOTIFS_ENABLED, )
 
         user.signUpInBackground(e -> {
