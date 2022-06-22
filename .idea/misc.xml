@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/ic_barn.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_corn_black.xml" value="0.1385" />
         <entry key="app/src/main/res/drawable/ic_corn_emoji.xml" value="0.1385" />
         <entry key="app/src/main/res/drawable/ic_globe_black.xml" value="0.1385" />
