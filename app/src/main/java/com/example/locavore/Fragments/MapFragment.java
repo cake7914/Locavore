@@ -211,18 +211,18 @@ public class MapFragment extends Fragment {
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
             map.animateCamera(cameraUpdate);
-            getFarms();
+            getRequest("farms");
+            getRequest("farmersmarket");
         }
     }
 
-    public Bitmap getMarker() {
+    public Bitmap getMarker(String request) {
         IconGenerator iconGen = new IconGenerator(getContext());
 
-        // Define the size you want from dimensions file
+        // Define the size from the dimensions file
         int shapeSize = this.getResources().getDimensionPixelSize(R.dimen.custom_marker_value);
 
-        Drawable shapeDrawable = ResourcesCompat.getDrawable(this.getResources(),
-                R.drawable.ic_baseline_house_24, null);
+        Drawable shapeDrawable = request.equals("farms") ? ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_baseline_house_24, null) : ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_baseline_storefront_24, null);
         iconGen.setBackground(shapeDrawable);
 
         // Create a view container to set the size
@@ -234,23 +234,22 @@ public class MapFragment extends Fragment {
         return iconGen.makeIcon();
     }
 
-    protected void dropMarkers(List<Farm> newFarms){
+    protected void dropMarkers(List<Farm> newFarms, String request){
         for(Farm farm : newFarms) {
-            Log.i(TAG, farm.getName() + " " + farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState() + " ");
             map.addMarker(new MarkerOptions()
                     .position(farm.getCoordinates())
                     .title(farm.getName())
-                    .icon(BitmapDescriptorFactory.fromBitmap(getMarker()))
+                    .icon(BitmapDescriptorFactory.fromBitmap(getMarker(request)))
             );
             bounds = bounds.including(farm.getCoordinates());
             map.setLatLngBoundsForCameraTarget(bounds);
         }
     }
 
-    protected void getFarms() {
+    protected void getRequest(String request) {
         // network request: need to take off of main thread? does retrofit automatically do this?
         YelpService yelpService = retrofit.create(YelpService.class);
-        Call<FarmSearchResult> call = yelpService.searchFarms("Bearer "+YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(),"farms", 50, radius);
+        Call<FarmSearchResult> call = yelpService.searchFarms("Bearer "+YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(),request, 50, radius);
         call.enqueue(new Callback<FarmSearchResult>() {
             @Override
             public void onResponse(Call<FarmSearchResult> call, Response<FarmSearchResult> response) {
@@ -264,7 +263,7 @@ public class MapFragment extends Fragment {
                             newFarms.add(farm);
                         }
                     }
-                    dropMarkers(newFarms);
+                    dropMarkers(newFarms, request);
                 }
             }
 
