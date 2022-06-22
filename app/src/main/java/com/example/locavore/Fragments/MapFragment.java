@@ -222,7 +222,7 @@ public class MapFragment extends Fragment {
         // Define the size from the dimensions file
         int shapeSize = this.getResources().getDimensionPixelSize(R.dimen.custom_marker_value);
 
-        Drawable shapeDrawable = request.equals("farms") ? ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_baseline_house_24, null) : ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_baseline_storefront_24, null);
+        Drawable shapeDrawable = request.equals("farms") ? ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_farmhouse, null) : ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_baseline_storefront_24, null);
         iconGen.setBackground(shapeDrawable);
 
         // Create a view container to set the size
