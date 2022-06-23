@@ -21,6 +21,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
@@ -45,9 +47,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.maps.android.ui.IconGenerator;
-import com.parse.FindCallback;
-import com.parse.Parse;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
@@ -65,12 +64,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MapFragment extends Fragment {
 
     public static final String TAG = "MapFragment";
-    private static final String KEY_LOCATION = "location";
-    private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    public static final int TAG_CODE_PERMISSION_LOCATION = 500;
+    private static final String CATEGORY_FARM = "farms";
+    private static final String CATEGORY_FARMERS_MARKET = "farmersmarket";
     public static final String BASE_URL = "https://api.yelp.com/v3/";
-    private long UPDATE_INTERVAL = 60000;
-    private long FASTEST_INTERVAL = 60000;
+    private static final int MAX_YELP_RADIUS = 40000; // 40,000 meters or ~25 miles
+    private static final int YELP_RADIUS_INCREMENT = 8000; // ~ 5 miles
+    private static final double METERS_TO_MILE = 1609.34;
+    private static final long UPDATE_INTERVAL = 100000;
+    private static final long FASTEST_INTERVAL = 100000;
 
     private SupportMapFragment supportMapFragment;
     private GoogleMap map;
@@ -78,9 +79,13 @@ public class MapFragment extends Fragment {
     private Location prevLocation;
     private LocationRequest locationRequest;
     private Retrofit retrofit;
+    private Button btnIncreaseRadius;
+    private Button btnDecreaseRadius;
+    private TextView tvRadius;
 
     private Integer radius;
     private List<Farm> farms = new ArrayList<>();
+    private List<Marker> markers = new ArrayList<>();
     private LatLngBounds bounds;
 
 
@@ -113,11 +118,69 @@ public class MapFragment extends Fragment {
                 .build();
 
         radius = ParseUser.getCurrentUser().getInt("radius");
+
         if(radius == 0) {
-            ParseUser.getCurrentUser().put("radius", 40000);
+            ParseUser.getCurrentUser().put("radius", MAX_YELP_RADIUS);
             ParseUser.getCurrentUser().saveInBackground();
-            radius = ParseUser.getCurrentUser().getInt("radius");
+            radius = MAX_YELP_RADIUS;
         }
+
+        btnIncreaseRadius = view.findViewById(R.id.btnIncreaseRadius);
+        btnIncreaseRadius.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // increase radius by 5 miles
+                if(radius < MAX_YELP_RADIUS) //maximum radius allowed by yelp
+                {
+                    radius += YELP_RADIUS_INCREMENT;
+                    ParseUser.getCurrentUser().put("radius", radius);
+                    ParseUser.getCurrentUser().saveInBackground();
+                }
+                displayLocation();
+                tvRadius.setText(String.format(getContext().getString(R.string.radius_string), radius / METERS_TO_MILE));
+                //tvRadius.setText(radius / METERS_TO_MILE + " miles");
+            }
+        });
+
+        btnDecreaseRadius = view.findViewById(R.id.btnDecreaseRadius);
+        btnDecreaseRadius.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // decrease radius by 5 miles
+                if(radius > YELP_RADIUS_INCREMENT) //min radius ~= 5 miles
+                {
+                    radius -= YELP_RADIUS_INCREMENT;
+                    ParseUser.getCurrentUser().put("radius", radius);
+                    ParseUser.getCurrentUser().saveInBackground();
+                }
+                //adjust the map accordingly-- have to remove out of range markers
+                adjustRange();
+                displayLocation();
+                tvRadius.setText(String.format(getContext().getString(R.string.radius_string), radius / METERS_TO_MILE));
+            }
+        });
+
+        tvRadius = view.findViewById(R.id.tvRadius);
+        tvRadius.setText(String.format(getContext().getString(R.string.radius_string), radius / METERS_TO_MILE));
+    }
+
+    protected void adjustRange() {
+        List<Farm> nFarms = new ArrayList<>();
+        List<Marker> nMarkers = new ArrayList<>();
+
+        for (int i = 0; i < markers.size(); i++) //will farms and their markers always be at the same index? as farms get removed / added so do their markers?
+        {
+            if(farms.get(i).getDistance() > radius) { // remove these markers from the map
+                markers.get(i).remove();
+            }
+            else // keep these ones.
+            {
+                nFarms.add(farms.get(i));
+                nMarkers.add(markers.get(i));
+            }
+        }
+        farms = nFarms;
+        markers = nMarkers;
     }
 
     protected void loadMap(GoogleMap googleMap) {
@@ -211,8 +274,8 @@ public class MapFragment extends Fragment {
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
             map.animateCamera(cameraUpdate);
-            getRequest("farms");
-            getRequest("farmersmarket");
+            getRequest(CATEGORY_FARM);
+            getRequest(CATEGORY_FARMERS_MARKET);
         }
     }
 
@@ -222,7 +285,7 @@ public class MapFragment extends Fragment {
         // Define the size from the dimensions file
         int shapeSize = this.getResources().getDimensionPixelSize(R.dimen.custom_marker_value);
 
-        Drawable shapeDrawable = request.equals("farms") ? ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_farmhouse, null) : ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_baseline_storefront_24, null);
+        Drawable shapeDrawable = request.equals(CATEGORY_FARM) ? ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_farmhouse, null) : ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_baseline_storefront_24, null);
         iconGen.setBackground(shapeDrawable);
 
         // Create a view container to set the size
@@ -236,14 +299,15 @@ public class MapFragment extends Fragment {
 
     protected void dropMarkers(List<Farm> newFarms, String request){
         for(Farm farm : newFarms) {
-            map.addMarker(new MarkerOptions()
+            markers.add(map.addMarker(new MarkerOptions()
                     .position(farm.getCoordinates())
                     .title(farm.getName())
                     .icon(BitmapDescriptorFactory.fromBitmap(getMarker(request)))
-            );
+            ));
             bounds = bounds.including(farm.getCoordinates());
             map.setLatLngBoundsForCameraTarget(bounds);
         }
+        Log.i(TAG, String.valueOf(markers.size()));
     }
 
     protected void getRequest(String request) {
@@ -261,6 +325,7 @@ public class MapFragment extends Fragment {
                     for(Farm farm : response.body().getFarms()) {
                         if(!existingFarm(farm, farms) && farm.getDistance() < radius) {
                             newFarms.add(farm);
+                            farms.add(farm);
                         }
                     }
                     dropMarkers(newFarms, request);

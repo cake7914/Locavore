@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/ic_barn.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_remove_24.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_baseline_storefront_24.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_corn_black.xml" value="0.1385" />
         <entry key="app/src/main/res/drawable/ic_corn_emoji.xml" value="0.1385" />
@@ -16,7 +17,7 @@
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.28583984375000004" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.115911865234375" />
         <entry key="app/src/main/res/layout/activity_signup.xml" value="0.19630192502532928" />
-        <entry key="app/src/main/res/layout/fragment_map.xml" value="0.7807291666666667" />
+        <entry key="app/src/main/res/layout/fragment_map.xml" value="0.3170862833658854" />
         <entry key="app/src/main/res/layout/fragment_orders.xml" value="0.1894630192502533" />
         <entry key="app/src/main/res/menu/menu_bottom_navigation.xml" value="0.17953016493055562" />
         <entry key="app/src/main/res/menu/menu_main.xml" value="0.25092592592592594" />
