@@ -85,6 +85,7 @@ public class MapFragment extends Fragment {
 
     private Integer radius;
     private List<Farm> farms = new ArrayList<>();
+    private List<String> farmIds = new ArrayList<>();
     private List<Marker> markers = new ArrayList<>();
     private LatLngBounds bounds;
 
@@ -138,7 +139,6 @@ public class MapFragment extends Fragment {
                 }
                 displayLocation();
                 tvRadius.setText(String.format(getContext().getString(R.string.radius_string), radius / METERS_TO_MILE));
-                //tvRadius.setText(radius / METERS_TO_MILE + " miles");
             }
         });
 
@@ -167,6 +167,7 @@ public class MapFragment extends Fragment {
     protected void adjustRange() {
         List<Farm> nFarms = new ArrayList<>();
         List<Marker> nMarkers = new ArrayList<>();
+        List<String> nFarmIds = new ArrayList<>();
 
         for (int i = 0; i < markers.size(); i++) //will farms and their markers always be at the same index? as farms get removed / added so do their markers?
         {
@@ -177,10 +178,12 @@ public class MapFragment extends Fragment {
             {
                 nFarms.add(farms.get(i));
                 nMarkers.add(markers.get(i));
+                nFarmIds.add(farmIds.get(i));
             }
         }
         farms = nFarms;
         markers = nMarkers;
+        farmIds = nFarmIds;
     }
 
     protected void loadMap(GoogleMap googleMap) {
@@ -313,7 +316,7 @@ public class MapFragment extends Fragment {
     protected void getRequest(String request) {
         // network request: need to take off of main thread? does retrofit automatically do this?
         YelpService yelpService = retrofit.create(YelpService.class);
-        Call<FarmSearchResult> call = yelpService.searchFarms("Bearer "+YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(),request, 50, radius);
+        Call<FarmSearchResult> call = yelpService.searchFarms("Bearer "+ YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(),request, 50, radius);
         call.enqueue(new Callback<FarmSearchResult>() {
             @Override
             public void onResponse(Call<FarmSearchResult> call, Response<FarmSearchResult> response) {
@@ -322,10 +325,12 @@ public class MapFragment extends Fragment {
                     Log.e(TAG, "Error retrieving response body");
                 } else {
                     List<Farm> newFarms = new ArrayList<>();
+
                     for(Farm farm : response.body().getFarms()) {
-                        if(!existingFarm(farm, farms) && farm.getDistance() < radius) {
+                        if(!farmIds.contains(farm.getId()) && farm.getDistance() < radius) {
                             newFarms.add(farm);
                             farms.add(farm);
+                            farmIds.add(farm.getId());
                         }
                     }
                     dropMarkers(newFarms, request);
@@ -337,16 +342,5 @@ public class MapFragment extends Fragment {
                 Log.i(TAG, "Failure " + t);
             }
         });
-    }
-
-    protected boolean existingFarm(Farm newFarm, List<Farm> farms) {
-        for(Farm farm : farms)
-        {
-            if(farm.getId().equals(newFarm.getId()))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 }
