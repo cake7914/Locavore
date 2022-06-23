@@ -28,13 +28,13 @@
         android:theme="@style/Theme.Locavore"
         tools:targetApi="31">
         <activity
-            android:name=".CustomWindowAdapter"
+            android:name=".Adapters.CustomWindowAdapter"
             android:exported="false" />
         <activity
-            android:name=".LocavoreSignupActivity"
+            android:name=".Activities.LocavoreSignupActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".Activities.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,10 +43,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".FarmerSignupActivity"
+            android:name=".Activities.FarmerSignupActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".Activities.MainActivity"
             android:exported="true" />
 
         <uses-library

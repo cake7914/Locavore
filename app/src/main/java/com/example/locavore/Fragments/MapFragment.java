@@ -24,7 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.locavore.CustomWindowAdapter;
+import com.example.locavore.Adapters.CustomWindowAdapter;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.example.locavore.Models.FarmSearchResult;
