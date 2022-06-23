@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.locavore.CustomWindowAdapter;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.example.locavore.Models.FarmSearchResult;
@@ -110,6 +111,7 @@ public class MapFragment extends Fragment {
             @Override
             public void onMapReady(GoogleMap map) {
                 loadMap(map);
+                map.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater()));
             }
         });
 
@@ -169,7 +171,7 @@ public class MapFragment extends Fragment {
         List<Marker> nMarkers = new ArrayList<>();
         List<String> nFarmIds = new ArrayList<>();
 
-        for (int i = 0; i < markers.size(); i++) //will farms and their markers always be at the same index? as farms get removed / added so do their markers?
+        for (int i = 0; i < markers.size(); i++) // farms and their markers always be at the same index? as farms get removed / added so do their markers?
         {
             if(farms.get(i).getDistance() > radius) { // remove these markers from the map
                 markers.get(i).remove();
@@ -302,15 +304,16 @@ public class MapFragment extends Fragment {
 
     protected void dropMarkers(List<Farm> newFarms, String request){
         for(Farm farm : newFarms) {
-            markers.add(map.addMarker(new MarkerOptions()
+            Marker marker = map.addMarker(new MarkerOptions()
                     .position(farm.getCoordinates())
                     .title(farm.getName())
                     .icon(BitmapDescriptorFactory.fromBitmap(getMarker(request)))
-            ));
+            );
+            marker.setTag(farm); // associate farm --> marker
+            markers.add(marker);
             bounds = bounds.including(farm.getCoordinates());
             map.setLatLngBoundsForCameraTarget(bounds);
         }
-        Log.i(TAG, String.valueOf(markers.size()));
     }
 
     protected void getRequest(String request) {
