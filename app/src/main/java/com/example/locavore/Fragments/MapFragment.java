@@ -4,6 +4,7 @@ import static com.example.locavore.BuildConfig.YELP_API_KEY;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -172,6 +173,8 @@ public class MapFragment extends Fragment {
         profilesAdapter = new MapProfilesAdapter(getContext(), farms);
         rvProfiles.setAdapter(profilesAdapter);
         rvProfiles.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+
+
     }
 
     protected void adjustRange() {
@@ -214,6 +217,7 @@ public class MapFragment extends Fragment {
         MapFragmentPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     void getMyLocation() {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -224,6 +228,20 @@ public class MapFragment extends Fragment {
         /*map.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
                         getContext(), R.raw.style_json));*/
+
+        map.setOnMarkerClickListener(marker -> {
+            // scroll the adapter to the farm that has been clicked on
+            for(int i = 0; i < farms.size(); i++) {
+                if(farms.get(i) == marker.getTag()) {
+                    rvProfiles.smoothScrollToPosition(i);
+                    break;
+                }
+            }
+
+            //TODO: enlarge this farms' profile with more details (centralize)
+
+            return true;
+        });
 
         FusedLocationProviderClient locationClient = getFusedLocationProviderClient(getContext());
         locationClient.getLastLocation()
