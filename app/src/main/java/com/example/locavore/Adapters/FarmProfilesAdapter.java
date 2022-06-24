@@ -5,8 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.locavore.R;
 
 
@@ -14,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.locavore.Models.Farm;
+import com.parse.ParseFile;
 
 import java.util.List;
 
@@ -59,14 +62,23 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
     class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView tvFarmName;
+        ImageView ivProfileImage;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvFarmName = itemView.findViewById(R.id.tvFarmName);
+            ivProfileImage = itemView.findViewById(R.id.ivProfileImage);
         }
 
         public void bind(Farm farm) {
             tvFarmName.setText(farm.getName());
+
+            if(farm.getImageUrl() != null) {
+                Glide.with(context).load(farm.getImageUrl()).circleCrop().into(ivProfileImage);
+            } else {
+                ivProfileImage.setImageBitmap(null);
+            }
+
         }
     }
 

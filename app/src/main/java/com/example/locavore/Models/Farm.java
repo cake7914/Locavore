@@ -189,8 +189,9 @@ public class Farm {
         this.transactions = transactions;
     }
 
-    public Farm(String name) {
+    public Farm(String name, String profileImageUrl) {
         this.name = name;
+        this.imageUrl = profileImageUrl;
     }
 
 }

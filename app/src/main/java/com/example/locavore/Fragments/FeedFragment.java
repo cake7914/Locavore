@@ -66,7 +66,7 @@ public class FeedFragment extends Fragment {
         farms = new ArrayList<>();
         profilesAdapter = new FarmProfilesAdapter(getContext(), farms);
         rvFarmProfiles.setAdapter(profilesAdapter);
-        rvFarmProfiles.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvFarmProfiles.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.menu_feed);
@@ -83,7 +83,7 @@ public class FeedFragment extends Fragment {
             } else {
                 List<Farm> newFarms = new ArrayList<>();
                 for (ParseUser user : users) {
-                    Farm farm = new Farm(user.getString(Farm.KEY_NAME));
+                    Farm farm = new Farm(user.getString(Farm.KEY_NAME), user.getParseFile("profilePhoto").getUrl());
                     newFarms.add(farm);
                 }
                 profilesAdapter.addAll(newFarms);
