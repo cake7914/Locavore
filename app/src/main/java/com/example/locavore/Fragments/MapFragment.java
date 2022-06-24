@@ -15,6 +15,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Looper;
 import android.util.Log;
@@ -25,6 +27,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.locavore.CustomWindowAdapter;
+import com.example.locavore.MapProfilesAdapter;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.example.locavore.Models.FarmSearchResult;
@@ -89,7 +92,8 @@ public class MapFragment extends Fragment {
     private List<String> farmIds = new ArrayList<>();
     private List<Marker> markers = new ArrayList<>();
     private LatLngBounds bounds;
-
+    private RecyclerView rvProfiles;
+    private MapProfilesAdapter profilesAdapter;
 
     public MapFragment() {
         // Required empty public constructor
@@ -157,13 +161,17 @@ public class MapFragment extends Fragment {
                 }
                 //adjust the map accordingly-- have to remove out of range markers
                 adjustRange();
-                displayLocation();
                 tvRadius.setText(String.format(getContext().getString(R.string.radius_string), radius / METERS_TO_MILE));
             }
         });
 
         tvRadius = view.findViewById(R.id.tvRadius);
         tvRadius.setText(String.format(getContext().getString(R.string.radius_string), radius / METERS_TO_MILE));
+
+        rvProfiles = view.findViewById(R.id.rvProfiles);
+        profilesAdapter = new MapProfilesAdapter(getContext(), farms);
+        rvProfiles.setAdapter(profilesAdapter);
+        rvProfiles.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
     }
 
     protected void adjustRange() {
@@ -183,9 +191,11 @@ public class MapFragment extends Fragment {
                 nFarmIds.add(farmIds.get(i));
             }
         }
-        farms = nFarms;
+
+        farms.removeIf(farm -> !nFarms.contains(farm)); // maintain adapter list
         markers = nMarkers;
         farmIds = nFarmIds;
+        profilesAdapter.notifyDataSetChanged(); // how to change this to be more specific?
     }
 
     protected void loadMap(GoogleMap googleMap) {
@@ -336,6 +346,7 @@ public class MapFragment extends Fragment {
                             farmIds.add(farm.getId());
                         }
                     }
+                    profilesAdapter.notifyItemRangeInserted(farms.size()-newFarms.size(), newFarms.size());
                     dropMarkers(newFarms, request);
                 }
             }
