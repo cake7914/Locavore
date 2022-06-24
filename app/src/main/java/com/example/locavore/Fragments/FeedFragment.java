@@ -44,7 +44,6 @@ public class FeedFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -72,6 +71,7 @@ public class FeedFragment extends Fragment {
         toolbar.inflateMenu(R.menu.menu_feed);
 
         queryFarms();
+        queryEvents();
     }
 
     private void queryFarms() {
@@ -79,7 +79,7 @@ public class FeedFragment extends Fragment {
         query.whereEqualTo(Farm.KEY_USER_TYPE, Farm.USER_TYPE);
         query.findInBackground((users, e) -> {
             if (e != null) {
-                Log.e(TAG, "Issue with getting farms", e);
+                Log.e(TAG, "Issue with getting farms ", e);
             } else {
                 List<Farm> newFarms = new ArrayList<>();
                 for (ParseUser user : users) {
@@ -89,5 +89,23 @@ public class FeedFragment extends Fragment {
                 profilesAdapter.addAll(newFarms);
             }
         });
+    }
+
+    private void queryEvents() {
+        ParseQuery<Event> query = ParseQuery.getQuery(Event.class);
+        /*query.findInBackground((newEvents, e) -> {
+            if (e != null) {
+                Log.e(TAG, "Issue with getting events ", e);
+            } else {
+                eventsAdapter.addAll(newEvents);
+            }
+        });*/
+        query.findInBackground(new FindCallback<Event>() {
+            @Override
+            public void done(List<Event> newEvents, ParseException e) {
+                eventsAdapter.addAll(newEvents);
+            }
+        });
+
     }
 }
