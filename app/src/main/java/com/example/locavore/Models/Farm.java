@@ -15,7 +15,7 @@ import javax.annotation.Generated;
 @Generated("jsonschema2pojo")
 public class Farm {
 
-    public static final String USER_TYPE = "farmer";
+    public static final String USER_TYPE = "farms";
     public static final String KEY_NAME = "name";
     public static final String KEY_BIO = "bio";
     public static final String KEY_ADDRESS = "address";

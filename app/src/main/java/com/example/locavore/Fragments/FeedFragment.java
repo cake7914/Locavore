@@ -71,12 +71,31 @@ public class FeedFragment extends Fragment {
         toolbar.inflateMenu(R.menu.menu_feed);
 
         queryFarms();
+        queryFarmersMarkets();
         queryEvents();
     }
 
     private void queryFarms() {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
         query.whereEqualTo(Farm.KEY_USER_TYPE, Farm.USER_TYPE);
+
+        query.findInBackground((users, e) -> {
+            if (e != null) {
+                Log.e(TAG, "Issue with getting farms ", e);
+            } else {
+                List<Farm> newFarms = new ArrayList<>();
+                for (ParseUser user : users) {
+                    Farm farm = new Farm(user.getString(Farm.KEY_NAME), user.getParseFile("profilePhoto").getUrl());
+                    newFarms.add(farm);
+                }
+                profilesAdapter.addAll(newFarms);
+            }
+        });
+    }
+
+    private void queryFarmersMarkets() {
+        ParseQuery<ParseUser> query = ParseUser.getQuery();
+        query.whereEqualTo(Farm.KEY_USER_TYPE, "farmersmarket");
         query.findInBackground((users, e) -> {
             if (e != null) {
                 Log.e(TAG, "Issue with getting farms ", e);
