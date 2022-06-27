@@ -1,6 +1,11 @@
 package com.example.locavore;
 
+import static com.example.locavore.BuildConfig.YELP_API_KEY;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,15 +13,62 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import com.example.locavore.Fragments.FeedFragment;
+import com.example.locavore.Fragments.LocavoreProfileFragment;
+import com.example.locavore.Fragments.MapFragment;
+import com.example.locavore.Fragments.OrdersFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseUser;
+
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    private BottomNavigationView bottomNavigationView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Fragment fragment;
+                switch (item.getItemId()) {// do something here
+                    case R.id.feed_screen: // go to compose screen
+                        // do something here
+                        fragment = new FeedFragment();
+                        break;
+                    case R.id.map_screen: // go to my profile
+                        // do something here
+                        fragment = new MapFragment();
+                        break;
+                    case R.id.order_screen:
+                        fragment = new OrdersFragment();
+                    case R.id.profile_screen:
+                        fragment = new LocavoreProfileFragment();
+                    default: // go to feed
+                        fragment = new FeedFragment();
+                        break;
+                }
+                fragmentManager.beginTransaction().replace(R.id.flContainer, fragment).commit();
+                return true;
+            }
+        });
+        // Set default selection
+        bottomNavigationView.setSelectedItemId(R.id.feed_screen);
     }
 
     @Override
@@ -44,4 +96,5 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }

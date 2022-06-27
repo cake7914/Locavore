@@ -1,14 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Fragments.MapFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/google_map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="match_parent" />
 
-</FrameLayout>
+    <Button
+        android:id="@+id/btnDecreaseRadius"
+        android:layout_width="44dp"
+        android:layout_height="52dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="55dp"
+        android:layout_marginBottom="135dp"
+        android:alpha="0.5"
+        android:backgroundTint="#9E9393"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        app:cornerRadius="90dp"
+        app:icon="@drawable/ic_baseline_remove_24"
+        app:iconGravity="top"
+        app:iconPadding="0dp"
+        app:iconSize="30dp" />
+
+    <Button
+        android:id="@+id/btnIncreaseRadius"
+        android:layout_width="44dp"
+        android:layout_height="52dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="135dp"
+        android:alpha="0.5"
+        android:backgroundTint="#9E9393"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        app:cornerRadius="90dp"
+        app:icon="@android:drawable/ic_input_add"
+        app:iconGravity="top"
+        app:iconPadding="0dp" />
+
+    <TextView
+        android:id="@+id/tvRadius"
+        android:layout_width="91dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnIncreaseRadius"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="6dp"
+        android:layout_marginBottom="0dp"
+        android:background="#FFFFFF"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        tools:text="25 miles" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvProfiles"
+        android:layout_width="match_parent"
+        android:layout_height="128dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="-6dp"
+        android:orientation="horizontal" />
+
+</RelativeLayout>

@@ -16,4 +16,15 @@
     <string name="farm_name">Farm Name</string>
     <string name="brief_farm_bio">brief farm bio</string>
     <string name="address">address</string>
+    <string name="corn">🌽</string>
+    <string name="map">🗺️</string>
+    <string name="smile">😁</string>
+    <string name="tractor">🚜</string>
+    <string name="map_screen">map</string>
+    <string name="order_screen">order</string>
+    <string name="feed_screen">feed</string>
+    <string name="profile">profile</string>
+    <string name="GOOGLE_MAPS_API_KEY">AIzaSyA5e-GR4Jy4zIEU92ulMkSR8C4ukmIwc2k</string>
+    <string name="radius_string">%2.2f miles</string>
+    <string name="farm_profile_background_image">Farm Profile Background Image</string>
 </resources>
