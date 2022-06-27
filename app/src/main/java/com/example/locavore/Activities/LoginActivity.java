@@ -1,4 +1,4 @@
-package com.example.locavore;
+package com.example.locavore.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.locavore.R;
 import com.parse.ParseUser;
 
 public class LoginActivity extends AppCompatActivity {

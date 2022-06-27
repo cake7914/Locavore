@@ -28,25 +28,25 @@
         android:theme="@style/Theme.Locavore"
         tools:targetApi="31">
         <activity
-            android:name=".CustomWindowAdapter"
-            android:exported="false" />
-        <activity
-            android:name=".LocavoreSignupActivity"
-            android:exported="false" />
-        <activity
-            android:name=".LoginActivity"
+            android:name=".Activities.SplashScreenActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
         </activity>
         <activity
-            android:name=".FarmerSignupActivity"
+            android:name=".Activities.LocavoreSignupActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".Activities.LoginActivity"
+            android:exported="true"/>
+        <activity
+            android:name=".Activities.FarmerSignupActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities.MainActivity"
             android:exported="true" />
 
         <uses-library

@@ -26,5 +26,6 @@
     <string name="profile">profile</string>
     <string name="GOOGLE_MAPS_API_KEY">AIzaSyA5e-GR4Jy4zIEU92ulMkSR8C4ukmIwc2k</string>
     <string name="radius_string">%2.2f miles</string>
-    <string name="farm_profile_background_image">Farm Profile Background Image</string>
+    <string name="search">Search</string>
+    <string name="follow">follow</string>
 </resources>

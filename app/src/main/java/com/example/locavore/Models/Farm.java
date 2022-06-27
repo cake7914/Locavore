@@ -5,6 +5,8 @@ import android.location.Location;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.parse.ParseClassName;
+import com.parse.ParseObject;
 
 import java.util.List;
 
@@ -12,6 +14,14 @@ import javax.annotation.Generated;
 
 @Generated("jsonschema2pojo")
 public class Farm {
+
+    public static final String USER_TYPE = "farms";
+    public static final String KEY_NAME = "name";
+    public static final String KEY_BIO = "bio";
+    public static final String KEY_ADDRESS = "address";
+    public static final String KEY_PROFILE_PHOTO = "profilePhoto";
+    public static final String KEY_PROFILE_BACKDROP = "profileBackdrop";
+    public static final String KEY_USER_TYPE = "userType";
 
     @SerializedName("rating")
     @Expose
@@ -177,6 +187,11 @@ public class Farm {
 
     public void setTransactions(List<String> transactions) {
         this.transactions = transactions;
+    }
+
+    public Farm(String name, String profileImageUrl) {
+        this.name = name;
+        this.imageUrl = profileImageUrl;
     }
 
 }

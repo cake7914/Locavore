@@ -1,4 +1,4 @@
-package com.example.locavore;
+package com.example.locavore.Models;
 
 import com.parse.ParseUser;
 

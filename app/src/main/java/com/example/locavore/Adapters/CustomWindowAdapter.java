@@ -1,4 +1,4 @@
-package com.example.locavore;
+package com.example.locavore.Adapters;
 
 
 import android.os.Bundle;
@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.example.locavore.Models.Farm;
 import com.example.locavore.Models.YelpLocation;
+import com.example.locavore.R;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
