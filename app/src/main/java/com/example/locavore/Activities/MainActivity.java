@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.locavore.Fragments.FarmProfileFragment;
 import com.example.locavore.Fragments.FeedFragment;
 import com.example.locavore.Fragments.LocavoreProfileFragment;
 import com.example.locavore.Fragments.MapFragment;
@@ -26,6 +27,8 @@ import com.example.locavore.Fragments.OrdersFragment;
 import com.example.locavore.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseUser;
+
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,8 +58,14 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.order_screen:
                         fragment = new OrdersFragment();
+                        break;
                     case R.id.profile_screen:
-                        fragment = new LocavoreProfileFragment();
+                        if(Objects.equals(ParseUser.getCurrentUser().getString("userType"), "farms") || Objects.equals(ParseUser.getCurrentUser().getString("userType"), "farmersmarket")) {
+                            fragment = new FarmProfileFragment();
+                        } else {
+                            fragment = new LocavoreProfileFragment();
+                        }
+                        break;
                     default: // go to feed
                         fragment = new FeedFragment();
                         break;

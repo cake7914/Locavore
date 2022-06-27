@@ -7,6 +7,11 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -22,6 +27,8 @@ public class Farm {
     public static final String KEY_PROFILE_PHOTO = "profilePhoto";
     public static final String KEY_PROFILE_BACKDROP = "profileBackdrop";
     public static final String KEY_USER_TYPE = "userType";
+
+    private ParseUser user;
 
     @SerializedName("rating")
     @Expose
@@ -69,10 +76,11 @@ public class Farm {
     @Expose
     private List<String> transactions = null;
 
+    private List<Event> events = null;
+
     public Double getRating() {
         return rating;
     }
-
     public void setRating(Double rating) {
         this.rating = rating;
     }
@@ -80,7 +88,6 @@ public class Farm {
     public String getPrice() {
         return price;
     }
-
     public void setPrice(String price) {
         this.price = price;
     }
@@ -88,7 +95,6 @@ public class Farm {
     public String getPhone() {
         return phone;
     }
-
     public void setPhone(String phone) {
         this.phone = phone;
     }
@@ -96,7 +102,6 @@ public class Farm {
     public String getId() {
         return id;
     }
-
     public void setId(String id) {
         this.id = id;
     }
@@ -104,7 +109,6 @@ public class Farm {
     public String getAlias() {
         return alias;
     }
-
     public void setAlias(String alias) {
         this.alias = alias;
     }
@@ -112,7 +116,6 @@ public class Farm {
     public Boolean getIsClosed() {
         return isClosed;
     }
-
     public void setIsClosed(Boolean isClosed) {
         this.isClosed = isClosed;
     }
@@ -120,7 +123,6 @@ public class Farm {
     public List<YelpCategory> getCategories() {
         return categories;
     }
-
     public void setCategories(List<YelpCategory> categories) {
         this.categories = categories;
     }
@@ -128,7 +130,6 @@ public class Farm {
     public Integer getReviewCount() {
         return reviewCount;
     }
-
     public void setReviewCount(Integer reviewCount) {
         this.reviewCount = reviewCount;
     }
@@ -136,7 +137,6 @@ public class Farm {
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -144,7 +144,6 @@ public class Farm {
     public String getUrl() {
         return url;
     }
-
     public void setUrl(String url) {
         this.url = url;
     }
@@ -152,7 +151,6 @@ public class Farm {
     public LatLng getCoordinates() {
         return coordinates;
     }
-
     public void setCoordinates(LatLng coordinates) {
         this.coordinates = coordinates;
     }
@@ -160,7 +158,6 @@ public class Farm {
     public String getImageUrl() {
         return imageUrl;
     }
-
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
@@ -168,7 +165,6 @@ public class Farm {
     public YelpLocation getLocation() {
         return location;
     }
-
     public void setLocation(YelpLocation location) {
         this.location = location;
     }
@@ -176,7 +172,6 @@ public class Farm {
     public Double getDistance() {
         return distance;
     }
-
     public void setDistance(Double distance) {
         this.distance = distance;
     }
@@ -184,14 +179,19 @@ public class Farm {
     public List<String> getTransactions() {
         return transactions;
     }
-
     public void setTransactions(List<String> transactions) {
         this.transactions = transactions;
     }
 
-    public Farm(String name, String profileImageUrl) {
-        this.name = name;
-        this.imageUrl = profileImageUrl;
+    public ParseUser getUser() { return user; }
+    public void setUser(ParseUser user) { this.user = user; }
+
+    public JSONArray getEvents() { return user.getJSONArray("events"); }
+
+    //public void setEvents(JSONArray ) { }
+
+    public Farm(ParseUser user) {
+       this.user = user;
     }
 
 }
