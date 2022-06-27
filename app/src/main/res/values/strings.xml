@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Locavore</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -28,4 +28,6 @@
     <string name="radius_string">%2.2f miles</string>
     <string name="search">Search</string>
     <string name="follow">follow</string>
+    <string name="farm_profile_image" tools:ignore="ExtraTranslation">Farm Profile Image</string>
+    <string name="refresh">Refresh</string>
 </resources>

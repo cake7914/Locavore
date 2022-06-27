@@ -27,7 +27,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.locavore.CustomWindowAdapter;
+import com.example.locavore.Adapters.CustomWindowAdapter;
 import com.example.locavore.MapProfilesAdapter;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
@@ -385,6 +385,8 @@ public class MapFragment extends Fragment {
         user.put("userType", request);
         user.put("name", farm.getName());
         user.put("address", farm.getLocation().getAddress1() + farm.getLocation().getCity() + farm.getLocation().getState());
+        user.put("latitude", farm.getCoordinates().latitude);
+        user.put("longitude", farm.getCoordinates().longitude);
         user.signUpInBackground();
         //user.put("profileBackdrop", farm.getImageUrl());
     }

@@ -6,10 +6,12 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -24,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.locavore.Adapters.FarmEventsAdapter;
 import com.example.locavore.Adapters.FarmProfilesAdapter;
@@ -37,9 +40,14 @@ import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+
+import permissions.dispatcher.NeedsPermission;
 
 public class FeedFragment extends Fragment implements LocationListener {
     public static final String TAG = "FeedFragment";
+    private static final double METERS_TO_MILE = 1609.34;
+
 
     private RecyclerView rvFarmProfiles;
     private RecyclerView rvFarmEvents;
@@ -49,6 +57,7 @@ public class FeedFragment extends Fragment implements LocationListener {
     private List<Farm> farms;
     private Location location;
     private LocationManager locationManager;
+    private Button btnRefresh;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -61,7 +70,9 @@ public class FeedFragment extends Fragment implements LocationListener {
         return inflater.inflate(R.layout.fragment_feed, container, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
+    //@NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -80,20 +91,17 @@ public class FeedFragment extends Fragment implements LocationListener {
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.menu_feed);
 
+        locationManager = (LocationManager) getContext().getSystemService(getContext().LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+        }
+
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 0, this);
+
+        location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
         queryFarms();
         queryFarmersMarkets();
         queryEvents();
-
-        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-    }
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-        this.location = location;
     }
 
     private void queryFarms() {
@@ -105,11 +113,22 @@ public class FeedFragment extends Fragment implements LocationListener {
             } else {
                 List<Farm> newFarms = new ArrayList<>();
                 for (ParseUser user : users) {
-                    // only show farms that are within the user's radius
-                    //location.distanceTo(new Location());
-                    //if(user.getString("address"))
-                    Farm farm = new Farm(user.getString(Farm.KEY_NAME), user.getParseFile("profilePhoto").getUrl());
-                    newFarms.add(farm);
+                    //show farms that are within the user's radius
+                    Location userLocation = new Location(LocationManager.GPS_PROVIDER);
+                    userLocation.setLatitude(user.getDouble("latitude"));
+                    userLocation.setLongitude(user.getDouble("longitude"));
+                    if(location != null) {
+                        if(location.distanceTo(userLocation) < ParseUser.getCurrentUser().getDouble("radius"))
+                        {
+                            Farm farm = new Farm(user.getString(Farm.KEY_NAME), user.getParseFile("profilePhoto").getUrl());
+                            newFarms.add(farm);
+                            Log.i(TAG, "farm successfully added!");
+                        } else {
+                            Log.i(TAG, "this farm is not within the required radius!");
+                        }
+                    } else {
+                        Log.i(TAG, "location is null");
+                    }
                 }
                 profilesAdapter.addAll(newFarms);
             }
@@ -125,13 +144,29 @@ public class FeedFragment extends Fragment implements LocationListener {
             } else {
                 List<Farm> newFarms = new ArrayList<>();
                 for (ParseUser user : users) {
-                    Farm farm = new Farm(user.getString(Farm.KEY_NAME), user.getParseFile("profilePhoto").getUrl());
-                    newFarms.add(farm);
+                    //show farms that are within the user's radius
+                    Location userLocation = new Location(LocationManager.GPS_PROVIDER);
+                    userLocation.setLatitude(user.getDouble("latitude"));
+                    userLocation.setLongitude(user.getDouble("longitude"));
+                    if(location != null) {
+                        if(location.distanceTo(userLocation) < ParseUser.getCurrentUser().getDouble("radius"))
+                        {
+                            Farm farm = new Farm(user.getString(Farm.KEY_NAME), user.getParseFile("profilePhoto").getUrl());
+                            newFarms.add(farm);
+                            Log.i(TAG, "farm successfully added!");
+                        } else {
+                            Log.i(TAG, "this farm is not within the required radius!");
+                        }
+                    } else {
+                        Log.i(TAG, "location is null");
+                    }
                 }
                 profilesAdapter.addAll(newFarms);
             }
         });
     }
+
+
 
     private void queryEvents() {
         ParseQuery<Event> query = ParseQuery.getQuery(Event.class);
@@ -149,5 +184,10 @@ public class FeedFragment extends Fragment implements LocationListener {
             }
         });
 
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location newLocation) {
+        location = newLocation;
     }
 }
