@@ -27,7 +27,7 @@ import com.example.locavore.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseUser;
 
-public class MainActivity extends AppCompatActivity implements LocationListener {
+public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
     final FragmentManager fragmentManager = getSupportFragmentManager();
@@ -67,18 +67,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         });
         // Set default selection
         bottomNavigationView.setSelectedItemId(R.id.feed_screen);
-
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-
-    }
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-        Log.i(TAG, String.valueOf(location.getLatitude()));
     }
 
     @Override

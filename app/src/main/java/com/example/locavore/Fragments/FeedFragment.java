@@ -1,11 +1,19 @@
 package com.example.locavore.Fragments;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,7 +38,7 @@ import com.parse.ParseUser;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeedFragment extends Fragment {
+public class FeedFragment extends Fragment implements LocationListener {
     public static final String TAG = "FeedFragment";
 
     private RecyclerView rvFarmProfiles;
@@ -39,6 +47,8 @@ public class FeedFragment extends Fragment {
     private FarmProfilesAdapter profilesAdapter;
     private List<Event> events;
     private List<Farm> farms;
+    private Location location;
+    private LocationManager locationManager;
 
     public FeedFragment() {
         // Required empty public constructor
@@ -73,18 +83,31 @@ public class FeedFragment extends Fragment {
         queryFarms();
         queryFarmersMarkets();
         queryEvents();
+
+        locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        this.location = location;
     }
 
     private void queryFarms() {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
         query.whereEqualTo(Farm.KEY_USER_TYPE, Farm.USER_TYPE);
-
         query.findInBackground((users, e) -> {
             if (e != null) {
                 Log.e(TAG, "Issue with getting farms ", e);
             } else {
                 List<Farm> newFarms = new ArrayList<>();
                 for (ParseUser user : users) {
+                    // only show farms that are within the user's radius
+                    //location.distanceTo(new Location());
+                    //if(user.getString("address"))
                     Farm farm = new Farm(user.getString(Farm.KEY_NAME), user.getParseFile("profilePhoto").getUrl());
                     newFarms.add(farm);
                 }
