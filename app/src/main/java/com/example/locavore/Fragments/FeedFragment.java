@@ -3,6 +3,7 @@ package com.example.locavore.Fragments;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -38,6 +39,7 @@ import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -57,6 +59,7 @@ public class FeedFragment extends Fragment implements LocationListener {
     private List<Farm> farms;
     private Location location;
     private LocationManager locationManager;
+    private String bestProvider;
     private Button btnRefresh;
 
     public FeedFragment() {
@@ -95,18 +98,19 @@ public class FeedFragment extends Fragment implements LocationListener {
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
         }
+        Criteria criteria = new Criteria();
+        bestProvider = locationManager.getBestProvider(criteria, false);
+        locationManager.requestLocationUpdates(bestProvider, 3000, 0, this);
 
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 3000, 0, this);
-
-        location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-        queryFarms();
-        queryFarmersMarkets();
-        queryEvents();
+        location = locationManager.getLastKnownLocation(bestProvider);
+        queryFarms("farms");
+        queryFarms("farmersmarket");
+        //queryEvents();
     }
 
-    private void queryFarms() {
+    private void queryFarms(String request) {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereEqualTo(Farm.KEY_USER_TYPE, Farm.USER_TYPE);
+        query.whereEqualTo(Farm.KEY_USER_TYPE, request);
         query.findInBackground((users, e) -> {
             if (e != null) {
                 Log.e(TAG, "Issue with getting farms ", e);
@@ -114,7 +118,7 @@ public class FeedFragment extends Fragment implements LocationListener {
                 List<Farm> newFarms = new ArrayList<>();
                 for (ParseUser user : users) {
                     //show farms that are within the user's radius
-                    Location userLocation = new Location(LocationManager.GPS_PROVIDER);
+                    Location userLocation = new Location(bestProvider);
                     userLocation.setLatitude(user.getDouble("latitude"));
                     userLocation.setLongitude(user.getDouble("longitude"));
                     if(location != null) {
@@ -135,55 +139,8 @@ public class FeedFragment extends Fragment implements LocationListener {
         });
     }
 
-    private void queryFarmersMarkets() {
-        ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereEqualTo(Farm.KEY_USER_TYPE, "farmersmarket");
-        query.findInBackground((users, e) -> {
-            if (e != null) {
-                Log.e(TAG, "Issue with getting farms ", e);
-            } else {
-                List<Farm> newFarms = new ArrayList<>();
-                for (ParseUser user : users) {
-                    //show farms that are within the user's radius
-                    Location userLocation = new Location(LocationManager.GPS_PROVIDER);
-                    userLocation.setLatitude(user.getDouble("latitude"));
-                    userLocation.setLongitude(user.getDouble("longitude"));
-                    if(location != null) {
-                        if(location.distanceTo(userLocation) < ParseUser.getCurrentUser().getDouble("radius"))
-                        {
-                            Farm farm = new Farm(user.getString(Farm.KEY_NAME), user.getParseFile("profilePhoto").getUrl());
-                            newFarms.add(farm);
-                            Log.i(TAG, "farm successfully added!");
-                        } else {
-                            Log.i(TAG, "this farm is not within the required radius!");
-                        }
-                    } else {
-                        Log.i(TAG, "location is null");
-                    }
-                }
-                profilesAdapter.addAll(newFarms);
-            }
-        });
-    }
-
-
-
-    private void queryEvents() {
-        ParseQuery<Event> query = ParseQuery.getQuery(Event.class);
-        /*query.findInBackground((newEvents, e) -> {
-            if (e != null) {
-                Log.e(TAG, "Issue with getting events ", e);
-            } else {
-                eventsAdapter.addAll(newEvents);
-            }
-        });*/
-        query.findInBackground(new FindCallback<Event>() {
-            @Override
-            public void done(List<Event> newEvents, ParseException e) {
-                eventsAdapter.addAll(newEvents);
-            }
-        });
-
+    protected void queryEvents() {
+        //using only the users that are within the required radius, populate the adapter with those events
     }
 
     @Override
