@@ -362,6 +362,7 @@ public class MapFragment extends Fragment {
                             newFarms.add(farm);
                             farms.add(farm);
                             farmIds.add(farm.getId());
+                            //createUser(farm, request);
                         }
                     }
                     profilesAdapter.notifyItemRangeInserted(farms.size()-newFarms.size(), newFarms.size());
@@ -374,5 +375,17 @@ public class MapFragment extends Fragment {
                 Log.i(TAG, "Failure " + t);
             }
         });
+    }
+
+    // populate the parse database with farm users
+    protected void createUser(Farm farm, String request) {
+        ParseUser user = new ParseUser();
+        user.setUsername(farm.getId());
+        user.setPassword(farm.getId());
+        user.put("userType", request);
+        user.put("name", farm.getName());
+        user.put("address", farm.getLocation().getAddress1() + farm.getLocation().getCity() + farm.getLocation().getState());
+        user.signUpInBackground();
+        //user.put("profileBackdrop", farm.getImageUrl());
     }
 }
