@@ -26,6 +26,8 @@ import java.util.List;
 public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.ViewHolder> {
     private Context context;
     private List<Farm> farms;
+    private static final double METERS_TO_MILE = 1609.34;
+
 
     public MapProfilesAdapter(Context context, List<Farm> farms)
     {
@@ -80,6 +82,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
         public void bind(Farm farm) throws JSONException {
             tvFarmName.setText(farm.getName());
+            tvDistance.setText(String.format("%.2f miles", farm.getDistance()/METERS_TO_MILE));
 
             if(farm.getImageUrl() != null) {
                 Glide.with(context)
