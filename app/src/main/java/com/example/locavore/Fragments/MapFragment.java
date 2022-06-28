@@ -5,6 +5,7 @@ import static com.google.android.gms.location.LocationServices.getFusedLocationP
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -17,6 +18,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Looper;
@@ -79,8 +81,8 @@ public class MapFragment extends Fragment {
     private static final int MAX_YELP_RADIUS = 40000; // 40,000 meters or ~25 miles
     private static final int YELP_RADIUS_INCREMENT = 8000; // ~ 5 miles
     private static final double METERS_TO_MILE = 1609.34;
-    private static final long UPDATE_INTERVAL = 6000;
-    private static final long FASTEST_INTERVAL = 3000;
+    private static final long UPDATE_INTERVAL = 100000;
+    private static final long FASTEST_INTERVAL = 100000;
 
     private SupportMapFragment supportMapFragment;
     private GoogleMap map;
@@ -100,6 +102,8 @@ public class MapFragment extends Fragment {
     private LatLngBounds bounds;
     private RecyclerView rvProfiles;
     private MapProfilesAdapter profilesAdapter;
+    private RecyclerView.SmoothScroller smoothScroller;
+    private LinearLayoutManager linearLayoutManager;
 
     public MapFragment() {
         // Required empty public constructor
@@ -174,7 +178,10 @@ public class MapFragment extends Fragment {
         rvProfiles = view.findViewById(R.id.rvProfiles);
         profilesAdapter = new MapProfilesAdapter(getContext(), farms);
         rvProfiles.setAdapter(profilesAdapter);
-        rvProfiles.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        rvProfiles.setLayoutManager(linearLayoutManager);
+
+        smoothScroller = new CenterSmoothScroller(getContext());
     }
 
     protected void adjustRange() {
@@ -233,7 +240,9 @@ public class MapFragment extends Fragment {
             // scroll the adapter to the farm that has been clicked on
             for(int i = 0; i < farms.size(); i++) {
                 if(farms.get(i) == marker.getTag()) {
-                    rvProfiles.smoothScrollToPosition(i);
+                    //rvProfiles.smoothScrollToPosition(i);
+                    smoothScroller.setTargetPosition(i);
+                    linearLayoutManager.startSmoothScroll(smoothScroller);
                     farms.get(i).expanded = true;
                 } else {
                     farms.get(i).expanded = false;
@@ -410,5 +419,17 @@ public class MapFragment extends Fragment {
             }
         });
         return farm[0];
+    }
+
+    public class CenterSmoothScroller extends LinearSmoothScroller {
+
+        public CenterSmoothScroller(Context context) {
+            super(context);
+        }
+
+        @Override
+        public int calculateDtToFit(int viewStart, int viewEnd, int boxStart, int boxEnd, int snapPreference) {
+            return (boxStart + (boxEnd - boxStart) / 2) - (viewStart + (viewEnd - viewStart) / 2);
+        }
     }
 }
