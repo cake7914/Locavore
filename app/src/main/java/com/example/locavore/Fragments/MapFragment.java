@@ -28,7 +28,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.locavore.Adapters.CustomWindowAdapter;
-import com.example.locavore.MapProfilesAdapter;
+import com.example.locavore.Adapters.MapProfilesAdapter;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.example.locavore.Models.FarmSearchResult;
@@ -75,8 +75,8 @@ public class MapFragment extends Fragment {
     private static final int MAX_YELP_RADIUS = 40000; // 40,000 meters or ~25 miles
     private static final int YELP_RADIUS_INCREMENT = 8000; // ~ 5 miles
     private static final double METERS_TO_MILE = 1609.34;
-    private static final long UPDATE_INTERVAL = 100000;
-    private static final long FASTEST_INTERVAL = 100000;
+    private static final long UPDATE_INTERVAL = 6000;
+    private static final long FASTEST_INTERVAL = 3000;
 
     private SupportMapFragment supportMapFragment;
     private GoogleMap map;
@@ -111,13 +111,10 @@ public class MapFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         supportMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.google_map);
-
-        supportMapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap map) {
-                loadMap(map);
-                map.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater()));
-            }
+        assert supportMapFragment != null;
+        supportMapFragment.getMapAsync(map -> {
+            loadMap(map);
+            map.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater()));
         });
 
         retrofit = new Retrofit.Builder()
@@ -173,8 +170,6 @@ public class MapFragment extends Fragment {
         profilesAdapter = new MapProfilesAdapter(getContext(), farms);
         rvProfiles.setAdapter(profilesAdapter);
         rvProfiles.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-
-
     }
 
     protected void adjustRange() {
@@ -212,7 +207,7 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         MapFragmentPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
@@ -250,12 +245,9 @@ public class MapFragment extends Fragment {
                         onLocationChanged(location);
                     }
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d("MapFragment", "Error trying to get last GPS location");
-                        e.printStackTrace();
-                    }
+                .addOnFailureListener(e -> {
+                    Log.d("MapFragment", "Error trying to get last GPS location");
+                    e.printStackTrace();
                 });
     }
 
@@ -275,7 +267,7 @@ public class MapFragment extends Fragment {
         //noinspection MissingPermission
         getFusedLocationProviderClient(getContext()).requestLocationUpdates(locationRequest, new LocationCallback() {
                     @Override
-                    public void onLocationResult(LocationResult locationResult) {
+                    public void onLocationResult(@NonNull LocationResult locationResult) {
                         onLocationChanged(locationResult.getLastLocation());
                     }
                 },
@@ -337,6 +329,7 @@ public class MapFragment extends Fragment {
                     .title(farm.getName())
                     .icon(BitmapDescriptorFactory.fromBitmap(getMarker(request)))
             );
+            assert marker != null;
             marker.setTag(farm); // associate farm --> marker
             markers.add(marker);
             bounds = bounds.including(farm.getCoordinates());
@@ -350,7 +343,7 @@ public class MapFragment extends Fragment {
         Call<FarmSearchResult> call = yelpService.searchFarms("Bearer "+ YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(),request, 50, radius);
         call.enqueue(new Callback<FarmSearchResult>() {
             @Override
-            public void onResponse(Call<FarmSearchResult> call, Response<FarmSearchResult> response) {
+            public void onResponse(@NonNull Call<FarmSearchResult> call, @NonNull Response<FarmSearchResult> response) {
                 Log.i(TAG, "Success! " + response);
                 if(response.body() == null) {
                     Log.e(TAG, "Error retrieving response body");
@@ -362,7 +355,7 @@ public class MapFragment extends Fragment {
                             newFarms.add(farm);
                             farms.add(farm);
                             farmIds.add(farm.getId());
-                            //createUser(farm, request);
+                            createUser(farm, request);
                         }
                     }
                     profilesAdapter.notifyItemRangeInserted(farms.size()-newFarms.size(), newFarms.size());
@@ -371,7 +364,7 @@ public class MapFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<FarmSearchResult> call, Throwable t) {
+            public void onFailure(@NonNull Call<FarmSearchResult> call, @NonNull Throwable t) {
                 Log.i(TAG, "Failure " + t);
             }
         });
@@ -382,11 +375,11 @@ public class MapFragment extends Fragment {
         ParseUser user = new ParseUser();
         user.setUsername(farm.getId());
         user.setPassword(farm.getId());
-        user.put("userType", request);
-        user.put("name", farm.getName());
-        user.put("address", farm.getLocation().getAddress1() + farm.getLocation().getCity() + farm.getLocation().getState());
-        user.put("latitude", farm.getCoordinates().latitude);
-        user.put("longitude", farm.getCoordinates().longitude);
+        user.put(Farm.KEY_USER_TYPE, request);
+        user.put(Farm.KEY_NAME, farm.getName());
+        user.put(Farm.KEY_ADDRESS, farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState());
+        user.put(Farm.KEY_LATITUDE, farm.getCoordinates().latitude);
+        user.put(Farm.KEY_LONGITUDE, farm.getCoordinates().longitude);
         user.signUpInBackground();
         //user.put("profileBackdrop", farm.getImageUrl());
     }

@@ -71,10 +71,10 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
         }
 
         public void bind(Farm farm) {
-            tvFarmName.setText(farm.getName());
+            tvFarmName.setText(farm.getUser().getString(Farm.KEY_NAME));
 
-            if(farm.getImageUrl() != null) {
-                Glide.with(context).load(farm.getImageUrl()).circleCrop().into(ivProfileImage);
+            if(farm.getUser().getParseFile("profilePhoto") != null) {
+                Glide.with(context).load(farm.getUser().getParseFile("profilePhoto").getUrl()).circleCrop().into(ivProfileImage);
             } else {
                 ivProfileImage.setImageBitmap(null);
             }

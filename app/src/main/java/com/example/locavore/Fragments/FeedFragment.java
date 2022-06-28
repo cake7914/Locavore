@@ -36,8 +36,12 @@ import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.security.Provider;
 import java.util.ArrayList;
@@ -105,7 +109,6 @@ public class FeedFragment extends Fragment implements LocationListener {
         location = locationManager.getLastKnownLocation(bestProvider);
         queryFarms("farms");
         queryFarms("farmersmarket");
-        //queryEvents();
     }
 
     private void queryFarms(String request) {
@@ -124,9 +127,34 @@ public class FeedFragment extends Fragment implements LocationListener {
                     if(location != null) {
                         if(location.distanceTo(userLocation) < ParseUser.getCurrentUser().getDouble("radius"))
                         {
-                            Farm farm = new Farm(user.getString(Farm.KEY_NAME), user.getParseFile("profilePhoto").getUrl());
+                            Farm farm = new Farm(user);
                             newFarms.add(farm);
                             Log.i(TAG, "farm successfully added!");
+
+                            // also add any events that this farm has to the events list
+                            JSONArray newEvents = user.getJSONArray("events");
+                            if(newEvents != null) {
+                                for (int i = 0; i < newEvents.length(); i++) {
+                                    try {
+                                        String eventId = newEvents.getJSONObject(i).getString("objectId");
+                                        Log.i(TAG, eventId);
+                                        ParseQuery<ParseObject> eventQuery = ParseQuery.getQuery("Event");
+                                        eventQuery.getInBackground(eventId, (event, err) -> {
+                                            if (err != null) {
+                                                Log.e(TAG, "Issue with getting event ", err);
+                                            } else {
+                                               // add this event to the events list
+                                                events.add((Event) event);
+                                                eventsAdapter.notifyDataSetChanged(); //TODO: change this
+                                                Log.i(TAG, "event successfully added!");
+                                            }
+                                        });
+
+                                    } catch (JSONException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+                            }
                         } else {
                             Log.i(TAG, "this farm is not within the required radius!");
                         }
@@ -139,9 +167,7 @@ public class FeedFragment extends Fragment implements LocationListener {
         });
     }
 
-    protected void queryEvents() {
-        //using only the users that are within the required radius, populate the adapter with those events
-    }
+
 
     @Override
     public void onLocationChanged(@NonNull Location newLocation) {

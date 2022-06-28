@@ -1,8 +1,6 @@
-package com.example.locavore;
+package com.example.locavore.Adapters;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +15,7 @@ import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.Models.Farm;
-import com.google.android.material.shape.RoundedCornerTreatment;
+import com.example.locavore.R;
 
 import org.json.JSONException;
 

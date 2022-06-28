@@ -9,7 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.locavore.Models.MyUser;
+import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.parse.ParseUser;
 
@@ -53,13 +53,13 @@ public class FarmerSignupActivity extends AppCompatActivity {
     private void signupFarmer(String farmName, String emailAddress, String username, String password, String bio, String address) {
         Log.i(TAG, "Attempting to signup new farmer");
         ParseUser user = new ParseUser();
-        user.put(MyUser.KEY_NAME, farmName);
+        user.put(Farm.KEY_NAME, farmName);
         user.setEmail(emailAddress);
         user.setUsername(username);
         user.setPassword(password);
-        user.put(MyUser.KEY_BIO, bio);
-        user.put(MyUser.KEY_ADDRESS, address);
-        user.put(MyUser.KEY_USER_TYPE, "farmer");
+        user.put(Farm.KEY_BIO, bio);
+        user.put(Farm.KEY_ADDRESS, address);
+        user.put(Farm.KEY_USER_TYPE, "farmer");
 
         user.signUpInBackground(e -> {
             if (e != null) {
