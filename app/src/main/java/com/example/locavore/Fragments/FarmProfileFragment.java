@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,39 +44,29 @@ public class FarmProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
-        btnCreateEvent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ParseObject event = ParseObject.create("Event");
-                event.put("name", "Corn Maze");
-                event.put("description", "Our world famous Corn Maze!");
-                event.saveInBackground();
-
-                ParseUser user = ParseUser.getCurrentUser();
-                if (user != null) {
-                    user.add("events", event);
-                    user.saveInBackground();
-                }
-            }
+        btnCreateEvent.setOnClickListener(v -> {
+            showAlertDialog();
         });
 
         btnLogout = view.findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ParseUser.logOutInBackground(e -> {
-                    if (e != null) {
-                        Log.e(TAG, "Issue with logout", e);
-                        Toast.makeText(getContext(), "Issue with logout!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        //go to the login activity
-                        Intent i = new Intent(getContext(), LoginActivity.class);
-                        startActivity(i);
-                        Toast.makeText(getContext(), "Success in logging out!", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        btnLogout.setOnClickListener(v -> ParseUser.logOutInBackground(e -> {
+            if (e != null) {
+                Log.e(TAG, "Issue with logout", e);
+                Toast.makeText(getContext(), "Issue with logout!", Toast.LENGTH_SHORT).show();
+            } else {
+                //go to the login activity
+                Intent i = new Intent(getContext(), LoginActivity.class);
+                startActivity(i);
+                Toast.makeText(getContext(), "Success in logging out!", Toast.LENGTH_SHORT).show();
             }
-        });
+        }));
 
     }
+
+    private void showAlertDialog() {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        CreateEventDialogFragment alertDialog = CreateEventDialogFragment.newInstance("New Event");
+        alertDialog.show(fragmentManager, "fragment_alert");
+    }
+
 }

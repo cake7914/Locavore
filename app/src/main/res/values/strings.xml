@@ -30,4 +30,6 @@
     <string name="follow">follow</string>
     <string name="farm_profile_image" tools:ignore="ExtraTranslation">Farm Profile Image</string>
     <string name="refresh">Refresh</string>
+    <string name="event_name">Event Name</string>
+    <string name="event_description">Event Description</string>
 </resources>

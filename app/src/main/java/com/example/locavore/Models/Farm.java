@@ -27,6 +27,8 @@ public class Farm {
     public static final String KEY_PROFILE_PHOTO = "profilePhoto";
     public static final String KEY_PROFILE_BACKDROP = "profileBackdrop";
     public static final String KEY_USER_TYPE = "userType";
+    public static final String KEY_LATITUDE = "latitude";
+    public static final String KEY_LONGITUDE = "longitude";
 
     private ParseUser user;
 

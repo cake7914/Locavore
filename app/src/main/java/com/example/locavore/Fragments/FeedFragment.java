@@ -109,7 +109,6 @@ public class FeedFragment extends Fragment implements LocationListener {
         location = locationManager.getLastKnownLocation(bestProvider);
         queryFarms("farms");
         queryFarms("farmersmarket");
-        //queryEvents();
     }
 
     private void queryFarms(String request) {
@@ -138,7 +137,7 @@ public class FeedFragment extends Fragment implements LocationListener {
                                 for (int i = 0; i < newEvents.length(); i++) {
                                     try {
                                         String eventId = newEvents.getJSONObject(i).getString("objectId");
-
+                                        Log.i(TAG, eventId);
                                         ParseQuery<ParseObject> eventQuery = ParseQuery.getQuery("Event");
                                         eventQuery.getInBackground(eventId, (event, err) -> {
                                             if (err != null) {

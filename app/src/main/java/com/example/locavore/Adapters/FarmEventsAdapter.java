@@ -11,10 +11,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import org.w3c.dom.Text;
 
@@ -81,14 +87,17 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
             if(event.getPhoto() != null) {
                 Glide.with(context)
                         .load(event.getPhoto().getUrl())
-                        .centerCrop()
-                        //.transform(new RoundedCornersTransformation(50, 0))
+                        .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
                         .into(ivEventPhoto);
             } else {
                 ivEventPhoto.setImageBitmap(null);
             }
 
-            tvEventFarm.setText(event.getFarm());
+            String farmID = event.getFarm();
+            ParseQuery<ParseUser> query = ParseUser.getQuery();
+            query.whereEqualTo("objectId", farmID);
+            query.findInBackground((objects, e) -> tvEventFarm.setText(objects.get(0).getString(Farm.KEY_NAME)));
+
             tvEventName.setText(event.getName());
 
             // calculate distance from event to this user, using current location and the event's address
