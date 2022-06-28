@@ -29,6 +29,7 @@ public class Farm {
     public static final String KEY_USER_TYPE = "userType";
     public static final String KEY_LATITUDE = "latitude";
     public static final String KEY_LONGITUDE = "longitude";
+    public static final String KEY_FARMS_FOLLOWING = "following";
 
     private ParseUser user;
 
@@ -191,6 +192,20 @@ public class Farm {
     public JSONArray getEvents() { return user.getJSONArray("events"); }
 
     //public void setEvents(JSONArray ) { }
+
+    public JSONArray getFollowedFarms() { return user.getJSONArray(KEY_FARMS_FOLLOWING); }
+
+    public void setFollowedFarms(JSONArray farms) { user.put(KEY_FARMS_FOLLOWING, farms); }
+
+    public void followFarm(ParseUser farm) {
+        user.add(KEY_FARMS_FOLLOWING, farm.getObjectId());
+    }
+
+    public void unfollowFarm(int pos) {
+        JSONArray farms = getFollowedFarms();
+        farms.remove(pos);
+        setFollowedFarms(farms);
+    }
 
     public Farm(ParseUser user) {
        this.user = user;
