@@ -52,6 +52,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.maps.android.ui.IconGenerator;
+import com.parse.FindCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
@@ -92,6 +96,7 @@ public class MapFragment extends Fragment {
     private List<Farm> farms = new ArrayList<>();
     private List<String> farmIds = new ArrayList<>();
     private List<Marker> markers = new ArrayList<>();
+    private List<String> farmsInDatabase = new ArrayList<>();
     private LatLngBounds bounds;
     private RecyclerView rvProfiles;
     private MapProfilesAdapter profilesAdapter;
@@ -229,11 +234,12 @@ public class MapFragment extends Fragment {
             for(int i = 0; i < farms.size(); i++) {
                 if(farms.get(i) == marker.getTag()) {
                     rvProfiles.smoothScrollToPosition(i);
-                    break;
+                    farms.get(i).expanded = true;
+                } else {
+                    farms.get(i).expanded = false;
                 }
             }
-
-            //TODO: enlarge this farms' profile with more details (centralize)
+            profilesAdapter.notifyDataSetChanged();
 
             return true;
         });
@@ -355,7 +361,12 @@ public class MapFragment extends Fragment {
                             newFarms.add(farm);
                             farms.add(farm);
                             farmIds.add(farm.getId());
-                            createUser(farm, request);
+                            if(!farmsInDatabase.contains(farm.getId())) {
+                                farm.setUser(createUser(farm, request));
+                                farmsInDatabase.add(farm.getId());
+                            } else {
+                                farm.setUser(findFarm(farm.getId()));
+                            }
                         }
                     }
                     profilesAdapter.notifyItemRangeInserted(farms.size()-newFarms.size(), newFarms.size());
@@ -370,8 +381,8 @@ public class MapFragment extends Fragment {
         });
     }
 
-    // populate the parse database with farm users
-    protected void createUser(Farm farm, String request) {
+    // populate the parse database with farm user
+    protected ParseUser createUser(Farm farm, String request) {
         ParseUser user = new ParseUser();
         user.setUsername(farm.getId());
         user.setPassword(farm.getId());
@@ -380,7 +391,24 @@ public class MapFragment extends Fragment {
         user.put(Farm.KEY_ADDRESS, farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState());
         user.put(Farm.KEY_LATITUDE, farm.getCoordinates().latitude);
         user.put(Farm.KEY_LONGITUDE, farm.getCoordinates().longitude);
-        user.signUpInBackground();
         //user.put("profileBackdrop", farm.getImageUrl());
+        user.put(Farm.KEY_BIO, "this farm has not yet created a bio.");
+        user.put("yelpID", farm.getId());
+        user.signUpInBackground();
+        return user;
+    }
+
+    protected ParseUser findFarm(String yelpID) {
+        final ParseUser[] farm = new ParseUser[1];
+        ParseQuery<ParseUser> query = ParseUser.getQuery();
+        query.whereEqualTo("yelpID", yelpID);
+        query.include(Farm.KEY_BIO);
+        query.findInBackground(new FindCallback<ParseUser>() {
+            @Override
+            public void done(List<ParseUser> objects, ParseException e) {
+                farm[0] = objects.get(0);
+            }
+        });
+        return farm[0];
     }
 }

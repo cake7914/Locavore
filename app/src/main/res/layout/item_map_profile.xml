@@ -7,38 +7,106 @@
     android:layout_marginHorizontal="5dp"
     android:layout_marginVertical="5dp">
 
-    <ImageView
-        android:id="@+id/ivBackgroundPhoto"
-        android:layout_width="175dp"
-        android:layout_height="85dp"
-        android:layout_marginEnd="0dp"
-        android:layout_marginBottom="5dp"
-        android:contentDescription="@string/farm_profile_image"
-        app:srcCompat="@drawable/farm_background" />
-
-    <TextView
-        android:id="@+id/tvDistance"
+    <RelativeLayout
+        android:id="@+id/normalView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="56dp"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        tools:text="10mi" />
+        android:layout_marginTop="40dp"
+        android:visibility="gone">
 
-    <TextView
-        android:id="@+id/tvFarmName"
-        android:layout_width="167dp"
+        <ImageView
+            android:id="@+id/ivBackgroundPhoto"
+            android:layout_width="175dp"
+            android:layout_height="85dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginBottom="5dp"
+            android:contentDescription="@string/farm_profile_image"
+            app:srcCompat="@drawable/farm_background" />
+
+        <TextView
+            android:id="@+id/tvFarmName"
+            android:layout_width="167dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="5dp"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="March Farms" />
+
+        <TextView
+            android:id="@+id/tvDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="56dp"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="10mi" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/expandedView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="5dp"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        tools:text="March Farms" />
+        android:visibility="visible">
+
+        <ImageView
+            android:id="@+id/ivBackgroundEnlarged"
+            android:layout_width="350dp"
+            android:layout_height="200dp"
+            android:visibility="visible"
+            app:srcCompat="@drawable/farm_background" />
+
+        <TextView
+            android:id="@+id/tvFarmNameExpanded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="25dp"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="Maple Bank Farm" />
+
+        <TextView
+            android:id="@+id/tvFarmDistanceExpanded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="15dp"
+            android:layout_marginTop="26dp"
+            android:layout_toEndOf="@+id/tvFarmNameExpanded"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="10mi" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="350dp"
+            android:layout_height="102dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="99dp"
+            android:background="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/tvFarmDescription"
+            android:layout_width="347dp"
+            android:layout_height="61dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="3dp"
+            android:layout_marginTop="134dp"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="On our 200 acres, we grow apples, nectarines, and all other varieties of fruits!" />
+
+    </RelativeLayout>
+
 </RelativeLayout>

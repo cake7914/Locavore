@@ -32,6 +32,7 @@ public class Farm {
     public static final String KEY_FARMS_FOLLOWING = "following";
 
     private ParseUser user;
+    public boolean expanded;
 
     @SerializedName("rating")
     @Expose
