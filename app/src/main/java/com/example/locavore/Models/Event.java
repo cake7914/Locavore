@@ -12,6 +12,8 @@ public class Event extends ParseObject {
     public static final String KEY_FARM = "farm";
     public static final String KEY_LOCATION = "location";
     public static final String KEY_PHOTO = "photo";
+    public static final String KEY_LATITUDE = "latitude";
+    public static final String KEY_LONGITUDE = "longitude";
 
     public String getName() {
         return getString(KEY_NAME);
@@ -43,5 +45,17 @@ public class Event extends ParseObject {
 
     public ParseFile getPhoto() { return getParseFile(KEY_PHOTO); }
     public void setPhoto(ParseFile photo) { put(KEY_PHOTO, photo); }
+
+    public Double getLatitude() {
+        return getDouble(KEY_LATITUDE);
+    }
+    public void setLatitude(Double latitude) {
+        put(KEY_LATITUDE, latitude);
+    }
+
+    public Double getLongitude() {return getDouble(KEY_LONGITUDE);}
+    public void setLongitude(Double longitude) {
+        put(KEY_LONGITUDE, longitude);
+    }
 
 }

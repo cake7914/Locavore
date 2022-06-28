@@ -133,7 +133,7 @@ public class MapFragment extends Fragment {
 
         radius = ParseUser.getCurrentUser().getInt("radius");
 
-        if(radius == 0) {
+        if (radius == 0) {
             ParseUser.getCurrentUser().put("radius", MAX_YELP_RADIUS);
             ParseUser.getCurrentUser().saveInBackground();
             radius = MAX_YELP_RADIUS;
@@ -144,7 +144,7 @@ public class MapFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // increase radius by 5 miles
-                if(radius < MAX_YELP_RADIUS) //maximum radius allowed by yelp
+                if (radius < MAX_YELP_RADIUS) //maximum radius allowed by yelp
                 {
                     radius += YELP_RADIUS_INCREMENT;
                     ParseUser.getCurrentUser().put("radius", radius);
@@ -160,7 +160,7 @@ public class MapFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // decrease radius by 5 miles
-                if(radius > YELP_RADIUS_INCREMENT) //min radius ~= 5 miles
+                if (radius > YELP_RADIUS_INCREMENT) //min radius ~= 5 miles
                 {
                     radius -= YELP_RADIUS_INCREMENT;
                     ParseUser.getCurrentUser().put("radius", radius);
@@ -191,10 +191,9 @@ public class MapFragment extends Fragment {
 
         for (int i = 0; i < markers.size(); i++) // farms and their markers always be at the same index? as farms get removed / added so do their markers?
         {
-            if(farms.get(i).getDistance() > radius) { // remove these markers from the map
+            if (farms.get(i).getDistance() > radius) { // remove these markers from the map
                 markers.get(i).remove();
-            }
-            else // keep these ones.
+            } else // keep these ones.
             {
                 nFarms.add(farms.get(i));
                 nMarkers.add(markers.get(i));
@@ -212,6 +211,11 @@ public class MapFragment extends Fragment {
         map = googleMap;
         if (map != null) {
             // Map is ready
+            CameraUpdate point = CameraUpdateFactory.newLatLng(new LatLng(53, 2));
+            // moves camera to coordinates
+            map.moveCamera(point);
+            // animates camera to coordinates
+            map.animateCamera(point);
             getMyLocation();
             MapFragmentPermissionsDispatcher.getMyLocationWithPermissionCheck(this);
             MapFragmentPermissionsDispatcher.startLocationUpdatesWithPermissionCheck(this);
@@ -294,16 +298,15 @@ public class MapFragment extends Fragment {
         if (location == null) {
             return;
         }
-        if(prevLocation == null) {
+        if (prevLocation == null) {
             prevLocation = location;
             currentLocation = location;
-        }
-        else if(prevLocation != location) {
+        } else if (prevLocation != location) {
             currentLocation = location;
             displayLocation();
         }
 
-        if(bounds == null) { //initialize
+        if (bounds == null) { //initialize
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             bounds = new LatLngBounds(latLng, latLng);
         }
@@ -337,8 +340,8 @@ public class MapFragment extends Fragment {
         return iconGen.makeIcon();
     }
 
-    protected void dropMarkers(List<Farm> newFarms, String request){
-        for(Farm farm : newFarms) {
+    protected void dropMarkers(List<Farm> newFarms, String request) {
+        for (Farm farm : newFarms) {
             Marker marker = map.addMarker(new MarkerOptions()
                     .position(farm.getCoordinates())
                     .title(farm.getName())
@@ -355,22 +358,22 @@ public class MapFragment extends Fragment {
     protected void getRequest(String request) {
         // network request: need to take off of main thread? does retrofit automatically do this?
         YelpService yelpService = retrofit.create(YelpService.class);
-        Call<FarmSearchResult> call = yelpService.searchFarms("Bearer "+ YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(),request, 50, radius);
+        Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, radius);
         call.enqueue(new Callback<FarmSearchResult>() {
             @Override
             public void onResponse(@NonNull Call<FarmSearchResult> call, @NonNull Response<FarmSearchResult> response) {
                 Log.i(TAG, "Success! " + response);
-                if(response.body() == null) {
+                if (response.body() == null) {
                     Log.e(TAG, "Error retrieving response body");
                 } else {
                     List<Farm> newFarms = new ArrayList<>();
 
-                    for(Farm farm : response.body().getFarms()) {
-                        if(!farmIds.contains(farm.getId()) && farm.getDistance() < radius) {
+                    for (Farm farm : response.body().getFarms()) {
+                        if (!farmIds.contains(farm.getId()) && farm.getDistance() < radius) {
                             newFarms.add(farm);
                             farms.add(farm);
                             farmIds.add(farm.getId());
-                            if(!farmsInDatabase.contains(farm.getId())) {
+                            if (!farmsInDatabase.contains(farm.getId())) {
                                 farm.setUser(createUser(farm, request));
                                 farmsInDatabase.add(farm.getId());
                             } else {
@@ -378,7 +381,7 @@ public class MapFragment extends Fragment {
                             }
                         }
                     }
-                    profilesAdapter.notifyItemRangeInserted(farms.size()-newFarms.size(), newFarms.size());
+                    profilesAdapter.notifyItemRangeInserted(farms.size() - newFarms.size(), newFarms.size());
                     dropMarkers(newFarms, request);
                 }
             }
