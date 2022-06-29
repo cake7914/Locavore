@@ -220,12 +220,6 @@ public class MapFragment extends Fragment {
         map = googleMap;
         if (map != null) {
             // Map is ready
-            //CameraUpdate point = CameraUpdateFactory.newLatLng(new LatLng(53, 2));
-            // moves camera to coordinates
-            //map.moveCamera(point);
-            // animates camera to coordinates
-            //map.animateCamera(point);
-
             getMyLocation();
             MapFragmentPermissionsDispatcher.getMyLocationWithPermissionCheck(this);
             MapFragmentPermissionsDispatcher.startLocationUpdatesWithPermissionCheck(this);
@@ -271,6 +265,8 @@ public class MapFragment extends Fragment {
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         try {
+                            CameraUpdate point = CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
+                            map.moveCamera(point);
                             onLocationChanged(location);
                         } catch (ParseException e) {
                             e.printStackTrace();
@@ -432,6 +428,7 @@ public class MapFragment extends Fragment {
         }
         user.put(Farm.KEY_BIO, "this farm has not yet created a bio.");
         user.put(Farm.KEY_YELP_ID, farm.getId());
+        user.add(Farm.KEY_TAGS, farm.getId());
         user.signUpInBackground();
         return user;
     }

@@ -43,39 +43,36 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnItemSelectedListener(new BottomNavigationView.OnItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                Fragment fragment;
-                switch (item.getItemId()) {// do something here
-                    case R.id.feed_screen: // go to compose screen
-                        // do something here
-                        fragment = new FeedFragment();
-                        break;
-                    case R.id.map_screen: // go to my profile
-                        // do something here
-                        fragment = new MapFragment();
-                        break;
-                    case R.id.order_screen:
-                        fragment = new OrdersFragment();
-                        break;
-                    case R.id.profile_screen:
-                        if(Objects.equals(ParseUser.getCurrentUser().getString("userType"), "farms") || Objects.equals(ParseUser.getCurrentUser().getString("userType"), "farmersmarket")) {
-                            fragment = new FarmProfileFragment();
-                        } else {
-                            fragment = new LocavoreProfileFragment();
-                        }
-                        break;
-                    default: // go to feed
-                        fragment = new FeedFragment();
-                        break;
-                }
-                fragmentManager.beginTransaction().replace(R.id.flContainer, fragment).commit();
-                return true;
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            Fragment fragment;
+            switch (item.getItemId()) {// do something here
+                case R.id.feed_screen: // go to compose screen
+                    // do something here
+                    fragment = new FeedFragment();
+                    break;
+                case R.id.map_screen: // go to my profile
+                    // do something here
+                    fragment = new MapFragment();
+                    break;
+                case R.id.order_screen:
+                    fragment = new OrdersFragment();
+                    break;
+                case R.id.profile_screen:
+                    if(Objects.equals(ParseUser.getCurrentUser().getString("userType"), "farms") || Objects.equals(ParseUser.getCurrentUser().getString("userType"), "farmersmarket")) {
+                        fragment = new FarmProfileFragment();
+                    } else {
+                        fragment = new LocavoreProfileFragment();
+                    }
+                    break;
+                default: // go to map
+                    fragment = new MapFragment();
+                    break;
             }
+            fragmentManager.beginTransaction().replace(R.id.flContainer, fragment).commit();
+            return true;
         });
         // Set default selection
-        bottomNavigationView.setSelectedItemId(R.id.feed_screen);
+        bottomNavigationView.setSelectedItemId(R.id.map_screen);
     }
 
     @Override

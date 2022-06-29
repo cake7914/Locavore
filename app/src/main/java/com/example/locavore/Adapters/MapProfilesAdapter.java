@@ -147,13 +147,16 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                 JSONArray JSONtags = farm.getUser().getJSONArray("tags");
                 if(JSONtags != null) {
                     List<String> tags = new ArrayList<>();
-                    for (int i = 0; i < JSONtags.length(); i++) {
-                        tags.add(JSONtags.getString(i));
-                    }
                     tagsAdapter = new MapProfileTagsAdapter(context, tags);
                     rvTags.setAdapter(tagsAdapter);
                     linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
                     rvTags.setLayoutManager(linearLayoutManager);
+
+                    for (int i = 0; i < JSONtags.length(); i++) {
+                        tags.add(JSONtags.getString(i));
+                        Log.i(TAG, tags.get(i));
+                    }
+                    tagsAdapter.notifyDataSetChanged();
                 }
 
             } else {

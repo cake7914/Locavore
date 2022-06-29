@@ -119,6 +119,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="75dp"
             android:layout_marginEnd="10dp"
+            android:elevation="3dp"
             android:orientation="horizontal" />
 
     </RelativeLayout>
