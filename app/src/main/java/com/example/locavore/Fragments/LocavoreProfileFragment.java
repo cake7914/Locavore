@@ -19,7 +19,7 @@ import com.example.locavore.R;
 import com.parse.ParseUser;
 
 public class LocavoreProfileFragment extends Fragment {
-    public static final String TAG = "FarmProfileFragment";
+    public static final String TAG = "LocavoreProfileFragment";
     Button btnLogout;
 
     public LocavoreProfileFragment() {
@@ -38,21 +38,16 @@ public class LocavoreProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         btnLogout = view.findViewById(R.id.btnLogout);
-        btnLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ParseUser.logOutInBackground(e -> {
-                    if (e != null) {
-                        Log.e(TAG, "Issue with logout", e);
-                        Toast.makeText(getContext(), "Issue with logout!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        //go to the login activity
-                        Intent i = new Intent(getContext(), LoginActivity.class);
-                        startActivity(i);
-                        Toast.makeText(getContext(), "Success in logging out!", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        btnLogout.setOnClickListener(v -> ParseUser.logOutInBackground(e -> {
+            if (e != null) {
+                Log.e(TAG, "Issue with logout", e);
+                Toast.makeText(getContext(), "Issue with logout!", Toast.LENGTH_SHORT).show();
+            } else {
+                //go to the login activity
+                Intent i = new Intent(getContext(), LoginActivity.class);
+                startActivity(i);
+                Toast.makeText(getContext(), "Success in logging out!", Toast.LENGTH_SHORT).show();
             }
-        });
+        }));
     }
 }

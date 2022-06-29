@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import com.example.locavore.Models.Event;
+import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -68,6 +70,8 @@ public class CreateEventDialogFragment extends DialogFragment {
                 event.put("name", eventName);
                 event.put("description", eventDescription);
                 event.put("farm", ParseUser.getCurrentUser().getObjectId());
+                event.put(Event.KEY_LATITUDE, ParseUser.getCurrentUser().getDouble(Farm.KEY_LATITUDE));
+                event.put(Event.KEY_LONGITUDE, ParseUser.getCurrentUser().getDouble(Farm.KEY_LONGITUDE));
                 event.saveInBackground();
 
                 // assign the event to the farm creating it
