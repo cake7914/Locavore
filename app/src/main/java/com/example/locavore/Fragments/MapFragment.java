@@ -83,6 +83,7 @@ public class MapFragment extends Fragment {
     private static final double METERS_TO_MILE = 1609.34;
     private static final long UPDATE_INTERVAL = 100000;
     private static final long FASTEST_INTERVAL = 100000;
+    private static final double MIN_DISTANCE_CHANGE = 19312.1;
 
     private SupportMapFragment supportMapFragment;
     private GoogleMap map;
@@ -211,11 +212,12 @@ public class MapFragment extends Fragment {
         map = googleMap;
         if (map != null) {
             // Map is ready
-            CameraUpdate point = CameraUpdateFactory.newLatLng(new LatLng(53, 2));
+            //CameraUpdate point = CameraUpdateFactory.newLatLng(new LatLng(53, 2));
             // moves camera to coordinates
-            map.moveCamera(point);
+            //map.moveCamera(point);
             // animates camera to coordinates
-            map.animateCamera(point);
+            //map.animateCamera(point);
+
             getMyLocation();
             MapFragmentPermissionsDispatcher.getMyLocationWithPermissionCheck(this);
             MapFragmentPermissionsDispatcher.startLocationUpdatesWithPermissionCheck(this);
@@ -244,7 +246,6 @@ public class MapFragment extends Fragment {
             // scroll the adapter to the farm that has been clicked on
             for(int i = 0; i < farms.size(); i++) {
                 if(farms.get(i) == marker.getTag()) {
-                    //rvProfiles.smoothScrollToPosition(i);
                     smoothScroller.setTargetPosition(i);
                     linearLayoutManager.startSmoothScroll(smoothScroller);
                     farms.get(i).expanded = true;
@@ -298,10 +299,12 @@ public class MapFragment extends Fragment {
         if (location == null) {
             return;
         }
-        if (prevLocation == null) {
+        if (prevLocation == null) { //prevlocation starts off as null--> initialize prevLocation and currentLocation to be the same
             prevLocation = location;
             currentLocation = location;
-        } else if (prevLocation != location) {
+            displayLocation();
+        } else if (prevLocation.distanceTo(location) > MIN_DISTANCE_CHANGE) { // location has changed by > 12 miles: set prevLocation to currentLocation and currentLocation to the new location and make request.
+            prevLocation = currentLocation;
             currentLocation = location;
             displayLocation();
         }
@@ -415,12 +418,7 @@ public class MapFragment extends Fragment {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
         query.whereEqualTo("yelpID", yelpID);
         query.include(Farm.KEY_BIO);
-        query.findInBackground(new FindCallback<ParseUser>() {
-            @Override
-            public void done(List<ParseUser> objects, ParseException e) {
-                farm[0] = objects.get(0);
-            }
-        });
+        query.findInBackground((objects, e) -> farm[0] = objects.get(0));
         return farm[0];
     }
 

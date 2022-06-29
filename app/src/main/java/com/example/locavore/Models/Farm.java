@@ -30,6 +30,7 @@ public class Farm {
     public static final String KEY_LATITUDE = "latitude";
     public static final String KEY_LONGITUDE = "longitude";
     public static final String KEY_FARMS_FOLLOWING = "following";
+    public static final String KEY_TAGS = "tags";
 
     private ParseUser user;
     public boolean expanded;

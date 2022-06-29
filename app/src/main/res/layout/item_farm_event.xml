@@ -14,29 +14,6 @@
         tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
     <TextView
-        android:id="@+id/tvEventName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:background="#FFFFFF"
-        tools:text="Maple Bank Farm" />
-
-    <TextView
-        android:id="@+id/tvEventFarm"
-        android:layout_width="111dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/ivEventPhoto"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="10dp"
-        android:background="#FFFFFF"
-        android:textAlignment="center"
-        tools:text="Corn Maze" />
-
-    <TextView
         android:id="@+id/tvDistance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -46,4 +23,53 @@
         android:layout_marginBottom="10dp"
         android:background="#FFFFFF"
         tools:text="10mi" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/vEventName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="10dp"
+        android:background="#FFFFFF"
+        app:cardCornerRadius="25dp"
+        app:cardElevation="0dp">
+
+        <TextView
+            android:id="@+id/tvFarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:elevation="2dp"
+            tools:text="Maple Bank Farm" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/vEventFarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/ivEventPhoto"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="10dp"
+        android:background="#FFFFFF"
+        app:cardCornerRadius="25dp"
+        app:cardElevation="0dp">
+
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:textAlignment="center"
+            tools:text="Corn Maze" />
+
+    </androidx.cardview.widget.CardView>
+
 </RelativeLayout>

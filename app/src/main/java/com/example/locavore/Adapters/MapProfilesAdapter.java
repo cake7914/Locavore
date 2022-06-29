@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -18,17 +19,19 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.ViewHolder> {
-    private Context context;
-    private List<Farm> farms;
     private static final double METERS_TO_MILE = 1609.34;
     public static final String TAG = "MapProfilesAdapter";
 
+    private Context context;
+    private List<Farm> farms;
 
     public MapProfilesAdapter(Context context, List<Farm> farms)
     {
@@ -84,6 +87,11 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
         TextView tvDescription;
 
+        RecyclerView rvTags;
+        MapProfileTagsAdapter tagsAdapter;
+        LinearLayoutManager linearLayoutManager;
+
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             expandedView = itemView.findViewById(R.id.expandedView);
@@ -99,6 +107,8 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
             tvDistanceExpanded = itemView.findViewById(R.id.tvFarmDistanceExpanded);
 
             tvDescription = itemView.findViewById(R.id.tvFarmDescription);
+
+            rvTags = itemView.findViewById(R.id.rvTags);
         }
 
         public void bind(Farm farm) throws JSONException {
@@ -130,6 +140,17 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                     Log.i(TAG, "farm user is null");
                 }
 
+                JSONArray JSONtags = farm.getUser().getJSONArray("tags");
+                if(JSONtags != null) {
+                    List<String> tags = new ArrayList<>();
+                    for (int i = 0; i < JSONtags.length(); i++) {
+                        tags.add(JSONtags.getString(i));
+                    }
+                    tagsAdapter = new MapProfileTagsAdapter(context, tags);
+                    rvTags.setAdapter(tagsAdapter);
+                    linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+                    rvTags.setLayoutManager(linearLayoutManager);
+                }
 
             } else {
                 normalView.setVisibility(View.VISIBLE);

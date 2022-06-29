@@ -107,7 +107,19 @@
             android:layout_alignParentTop="true"
             android:layout_marginTop="70dp"
             android:background="#FFFFFF"
-            app:cardCornerRadius="25dp" />
+            app:cardCornerRadius="25dp">
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTags"
+            android:layout_width="356dp"
+            android:layout_height="59dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="75dp"
+            android:layout_marginEnd="10dp"
+            android:orientation="horizontal" />
 
     </RelativeLayout>
 

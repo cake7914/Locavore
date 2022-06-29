@@ -167,6 +167,12 @@ public class FeedFragment extends Fragment implements LocationListener {
         location = newLocation;
     }
 
+    // the way to do this is by using each qualifier to add to a total weight, then ordering them by the weights??
+
+    // right now I just take into consideration the distance.
+
+    // first thing to add: if the farm is followed by the user, add weight
+
     public void insertEvent(Event newEvent) {
         for(int i = 0; i < events.size(); i++) {
             Location eventLocation = new Location(bestProvider);
@@ -185,5 +191,34 @@ public class FeedFragment extends Fragment implements LocationListener {
         }
         // if we haven't hit the return, that means to just add the event at the end of the list
         events.add(newEvent);
+    }
+
+    public void weightEvent(Event event) throws JSONException {
+        double weight = 0;
+
+        // calculate distance: subtract from total weight (want the highest weight to be the first shown)
+        Location eventLocation = new Location(bestProvider);
+        eventLocation.setLatitude(event.getDouble("latitude"));
+        eventLocation.setLongitude(event.getDouble("longitude"));
+        weight -= location.distanceTo(eventLocation);
+
+        // if the user does follow the farm
+        if(checkUserFollowingFarm(event.getFarm(), ParseUser.getCurrentUser().getJSONArray(Farm.KEY_FARMS_FOLLOWING)) != -1) {
+            weight += 5000;
+        }
+
+        // if the user has attended an event at the farm before
+
+    }
+
+    protected int checkUserFollowingFarm(String farmID, JSONArray farmsFollowing) throws JSONException {
+        if(farmsFollowing != null) {
+            for (int i = 0; i < farmsFollowing.length(); i++) {
+                if(farmsFollowing.getString(i).equals(farmID)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 }

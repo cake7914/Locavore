@@ -17,16 +17,10 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
-import com.parse.FindCallback;
-import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
-
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.ViewHolder> {
     private Context context;
@@ -77,8 +71,8 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivEventPhoto = itemView.findViewById(R.id.ivEventPhoto);
-            tvEventFarm = itemView.findViewById(R.id.tvEventFarm);
-            tvEventName = itemView.findViewById(R.id.tvEventName);
+            tvEventFarm = itemView.findViewById(R.id.tvFarm);
+            tvEventName = itemView.findViewById(R.id.tvName);
             tvDistance = itemView.findViewById(R.id.tvDistance);
         }
 
