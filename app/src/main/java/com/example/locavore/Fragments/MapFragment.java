@@ -1,5 +1,6 @@
 package com.example.locavore.Fragments;
 
+import static android.location.LocationManager.NETWORK_PROVIDER;
 import static com.example.locavore.BuildConfig.YELP_API_KEY;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
@@ -57,11 +58,14 @@ import com.google.maps.android.ui.IconGenerator;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
@@ -151,7 +155,11 @@ public class MapFragment extends Fragment {
                     ParseUser.getCurrentUser().put("radius", radius);
                     ParseUser.getCurrentUser().saveInBackground();
                 }
-                displayLocation();
+                try {
+                    displayLocation();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 tvRadius.setText(String.format(getContext().getString(R.string.radius_string), radius / METERS_TO_MILE));
             }
         });
@@ -262,7 +270,11 @@ public class MapFragment extends Fragment {
         locationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
-                        onLocationChanged(location);
+                        try {
+                            onLocationChanged(location);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -288,13 +300,17 @@ public class MapFragment extends Fragment {
         getFusedLocationProviderClient(getContext()).requestLocationUpdates(locationRequest, new LocationCallback() {
                     @Override
                     public void onLocationResult(@NonNull LocationResult locationResult) {
-                        onLocationChanged(locationResult.getLastLocation());
+                        try {
+                            onLocationChanged(locationResult.getLastLocation());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                     }
                 },
                 Looper.myLooper());
     }
 
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(Location location) throws ParseException {
         // GPS may be turned off
         if (location == null) {
             return;
@@ -302,20 +318,18 @@ public class MapFragment extends Fragment {
         if (prevLocation == null) { //prevlocation starts off as null--> initialize prevLocation and currentLocation to be the same
             prevLocation = location;
             currentLocation = location;
+            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            bounds = new LatLngBounds(latLng, latLng);
+
             displayLocation();
         } else if (prevLocation.distanceTo(location) > MIN_DISTANCE_CHANGE) { // location has changed by > 12 miles: set prevLocation to currentLocation and currentLocation to the new location and make request.
             prevLocation = currentLocation;
             currentLocation = location;
             displayLocation();
         }
-
-        if (bounds == null) { //initialize
-            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            bounds = new LatLngBounds(latLng, latLng);
-        }
     }
 
-    private void displayLocation() {
+    private void displayLocation() throws ParseException {
         if (currentLocation != null) {
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
@@ -358,57 +372,66 @@ public class MapFragment extends Fragment {
         }
     }
 
-    protected void getRequest(String request) {
-        // network request: need to take off of main thread? does retrofit automatically do this?
-        YelpService yelpService = retrofit.create(YelpService.class);
-        Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, radius);
-        call.enqueue(new Callback<FarmSearchResult>() {
-            @Override
-            public void onResponse(@NonNull Call<FarmSearchResult> call, @NonNull Response<FarmSearchResult> response) {
-                Log.i(TAG, "Success! " + response);
-                if (response.body() == null) {
-                    Log.e(TAG, "Error retrieving response body");
-                } else {
-                    List<Farm> newFarms = new ArrayList<>();
+    protected void getRequest(String request) throws ParseException {
+        // first make request to Parse database to check for farms nearby
+        populateDatabaseFarms(request);
 
-                    for (Farm farm : response.body().getFarms()) {
-                        if (!farmIds.contains(farm.getId()) && farm.getDistance() < radius) {
-                            newFarms.add(farm);
-                            farms.add(farm);
-                            farmIds.add(farm.getId());
-                            if (!farmsInDatabase.contains(farm.getId())) {
-                                farm.setUser(createUser(farm, request));
-                                farmsInDatabase.add(farm.getId());
-                            } else {
-                                farm.setUser(findFarm(farm.getId()));
+        if(!(farms.size() > 0)) {
+            // only make the request to Yelp if we don't have farms yet in the radius of the user's location.
+            YelpService yelpService = retrofit.create(YelpService.class);
+            Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, radius);
+            call.enqueue(new Callback<FarmSearchResult>() {
+                @Override
+                public void onResponse(@NonNull Call<FarmSearchResult> call, @NonNull Response<FarmSearchResult> response) {
+                    Log.i(TAG, "Success! " + response);
+                    if (response.body() == null) {
+                        Log.e(TAG, "Error retrieving response body");
+                    } else {
+                        List<Farm> newFarms = new ArrayList<>();
+
+                        for (Farm farm : response.body().getFarms()) {
+                            if (!farmIds.contains(farm.getId()) && farm.getDistance() < radius) {
+                                newFarms.add(farm);
+                                farms.add(farm);
+                                farmIds.add(farm.getId());
+                                if (!farmsInDatabase.contains(farm.getId())) {
+                                    farm.setUser(createUserFromYelpData(farm, request));
+                                    farmsInDatabase.add(farm.getId());
+                                    if(Objects.equals(farm.getImageUrl(), "")) {
+                                        farm.setImageUrl(farm.getUser().getString(Farm.KEY_PROFILE_BACKDROP));
+                                    }
+                                } else {
+                                    farm.setUser(findFarm(farm.getId()));
+                                }
                             }
                         }
+                        profilesAdapter.notifyItemRangeInserted(farms.size() - newFarms.size(), newFarms.size());
+                        dropMarkers(newFarms, request);
                     }
-                    profilesAdapter.notifyItemRangeInserted(farms.size() - newFarms.size(), newFarms.size());
-                    dropMarkers(newFarms, request);
                 }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<FarmSearchResult> call, @NonNull Throwable t) {
-                Log.i(TAG, "Failure " + t);
-            }
-        });
+                @Override
+                public void onFailure(@NonNull Call<FarmSearchResult> call, @NonNull Throwable t) {
+                    Log.i(TAG, "Failure " + t);
+                }
+            });
+        }
     }
 
     // populate the parse database with farm user
-    protected ParseUser createUser(Farm farm, String request) {
+    protected ParseUser createUserFromYelpData(Farm farm, String request) {
         ParseUser user = new ParseUser();
         user.setUsername(farm.getId());
         user.setPassword(farm.getId());
         user.put(Farm.KEY_USER_TYPE, request);
         user.put(Farm.KEY_NAME, farm.getName());
         user.put(Farm.KEY_ADDRESS, farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState());
-        user.put(Farm.KEY_LATITUDE, farm.getCoordinates().latitude);
-        user.put(Farm.KEY_LONGITUDE, farm.getCoordinates().longitude);
-        //user.put("profileBackdrop", farm.getImageUrl());
+        user.put(Farm.KEY_LOCATION, new ParseGeoPoint(farm.getCoordinates().latitude, farm.getCoordinates().longitude));
+        if(!Objects.equals(farm.getImageUrl(), "")) { // use the default image instead
+            user.put(Farm.KEY_PROFILE_BACKDROP, farm.getImageUrl());
+        }
         user.put(Farm.KEY_BIO, "this farm has not yet created a bio.");
-        user.put("yelpID", farm.getId());
+        user.put(Farm.KEY_YELP_ID, farm.getId());
         user.signUpInBackground();
         return user;
     }
@@ -416,10 +439,38 @@ public class MapFragment extends Fragment {
     protected ParseUser findFarm(String yelpID) {
         final ParseUser[] farm = new ParseUser[1];
         ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereEqualTo("yelpID", yelpID);
+        query.whereEqualTo(Farm.KEY_YELP_ID, yelpID);
         query.include(Farm.KEY_BIO);
         query.findInBackground((objects, e) -> farm[0] = objects.get(0));
         return farm[0];
+    }
+
+    protected void populateDatabaseFarms(String request) throws ParseException {
+        ParseQuery<ParseUser> query = ParseUser.getQuery();
+        query.whereEqualTo(Farm.KEY_USER_TYPE, request);
+        query.whereWithinMiles(Farm.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), radius/METERS_TO_MILE);
+
+        List<ParseUser> databaseFarms = query.find(); // this cannot be in the background, or it makes the yelp request too quickly
+        List<Farm> newFarms = new ArrayList<>();
+        for(int i = 0; i < databaseFarms.size(); i++) {
+            Farm farm = new Farm(databaseFarms.get(i));
+            if(!farmIds.contains(farm.getUser().getString(Farm.KEY_YELP_ID))) {
+                LatLng latLng = new LatLng(farm.getUser().getParseGeoPoint(Farm.KEY_LOCATION).getLatitude(), farm.getUser().getParseGeoPoint(Farm.KEY_LOCATION).getLongitude());
+                farm.setCoordinates(latLng);
+                Location location = new Location(NETWORK_PROVIDER);
+                location.setLatitude(latLng.latitude);
+                location.setLongitude(latLng.longitude);
+                farm.setDistance((double) currentLocation.distanceTo(location));
+                farm.setName(farm.getUser().getString(Farm.KEY_NAME));
+                farm.setImageUrl(farm.getUser().getString(Farm.KEY_PROFILE_BACKDROP));
+
+                newFarms.add(farm);
+                farms.add(farm);
+                farmIds.add(farm.getUser().getString(Farm.KEY_YELP_ID));
+            }
+        }
+        profilesAdapter.notifyItemRangeInserted(farms.size() - newFarms.size(), newFarms.size());
+        dropMarkers(newFarms, request);
     }
 
     public class CenterSmoothScroller extends LinearSmoothScroller {

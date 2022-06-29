@@ -36,6 +36,7 @@ import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -107,13 +108,12 @@ public class FeedFragment extends Fragment implements LocationListener {
         locationManager.requestLocationUpdates(bestProvider, 3000, 0, this);
 
         location = locationManager.getLastKnownLocation(bestProvider);
-        queryFarms("farms");
-        queryFarms("farmersmarket");
     }
 
     private void queryFarms(String request) {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
         query.whereEqualTo(Farm.KEY_USER_TYPE, request);
+        query.whereWithinMiles(Farm.KEY_LOCATION, new ParseGeoPoint(location.getLatitude(), location.getLongitude()), ParseUser.getCurrentUser().getDouble("radius")/METERS_TO_MILE);
         query.findInBackground((users, e) -> {
             if (e != null) {
                 Log.e(TAG, "Issue with getting farms ", e);
@@ -121,38 +121,28 @@ public class FeedFragment extends Fragment implements LocationListener {
                 List<Farm> newFarms = new ArrayList<>();
 
                 for (ParseUser user : users) {
-                    //show farms that are within the user's radius
-                    Location userLocation = new Location(bestProvider);
-                    userLocation.setLatitude(user.getDouble("latitude"));
-                    userLocation.setLongitude(user.getDouble("longitude"));
+                    Farm farm = new Farm(user);
+                    newFarms.add(farm);
 
-                    if(location != null) {
-                        if(location.distanceTo(userLocation) < ParseUser.getCurrentUser().getDouble("radius"))
-                        {
-                            Farm farm = new Farm(user);
-                            newFarms.add(farm);
-
-                            // also add any events that this farm has to the events list
-                            JSONArray newEvents = user.getJSONArray("events");
-                            if(newEvents != null) {
-                                for (int i = 0; i < newEvents.length(); i++) {
-                                    try {
-                                        String eventId = newEvents.getJSONObject(i).getString("objectId");
-                                        ParseQuery<ParseObject> eventQuery = ParseQuery.getQuery("Event");
-                                        eventQuery.getInBackground(eventId, (event, err) -> {
-                                            if (err != null) {
-                                                Log.e(TAG, "Issue with getting event ", err);
-                                            } else {
-                                               // add this event to the events list
-                                                insertEvent((Event) event);
-                                                eventsAdapter.notifyDataSetChanged(); //TODO: change this
-                                            }
-                                        });
-
-                                    } catch (JSONException ex) {
-                                        ex.printStackTrace();
+                    // also add any events that this farm has to the events list
+                    JSONArray newEvents = user.getJSONArray("events");
+                    if (newEvents != null) {
+                        for (int i = 0; i < newEvents.length(); i++) {
+                            try {
+                                String eventId = newEvents.getJSONObject(i).getString("objectId");
+                                ParseQuery<ParseObject> eventQuery = ParseQuery.getQuery("Event");
+                                eventQuery.getInBackground(eventId, (event, err) -> {
+                                    if (err != null) {
+                                        Log.e(TAG, "Issue with getting event ", err);
+                                    } else {
+                                        // add this event to the events list
+                                        insertEvent((Event) event);
+                                        eventsAdapter.notifyDataSetChanged(); //TODO: change this
                                     }
-                                }
+                                });
+
+                            } catch (JSONException ex) {
+                                ex.printStackTrace();
                             }
                         }
                     }
@@ -165,6 +155,8 @@ public class FeedFragment extends Fragment implements LocationListener {
     @Override
     public void onLocationChanged(@NonNull Location newLocation) {
         location = newLocation;
+        queryFarms("farms");
+        queryFarms("farmersmarket");
     }
 
     // the way to do this is by using each qualifier to add to a total weight, then ordering them by the weights??

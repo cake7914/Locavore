@@ -18,6 +18,10 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,7 +55,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
         Farm farm = farms.get(position);
         try {
             holder.bind(farm);
-        } catch (JSONException e) {
+        } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
     }
@@ -111,7 +115,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
             rvTags = itemView.findViewById(R.id.rvTags);
         }
 
-        public void bind(Farm farm) throws JSONException {
+        public void bind(Farm farm) throws JSONException, ParseException {
             if(farm.expanded) {
                 normalView.setVisibility(View.GONE);
                 expandedView.setVisibility(View.VISIBLE);

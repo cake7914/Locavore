@@ -31,6 +31,8 @@ public class Farm {
     public static final String KEY_LONGITUDE = "longitude";
     public static final String KEY_FARMS_FOLLOWING = "following";
     public static final String KEY_TAGS = "tags";
+    public static final String KEY_LOCATION = "location";
+    public static final String KEY_YELP_ID = "yelpID";
 
     private ParseUser user;
     public boolean expanded;
