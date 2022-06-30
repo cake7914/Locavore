@@ -377,6 +377,7 @@ public class MapFragment extends Fragment {
             YelpService yelpService = retrofit.create(YelpService.class);
             Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, radius);
             call.enqueue(new Callback<FarmSearchResult>() {
+
                 @Override
                 public void onResponse(@NonNull Call<FarmSearchResult> call, @NonNull Response<FarmSearchResult> response) {
                     Log.i(TAG, "Success! " + response);
@@ -410,8 +411,11 @@ public class MapFragment extends Fragment {
                 public void onFailure(@NonNull Call<FarmSearchResult> call, @NonNull Throwable t) {
                     Log.i(TAG, "Failure " + t);
                 }
+
+
             });
         }
+
     }
 
     // populate the parse database with farm user

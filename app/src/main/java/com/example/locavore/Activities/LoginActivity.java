@@ -7,8 +7,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.R;
 import com.parse.ParseUser;
 
@@ -20,6 +25,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button btnLogin;
     private Button btnFarmerSignup;
     private Button btnLocavoreSignup;
+    private ImageView ivWaves;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +48,12 @@ public class LoginActivity extends AppCompatActivity {
 
         btnLogin = findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(v -> loginUser(etEmailAddress.getText().toString(), etPassword.getText().toString()));
+
+        ivWaves = findViewById(R.id.ivWaves);
+        Glide.with(this)
+                .load(getDrawable(R.drawable.login_screen))
+                .centerCrop()
+                .into(ivWaves);
     }
     private void goToFarmerSignupActivity() {
         Intent i = new Intent(this, FarmerSignupActivity.class);

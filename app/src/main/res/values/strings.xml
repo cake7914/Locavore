@@ -33,4 +33,6 @@
     <string name="event_name">Event Name</string>
     <string name="event_description">Event Description</string>
     <string name="following">following</string>
+    <string name="view_profile">view profile</string>
+    <string name="locavore">LOCAVORE</string>
 </resources>

@@ -76,10 +76,10 @@
             android:id="@+id/tvFarmDistanceExpanded"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="14dp"
-            android:layout_marginTop="12dp"
-            android:layout_toEndOf="@+id/tvFarmNameExpanded"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="42dp"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -121,6 +121,19 @@
             android:layout_marginEnd="10dp"
             android:elevation="3dp"
             android:orientation="horizontal" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="53dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="11dp"
+            android:layout_marginEnd="26dp"
+            android:backgroundTint="@color/dark_yellow"
+            android:textSize="11sp"
+            app:cornerRadius="20dp"
+            app:icon="@drawable/ic_baseline_north_east_24" />
 
     </RelativeLayout>
 
