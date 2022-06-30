@@ -46,6 +46,7 @@ public class LocavoreProfileFragment extends Fragment {
                 //go to the login activity
                 Intent i = new Intent(getContext(), LoginActivity.class);
                 startActivity(i);
+                getActivity().finish();
                 Toast.makeText(getContext(), "Success in logging out!", Toast.LENGTH_SHORT).show();
             }
         }));
