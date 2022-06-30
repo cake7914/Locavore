@@ -265,7 +265,7 @@ public class MapFragment extends Fragment {
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         try {
-                            CameraUpdate point = CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
+                            CameraUpdate point = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 10);
                             map.moveCamera(point);
                             onLocationChanged(location);
                         } catch (ParseException e) {
@@ -411,8 +411,6 @@ public class MapFragment extends Fragment {
                 public void onFailure(@NonNull Call<FarmSearchResult> call, @NonNull Throwable t) {
                     Log.i(TAG, "Failure " + t);
                 }
-
-
             });
         }
 
@@ -451,7 +449,8 @@ public class MapFragment extends Fragment {
         query.whereEqualTo(Farm.KEY_USER_TYPE, request);
         query.whereWithinMiles(Farm.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), radius/METERS_TO_MILE);
 
-        List<ParseUser> databaseFarms = query.find(); // this cannot be in the background, or it makes the yelp request too quickly
+
+        List<ParseUser> databaseFarms = query.find(); // TODO: put this back on the background thread, but make the UI thread wait()?
         List<Farm> newFarms = new ArrayList<>();
         for(int i = 0; i < databaseFarms.size(); i++) {
             Farm farm = new Farm(databaseFarms.get(i));

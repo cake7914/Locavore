@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.parse.ParseUser;
@@ -23,6 +25,7 @@ public class FarmerSignupActivity extends AppCompatActivity {
     private EditText etPassword;
     private EditText etBio;
     private EditText etAddress;
+    private ImageView ivWaves;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,13 @@ public class FarmerSignupActivity extends AppCompatActivity {
 
             signupFarmer(farmName, emailAddress, username, password, bio, address);
         });
+
+        ivWaves = findViewById(R.id.ivSignUpWaves);
+        Glide.with(this)
+                .load(getDrawable(R.drawable.inverse_login_screen2))
+                .centerCrop()
+                .into(ivWaves);
+
     }
 
     private void signupFarmer(String farmName, String emailAddress, String username, String password, String bio, String address) {
