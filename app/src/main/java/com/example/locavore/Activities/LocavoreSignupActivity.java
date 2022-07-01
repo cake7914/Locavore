@@ -7,11 +7,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.locavore.Models.Farm;
 import com.example.locavore.R;
 import com.parse.ParseUser;
+
+import java.util.Set;
 
 public class LocavoreSignupActivity extends AppCompatActivity {
 
@@ -22,6 +26,7 @@ public class LocavoreSignupActivity extends AppCompatActivity {
     private EditText etUsername;
     private EditText etPassword;
     private EditText etRadius;
+    private ImageView ivWaves;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,12 @@ public class LocavoreSignupActivity extends AppCompatActivity {
 
             signupLocavore(name, emailAddress, username, password, radius);
         });
+
+        ivWaves = findViewById(R.id.ivWaves);
+        Glide.with(this)
+                .load(getDrawable(R.drawable.inverse_login_screen2))
+                .centerCrop()
+                .into(ivWaves);
     }
 
     private void signupLocavore(String name, String emailAddress, String username, String password, String radius) {

@@ -33,18 +33,18 @@
 
             <TextView
                 android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="128dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="45dp"
-                android:layout_marginEnd="53dp"
+                android:layout_marginEnd="0dp"
                 android:fontFamily="@font/allerta_stencil"
                 android:gravity="center_horizontal|center_vertical"
                 android:text="@string/locavore"
                 android:textAlignment="center"
                 android:textColor="#FFFFFF"
-                android:textSize="55sp"
+                android:textSize="65sp"
                 android:textStyle="bold" />
         </RelativeLayout>
 
