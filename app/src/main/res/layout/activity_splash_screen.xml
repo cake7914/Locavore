@@ -6,12 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".Activities.SplashScreenActivity">
 
-    <ImageView
-        android:id="@+id/ivBlur"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/splash_screen" />
-
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/animationView"
         android:layout_width="match_parent"

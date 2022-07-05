@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Theme.Locavore" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
@@ -12,5 +12,17 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" >?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+    </style>
+
+    <style name="SignupBackground" parent="Theme.Locavore">
+        <item name="android:windowBackground">@drawable/inverse_login_screen2</item>
+    </style>
+
+    <style name="LoginBackground" parent="Theme.Locavore">
+        <item name="android:windowBackground">@drawable/login_screen</item>
+    </style>
+
+    <style name="SplashScreenBackground" parent="Theme.Locavore">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
 </resources>

@@ -15,7 +15,7 @@ import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.Models.Event;
-import com.example.locavore.Models.Farm;
+import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -90,7 +90,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
             String farmID = event.getFarm();
             ParseQuery<ParseUser> query = ParseUser.getQuery();
             query.whereEqualTo("objectId", farmID);
-            query.findInBackground((objects, e) -> tvEventFarm.setText(objects.get(0).getString(Farm.KEY_NAME)));
+            query.findInBackground((objects, e) -> tvEventFarm.setText(objects.get(0).getString(User.KEY_NAME)));
 
             tvEventName.setText(event.getName());
 

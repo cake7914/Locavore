@@ -35,6 +35,14 @@
     <string name="following">following</string>
     <string name="view_profile">view profile</string>
     <string name="locavore">LOCAVORE</string>
-    <string name="tell_us_more_about_the_farm">Tell us more about the farm...</string>
+    <string name="tell_us_more_about_the_farm">Tell us more about the farm…</string>
     <string name="tell_us_about_yourself">Tell us about yourself</string>
+    <string name="username_field_empty">Please enter a username</string>
+    <string name="password_field_empty">Please enter a password</string>
+    <string name="user_already_exists">This user already exists; Please try a new username</string>
+    <string name="misc_signup_error">An issue with signup has occurred</string>
+    <string name="success">Success</string>
+    <string name="invalid_user">Invalid username or password</string>
+    <string name="misc_login_error">An issue with signup has occurred</string>
+    <string name="short_password">Password must be > 10 characters long</string>
 </resources>
