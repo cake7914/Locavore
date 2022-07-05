@@ -45,4 +45,6 @@
     <string name="invalid_user">Invalid username or password</string>
     <string name="misc_login_error">An issue with signup has occurred</string>
     <string name="short_password">Password must be > 10 characters long</string>
+    <string name="misc_logout_error">An issue with logout has occurred</string>
+    <string name="logout_success">Successful logout</string>
 </resources>
