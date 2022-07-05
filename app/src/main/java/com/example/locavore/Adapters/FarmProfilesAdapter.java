@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,9 +16,8 @@ import com.example.locavore.R;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.locavore.Models.Farm;
+import com.example.locavore.Models.User;
 import com.parse.ParseException;
-import com.parse.ParseFile;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
@@ -30,10 +28,10 @@ import java.util.List;
 
 public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapter.ViewHolder> {
     private Context context;
-    private List<Farm> farms;
+    private List<User> farms;
     public static final String TAG = "FarmProfilesAdapter";
 
-    public FarmProfilesAdapter(Context context, List<Farm> farms) {
+    public FarmProfilesAdapter(Context context, List<User> farms) {
         this.context = context;
         this.farms = farms;
     }
@@ -47,7 +45,7 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Farm farm = farms.get(position);
+        User farm = farms.get(position);
         try {
             holder.bind(farm);
         } catch (JSONException e) {
@@ -66,7 +64,7 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
         notifyItemRangeRemoved(0, size);
     }
 
-    public void addAll(List<Farm> newFarms) {
+    public void addAll(List<User> newFarms) {
         farms.addAll(newFarms);
         notifyItemRangeInserted(farms.size() - newFarms.size(), newFarms.size());
     }
@@ -85,21 +83,21 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
             btnFollow = itemView.findViewById(R.id.btnFollow);
         }
 
-        public void bind(Farm farm) throws JSONException {
-            String farmName = farm.getUser().getString(Farm.KEY_NAME);
+        public void bind(User farm) throws JSONException {
+            String farmName = farm.getUser().getString(User.KEY_NAME);
             if(farmName.length() >= 28) {
                 tvFarmName.setText(farmName.substring(0, 25) + "...");
             } else {
-                tvFarmName.setText(farm.getUser().getString(Farm.KEY_NAME));
+                tvFarmName.setText(farm.getUser().getString(User.KEY_NAME));
             }
 
-            if(farm.getUser().getString(Farm.KEY_PROFILE_PHOTO) != null) {
-                Glide.with(context).load(farm.getUser().getString(Farm.KEY_PROFILE_PHOTO)).circleCrop().into(ivProfileImage);
+            if(farm.getUser().getString(User.KEY_PROFILE_PHOTO) != null) {
+                Glide.with(context).load(farm.getUser().getString(User.KEY_PROFILE_PHOTO)).circleCrop().into(ivProfileImage);
             } else {
                 ivProfileImage.setImageBitmap(null);
             }
 
-            if(checkUserFollowingFarm(farm.getUser().getObjectId(), ParseUser.getCurrentUser().getJSONArray(Farm.KEY_FARMS_FOLLOWING)) == -1) {
+            if(checkUserFollowingFarm(farm.getUser().getObjectId(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) == -1) {
                 btnFollow.setText(R.string.follow);
                 btnFollow.setBackgroundColor(context.getResources().getColor(R.color.light_yellow));
             } else {
@@ -112,16 +110,16 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
                 public void onClick(View v) {
                     ParseUser user = ParseUser.getCurrentUser();
                     try {
-                        int pos = checkUserFollowingFarm(farm.getUser().getObjectId(), user.getJSONArray(Farm.KEY_FARMS_FOLLOWING));
+                        int pos = checkUserFollowingFarm(farm.getUser().getObjectId(), user.getJSONArray(User.KEY_FARMS_FOLLOWING));
                         if(pos == -1) {
-                            user.add(Farm.KEY_FARMS_FOLLOWING, farm.getUser().getObjectId());
+                            user.add(User.KEY_FARMS_FOLLOWING, farm.getUser().getObjectId());
                             btnFollow.setText(R.string.following);
                             btnFollow.setBackgroundColor(context.getResources().getColor(R.color.dark_yellow));
                         } else {
-                            JSONArray farms = user.getJSONArray(Farm.KEY_FARMS_FOLLOWING);
+                            JSONArray farms = user.getJSONArray(User.KEY_FARMS_FOLLOWING);
                             assert farms != null;
                             farms.remove(pos);
-                            user.put(Farm.KEY_FARMS_FOLLOWING, farms);
+                            user.put(User.KEY_FARMS_FOLLOWING, farms);
                             btnFollow.setText(R.string.follow);
                             btnFollow.setBackgroundColor(context.getResources().getColor(R.color.light_yellow));
                         }

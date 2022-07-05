@@ -1,25 +1,22 @@
 package com.example.locavore.Adapters;
 
 
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.locavore.Models.Farm;
+import com.example.locavore.Models.User;
 import com.example.locavore.Models.YelpLocation;
 import com.example.locavore.R;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
-
-import org.w3c.dom.Text;
 
 public class CustomWindowAdapter implements GoogleMap.InfoWindowAdapter {
     LayoutInflater mInflater;
     TextView tvFarmName;
     TextView tvFarmAddress;
     TextView tvFarmBio;
-    Farm farm;
+    User farm;
     YelpLocation location;
 
     public CustomWindowAdapter(LayoutInflater i){
@@ -29,7 +26,7 @@ public class CustomWindowAdapter implements GoogleMap.InfoWindowAdapter {
     @Override
     public View getInfoContents(Marker marker) {
         View v = mInflater.inflate(R.layout.activity_custom_window_adapter, null);
-        farm = (Farm) marker.getTag();
+        farm = (User) marker.getTag();
         location = farm.getLocation();
 
         tvFarmName = (TextView) v.findViewById(R.id.tvFarmName);

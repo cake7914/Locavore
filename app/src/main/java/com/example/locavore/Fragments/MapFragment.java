@@ -32,7 +32,7 @@ import android.widget.TextView;
 
 import com.example.locavore.Adapters.CustomWindowAdapter;
 import com.example.locavore.Adapters.MapProfilesAdapter;
-import com.example.locavore.Models.Farm;
+import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.example.locavore.Models.FarmSearchResult;
 import com.example.locavore.YelpService;
@@ -46,23 +46,18 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.maps.android.ui.IconGenerator;
-import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
-import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -100,7 +95,7 @@ public class MapFragment extends Fragment {
     private TextView tvRadius;
 
     private Integer radius;
-    private List<Farm> farms = new ArrayList<>();
+    private List<User> farms = new ArrayList<>();
     private List<String> farmIds = new ArrayList<>();
     private List<Marker> markers = new ArrayList<>();
     private List<String> farmsInDatabase = new ArrayList<>();
@@ -194,7 +189,7 @@ public class MapFragment extends Fragment {
     }
 
     protected void adjustRange() {
-        List<Farm> nFarms = new ArrayList<>();
+        List<User> nFarms = new ArrayList<>();
         List<Marker> nMarkers = new ArrayList<>();
         List<String> nFarmIds = new ArrayList<>();
 
@@ -265,7 +260,7 @@ public class MapFragment extends Fragment {
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         try {
-                            CameraUpdate point = CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
+                            CameraUpdate point = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 10);
                             map.moveCamera(point);
                             onLocationChanged(location);
                         } catch (ParseException e) {
@@ -353,8 +348,8 @@ public class MapFragment extends Fragment {
         return iconGen.makeIcon();
     }
 
-    protected void dropMarkers(List<Farm> newFarms, String request) {
-        for (Farm farm : newFarms) {
+    protected void dropMarkers(List<User> newFarms, String request) {
+        for (User farm : newFarms) {
             Marker marker = map.addMarker(new MarkerOptions()
                     .position(farm.getCoordinates())
                     .title(farm.getName())
@@ -377,15 +372,16 @@ public class MapFragment extends Fragment {
             YelpService yelpService = retrofit.create(YelpService.class);
             Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, radius);
             call.enqueue(new Callback<FarmSearchResult>() {
+
                 @Override
                 public void onResponse(@NonNull Call<FarmSearchResult> call, @NonNull Response<FarmSearchResult> response) {
                     Log.i(TAG, "Success! " + response);
                     if (response.body() == null) {
                         Log.e(TAG, "Error retrieving response body");
                     } else {
-                        List<Farm> newFarms = new ArrayList<>();
+                        List<User> newFarms = new ArrayList<>();
 
-                        for (Farm farm : response.body().getFarms()) {
+                        for (User farm : response.body().getFarms()) {
                             if (!farmIds.contains(farm.getId()) && farm.getDistance() < radius) {
                                 newFarms.add(farm);
                                 farms.add(farm);
@@ -394,7 +390,7 @@ public class MapFragment extends Fragment {
                                     farm.setUser(createUserFromYelpData(farm, request));
                                     farmsInDatabase.add(farm.getId());
                                     if(Objects.equals(farm.getImageUrl(), "")) {
-                                        farm.setImageUrl(farm.getUser().getString(Farm.KEY_PROFILE_BACKDROP));
+                                        farm.setImageUrl(farm.getUser().getString(User.KEY_PROFILE_BACKDROP));
                                     }
                                 } else {
                                     farm.setUser(findFarm(farm.getId()));
@@ -412,23 +408,24 @@ public class MapFragment extends Fragment {
                 }
             });
         }
+
     }
 
     // populate the parse database with farm user
-    protected ParseUser createUserFromYelpData(Farm farm, String request) {
+    protected ParseUser createUserFromYelpData(User farm, String request) {
         ParseUser user = new ParseUser();
         user.setUsername(farm.getId());
         user.setPassword(farm.getId());
-        user.put(Farm.KEY_USER_TYPE, request);
-        user.put(Farm.KEY_NAME, farm.getName());
-        user.put(Farm.KEY_ADDRESS, farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState());
-        user.put(Farm.KEY_LOCATION, new ParseGeoPoint(farm.getCoordinates().latitude, farm.getCoordinates().longitude));
+        user.put(User.KEY_USER_TYPE, request);
+        user.put(User.KEY_NAME, farm.getName());
+        user.put(User.KEY_ADDRESS, farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState());
+        user.put(User.KEY_LOCATION, new ParseGeoPoint(farm.getCoordinates().latitude, farm.getCoordinates().longitude));
         if(!Objects.equals(farm.getImageUrl(), "")) { // use the default image instead
-            user.put(Farm.KEY_PROFILE_BACKDROP, farm.getImageUrl());
+            user.put(User.KEY_PROFILE_BACKDROP, farm.getImageUrl());
         }
-        user.put(Farm.KEY_BIO, "this farm has not yet created a bio.");
-        user.put(Farm.KEY_YELP_ID, farm.getId());
-        user.add(Farm.KEY_TAGS, farm.getId());
+        user.put(User.KEY_BIO, "this farm has not yet created a bio.");
+        user.put(User.KEY_YELP_ID, farm.getId());
+        user.add(User.KEY_TAGS, farm.getId());
         user.signUpInBackground();
         return user;
     }
@@ -436,34 +433,35 @@ public class MapFragment extends Fragment {
     protected ParseUser findFarm(String yelpID) {
         final ParseUser[] farm = new ParseUser[1];
         ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereEqualTo(Farm.KEY_YELP_ID, yelpID);
-        query.include(Farm.KEY_BIO);
+        query.whereEqualTo(User.KEY_YELP_ID, yelpID);
+        query.include(User.KEY_BIO);
         query.findInBackground((objects, e) -> farm[0] = objects.get(0));
         return farm[0];
     }
 
     protected void populateDatabaseFarms(String request) throws ParseException {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereEqualTo(Farm.KEY_USER_TYPE, request);
-        query.whereWithinMiles(Farm.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), radius/METERS_TO_MILE);
+        query.whereEqualTo(User.KEY_USER_TYPE, request);
+        query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), radius/METERS_TO_MILE);
 
-        List<ParseUser> databaseFarms = query.find(); // this cannot be in the background, or it makes the yelp request too quickly
-        List<Farm> newFarms = new ArrayList<>();
+
+        List<ParseUser> databaseFarms = query.find(); // TODO: put this back on the background thread, but make the UI thread wait()?
+        List<User> newFarms = new ArrayList<>();
         for(int i = 0; i < databaseFarms.size(); i++) {
-            Farm farm = new Farm(databaseFarms.get(i));
-            if(!farmIds.contains(farm.getUser().getString(Farm.KEY_YELP_ID))) {
-                LatLng latLng = new LatLng(farm.getUser().getParseGeoPoint(Farm.KEY_LOCATION).getLatitude(), farm.getUser().getParseGeoPoint(Farm.KEY_LOCATION).getLongitude());
+            User farm = new User(databaseFarms.get(i));
+            if(!farmIds.contains(farm.getUser().getString(User.KEY_YELP_ID))) {
+                LatLng latLng = new LatLng(farm.getUser().getParseGeoPoint(User.KEY_LOCATION).getLatitude(), farm.getUser().getParseGeoPoint(User.KEY_LOCATION).getLongitude());
                 farm.setCoordinates(latLng);
                 Location location = new Location(NETWORK_PROVIDER);
                 location.setLatitude(latLng.latitude);
                 location.setLongitude(latLng.longitude);
                 farm.setDistance((double) currentLocation.distanceTo(location));
-                farm.setName(farm.getUser().getString(Farm.KEY_NAME));
-                farm.setImageUrl(farm.getUser().getString(Farm.KEY_PROFILE_BACKDROP));
+                farm.setName(farm.getUser().getString(User.KEY_NAME));
+                farm.setImageUrl(farm.getUser().getString(User.KEY_PROFILE_BACKDROP));
 
                 newFarms.add(farm);
                 farms.add(farm);
-                farmIds.add(farm.getUser().getString(Farm.KEY_YELP_ID));
+                farmIds.add(farm.getUser().getString(User.KEY_YELP_ID));
             }
         }
         profilesAdapter.notifyItemRangeInserted(farms.size() - newFarms.size(), newFarms.size());

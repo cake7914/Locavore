@@ -16,16 +16,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.example.locavore.Models.Farm;
+import com.example.locavore.Models.User;
 import com.example.locavore.R;
-import com.parse.Parse;
 import com.parse.ParseException;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +31,9 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
     public static final String TAG = "MapProfilesAdapter";
 
     private Context context;
-    private List<Farm> farms;
+    private List<User> farms;
 
-    public MapProfilesAdapter(Context context, List<Farm> farms)
+    public MapProfilesAdapter(Context context, List<User> farms)
     {
         this.context = context;
         this.farms = farms;
@@ -52,7 +48,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull MapProfilesAdapter.ViewHolder holder, int position) {
-        Farm farm = farms.get(position);
+        User farm = farms.get(position);
         try {
             holder.bind(farm);
         } catch (JSONException | ParseException e) {
@@ -71,7 +67,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
         notifyItemRangeRemoved(0, size);
     }
 
-    public void addAll(List<Farm> newFarms) {
+    public void addAll(List<User> newFarms) {
         farms.addAll(newFarms);
         notifyItemRangeInserted(farms.size()-newFarms.size(), newFarms.size());
     }
@@ -115,7 +111,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
             rvTags = itemView.findViewById(R.id.rvTags);
         }
 
-        public void bind(Farm farm) throws JSONException, ParseException {
+        public void bind(User farm) throws JSONException, ParseException {
             if(farm.expanded) {
                 normalView.setVisibility(View.GONE);
                 expandedView.setVisibility(View.VISIBLE);
@@ -135,8 +131,8 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                 tvFarmNameExpanded.setText(farm.getName());
                 tvDistanceExpanded.setText(String.format("%.2f miles", farm.getDistance() / METERS_TO_MILE));
                 if (farm.getUser() != null) {
-                    if (farm.getUser().getString(Farm.KEY_BIO) != null) {
-                        tvDescription.setText(farm.getUser().getString(Farm.KEY_BIO));
+                    if (farm.getUser().getString(User.KEY_BIO) != null) {
+                        tvDescription.setText(farm.getUser().getString(User.KEY_BIO));
                     } else {
                         Log.i(TAG, "bio is null " + farm.getUser().getUsername());
                     }

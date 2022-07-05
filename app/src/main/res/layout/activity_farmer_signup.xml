@@ -1,69 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".Activities.FarmerSignupActivity">
-
-    <EditText
-        android:id="@+id/etName"
+<ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/farm_name"
-        android:inputType="textPersonName"
-        android:autofillHints="farm name" />
+        android:layout_height="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
+        tools:context=".Activities.FarmerSignupActivity">
 
-    <EditText
-        android:id="@+id/etEmailAddress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="@string/email_address"
-        android:ems="10"
-        android:hint="@string/email_address"
-        android:inputType="textEmailAddress" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/etUsername"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="username"
-        android:ems="10"
-        android:hint="@string/username"
-        android:inputType="text" />
+            <TextView
+                android:id="@+id/tvFarm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="175dp"
+                android:fontFamily="@font/allerta_stencil"
+                android:text="@string/tell_us_more_about_the_farm"
+                android:textAlignment="center"
+                android:textColor="#FFFFFF"
+                android:textSize="50sp" />
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="password"
-        android:ems="10"
-        android:hint="@string/password"
-        android:inputType="textPassword" />
+            <EditText
+                android:id="@+id/etName"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="farm name"
+                android:drawableStart="@drawable/ic_farmhouse"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/farm_name"
+                android:inputType="textPersonName" />
 
-    <EditText
-        android:id="@+id/etBio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/brief_farm_bio"
-        android:inputType="textMultiLine"
-        android:autofillHints="farm bio" />
+            <EditText
+                android:id="@+id/etEmailAddress"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="@string/email_address"
+                android:drawableStart="@android:drawable/sym_action_email"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/email_address"
+                android:inputType="textEmailAddress" />
 
-    <EditText
-        android:id="@+id/etLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/address"
-        android:inputType="textPostalAddress"
-        android:autofillHints="farm address" />
+            <EditText
+                android:id="@+id/etUsername"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="username"
+                android:drawableStart="@android:drawable/ic_menu_edit"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/username"
+                android:inputType="text" />
 
-    <Button
-        android:id="@+id/btnFarmerSignup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/signup" />
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="password"
+                android:drawableStart="@android:drawable/ic_lock_lock"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/password"
+                android:inputType="textPassword" />
 
-</LinearLayout>
+            <EditText
+                android:id="@+id/etBio"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="farm bio"
+                android:drawableStart="@android:drawable/ic_menu_info_details"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:firstBaselineToTopHeight="5dp"
+                android:hint="@string/brief_farm_bio"
+                android:inputType="textMultiLine"
+                android:isScrollContainer="true"
+                android:lines="3" />
+
+            <EditText
+                android:id="@+id/etLocation"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="farm address"
+                android:drawableStart="@drawable/ic_baseline_add_home_24"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/address"
+                android:inputType="textPostalAddress" />
+
+            <Button
+                android:id="@+id/btnFarmerSignup"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/signup" />
+
+        </LinearLayout>
+</ScrollView>

@@ -1,60 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".Activities.LocavoreSignupActivity">
-
-    <EditText
-        android:id="@+id/etName"
+<ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/name"
-        android:inputType="textPersonName"
-        android:autofillHints="name" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".Activities.LocavoreSignupActivity">
 
-    <EditText
-        android:id="@+id/etEmailAddress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="@string/email_address"
-        android:ems="10"
-        android:hint="@string/email_address"
-        android:inputType="textEmailAddress" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/etUsername"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="username"
-        android:ems="10"
-        android:hint="@string/username"
-        android:inputType="text" />
+            <TextView
+                android:id="@+id/tvUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="200dp"
+                android:fontFamily="@font/allerta_stencil"
+                android:text="@string/tell_us_about_yourself"
+                android:textAlignment="center"
+                android:textColor="#FFFFFF"
+                android:textSize="50sp" />
 
-    <EditText
-        android:id="@+id/etPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="password"
-        android:ems="10"
-        android:hint="@string/password"
-        android:inputType="textPassword" />
+            <EditText
+                android:id="@+id/etName"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="name"
+                android:drawableStart="@drawable/ic_baseline_person_outline_24"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/name"
+                android:inputType="textPersonName" />
 
-    <EditText
-        android:id="@+id/etRadius"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/radius"
-        android:inputType="textPersonName"
-        android:autofillHints="radius" />
+            <EditText
+                android:id="@+id/etEmailAddress"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="@string/email_address"
+                android:drawableStart="@android:drawable/sym_action_email"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/email_address"
+                android:inputType="textEmailAddress" />
 
-    <Button
-        android:id="@+id/btnSignUp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/signup" />
+            <EditText
+                android:id="@+id/etUsername"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="username"
+                android:drawableStart="@android:drawable/ic_menu_edit"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/username"
+                android:inputType="text" />
 
-</LinearLayout>
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="password"
+                android:drawableStart="@android:drawable/ic_lock_lock"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/password"
+                android:inputType="textPassword" />
+
+            <EditText
+                android:id="@+id/etRadius"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:autofillHints="radius"
+                android:drawableStart="@drawable/ic_baseline_map_24"
+                android:drawableTint="#A59F9F"
+                android:ems="10"
+                android:hint="@string/radius"
+                android:inputType="textPersonName" />
+
+            <Button
+                android:id="@+id/btnSignUp"
+                android:layout_width="375dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/signup" />
+        </LinearLayout>
+</ScrollView>

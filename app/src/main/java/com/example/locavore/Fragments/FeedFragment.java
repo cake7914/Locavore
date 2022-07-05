@@ -1,7 +1,6 @@
 package com.example.locavore.Fragments;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -13,18 +12,14 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -32,10 +27,8 @@ import android.widget.Button;
 import com.example.locavore.Adapters.FarmEventsAdapter;
 import com.example.locavore.Adapters.FarmProfilesAdapter;
 import com.example.locavore.Models.Event;
-import com.example.locavore.Models.Farm;
+import com.example.locavore.Models.User;
 import com.example.locavore.R;
-import com.parse.FindCallback;
-import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -44,24 +37,21 @@ import com.parse.ParseUser;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.security.Provider;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-
-import permissions.dispatcher.NeedsPermission;
 
 public class FeedFragment extends Fragment implements LocationListener {
     public static final String TAG = "FeedFragment";
     private static final double METERS_TO_MILE = 1609.34;
-
+    private static final double MIN_DISTANCE_CHANGE = 19312.1;
 
     private RecyclerView rvFarmProfiles;
     private RecyclerView rvFarmEvents;
     private FarmEventsAdapter eventsAdapter;
     private FarmProfilesAdapter profilesAdapter;
     private List<Event> events;
-    private List<Farm> farms;
+    private List<User> farms;
+    private List<String> farmIds;
     private Location location;
     private LocationManager locationManager;
     private String bestProvider;
@@ -105,44 +95,52 @@ public class FeedFragment extends Fragment implements LocationListener {
         }
         Criteria criteria = new Criteria();
         bestProvider = locationManager.getBestProvider(criteria, false);
-        locationManager.requestLocationUpdates(bestProvider, 3000, 0, this);
+        locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
 
         location = locationManager.getLastKnownLocation(bestProvider);
+
+        farmIds = new ArrayList<>();
+
+        queryFarms("farms");
+        queryFarms("farmersmarket");
     }
 
     private void queryFarms(String request) {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereEqualTo(Farm.KEY_USER_TYPE, request);
-        query.whereWithinMiles(Farm.KEY_LOCATION, new ParseGeoPoint(location.getLatitude(), location.getLongitude()), ParseUser.getCurrentUser().getDouble("radius")/METERS_TO_MILE);
+        query.whereEqualTo(User.KEY_USER_TYPE, request);
+        query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(location.getLatitude(), location.getLongitude()), ParseUser.getCurrentUser().getDouble("radius")/METERS_TO_MILE);
         query.findInBackground((users, e) -> {
             if (e != null) {
                 Log.e(TAG, "Issue with getting farms ", e);
             } else {
-                List<Farm> newFarms = new ArrayList<>();
+                List<User> newFarms = new ArrayList<>();
 
                 for (ParseUser user : users) {
-                    Farm farm = new Farm(user);
-                    newFarms.add(farm);
+                    if(!farmIds.contains(user.getObjectId())) { // if we haven't already displayed this farm & its events
+                        User farm = new User(user);
+                        newFarms.add(farm);
+                        farmIds.add(user.getObjectId());
 
-                    // also add any events that this farm has to the events list
-                    JSONArray newEvents = user.getJSONArray("events");
-                    if (newEvents != null) {
-                        for (int i = 0; i < newEvents.length(); i++) {
-                            try {
-                                String eventId = newEvents.getJSONObject(i).getString("objectId");
-                                ParseQuery<ParseObject> eventQuery = ParseQuery.getQuery("Event");
-                                eventQuery.getInBackground(eventId, (event, err) -> {
-                                    if (err != null) {
-                                        Log.e(TAG, "Issue with getting event ", err);
-                                    } else {
-                                        // add this event to the events list
-                                        insertEvent((Event) event);
-                                        eventsAdapter.notifyDataSetChanged(); //TODO: change this
-                                    }
-                                });
+                        // also add any events that this farm has to the events list
+                        JSONArray newEvents = user.getJSONArray("events");
+                        if (newEvents != null) {
+                            for (int i = 0; i < newEvents.length(); i++) {
+                                try {
+                                    String eventId = newEvents.getJSONObject(i).getString("objectId");
+                                    ParseQuery<ParseObject> eventQuery = ParseQuery.getQuery("Event");
+                                    eventQuery.getInBackground(eventId, (event, err) -> {
+                                        if (err != null) {
+                                            Log.e(TAG, "Issue with getting event ", err);
+                                        } else {
+                                            // add this event to the events list
+                                            insertEvent((Event) event);
+                                            eventsAdapter.notifyDataSetChanged(); //TODO: change this
+                                        }
+                                    });
 
-                            } catch (JSONException ex) {
-                                ex.printStackTrace();
+                                } catch (JSONException ex) {
+                                    ex.printStackTrace();
+                                }
                             }
                         }
                     }
@@ -154,9 +152,11 @@ public class FeedFragment extends Fragment implements LocationListener {
 
     @Override
     public void onLocationChanged(@NonNull Location newLocation) {
-        location = newLocation;
-        queryFarms("farms");
-        queryFarms("farmersmarket");
+        if(location.distanceTo(newLocation) > MIN_DISTANCE_CHANGE) {
+            location = newLocation;
+            queryFarms("farms");
+            queryFarms("farmersmarket");
+        }
     }
 
     // the way to do this is by using each qualifier to add to a total weight, then ordering them by the weights??
@@ -195,7 +195,7 @@ public class FeedFragment extends Fragment implements LocationListener {
         weight -= location.distanceTo(eventLocation);
 
         // if the user does follow the farm
-        if(checkUserFollowingFarm(event.getFarm(), ParseUser.getCurrentUser().getJSONArray(Farm.KEY_FARMS_FOLLOWING)) != -1) {
+        if(checkUserFollowingFarm(event.getFarm(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) != -1) {
             weight += 5000;
         }
 

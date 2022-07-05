@@ -21,6 +21,8 @@ import com.example.locavore.R;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
+import java.util.Objects;
+
 
 public class FarmProfileFragment extends Fragment {
 
@@ -52,12 +54,12 @@ public class FarmProfileFragment extends Fragment {
         btnLogout.setOnClickListener(v -> ParseUser.logOutInBackground(e -> {
             if (e != null) {
                 Log.e(TAG, "Issue with logout", e);
-                Toast.makeText(getContext(), "Issue with logout!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), requireContext().getString(R.string.misc_logout_error), Toast.LENGTH_SHORT).show();
             } else {
-                //go to the login activity
                 Intent i = new Intent(getContext(), LoginActivity.class);
                 startActivity(i);
-                Toast.makeText(getContext(), "Success in logging out!", Toast.LENGTH_SHORT).show();
+                getActivity().finish();
+                Toast.makeText(getContext(), requireContext().getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
             }
         }));
 

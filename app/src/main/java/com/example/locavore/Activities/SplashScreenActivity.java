@@ -1,19 +1,15 @@
 package com.example.locavore.Activities;
-
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.bumptech.glide.Glide;
 import com.example.locavore.R;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.ImageView;
 
+@SuppressLint("CustomSplashScreen")
 public class SplashScreenActivity extends Activity {
     Handler handler;
-    Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +21,7 @@ public class SplashScreenActivity extends Activity {
             Intent intent=new Intent(SplashScreenActivity.this,LoginActivity.class);
             startActivity(intent);
             finish();
-        },1000);
+        },2000);
 
     }
 

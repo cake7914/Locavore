@@ -1,26 +1,22 @@
 package com.example.locavore.Models;
 
-import android.location.Location;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.parse.ParseClassName;
-import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.List;
 
 import javax.annotation.Generated;
 
 @Generated("jsonschema2pojo")
-public class Farm {
+public class User {
 
-    public static final String USER_TYPE = "farms";
+    public static final String FARM_USER_TYPE = "farms";
+    public static final String CONSUMER_USER_TYPE = "locavore";
     public static final String KEY_NAME = "name";
     public static final String KEY_BIO = "bio";
     public static final String KEY_ADDRESS = "address";
@@ -33,6 +29,7 @@ public class Farm {
     public static final String KEY_TAGS = "tags";
     public static final String KEY_LOCATION = "location";
     public static final String KEY_YELP_ID = "yelpID";
+    public static final String KEY_RADIUS = "radius";
 
     private ParseUser user;
     public boolean expanded;
@@ -211,7 +208,7 @@ public class Farm {
         setFollowedFarms(farms);
     }
 
-    public Farm(ParseUser user) {
+    public User(ParseUser user) {
        this.user = user;
     }
 

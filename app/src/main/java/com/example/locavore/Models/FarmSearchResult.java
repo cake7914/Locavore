@@ -1,6 +1,5 @@
 package com.example.locavore.Models;
 
-import com.example.locavore.Models.Farm;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -12,7 +11,7 @@ public class FarmSearchResult {
     private Integer total;
     @SerializedName("businesses")
     @Expose
-    private List<Farm> farms;
+    private List<User> farms;
 
     public Integer getTotal() {
         return total;
@@ -22,11 +21,11 @@ public class FarmSearchResult {
         this.total = total;
     }
 
-    public List<Farm> getFarms() {
+    public List<User> getFarms() {
         return farms;
     }
 
-    public void setFarms(List<Farm> farms) {
+    public void setFarms(List<User> farms) {
         this.farms = farms;
     }
 }
