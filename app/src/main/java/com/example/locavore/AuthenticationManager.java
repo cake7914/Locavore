@@ -62,7 +62,7 @@ public class AuthenticationManager {
                 }
             }
             return false;
-        } else if (password.length() < MIN_PASSWORD_LENGTH) { // check password complexity/length
+        } else if (Objects.equals(operation, STR_SIGNUP) && password.length() < MIN_PASSWORD_LENGTH) { // check password complexity/length
             Toast.makeText(context, context.getString(R.string.short_password), Toast.LENGTH_SHORT).show();
             return false;
         }  // check email is a valid email

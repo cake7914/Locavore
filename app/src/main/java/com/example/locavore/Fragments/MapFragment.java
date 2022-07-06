@@ -35,6 +35,7 @@ import com.example.locavore.Adapters.MapProfilesAdapter;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.example.locavore.Models.FarmSearchResult;
+import com.example.locavore.DataManager;
 import com.example.locavore.YelpService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -74,15 +75,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MapFragment extends Fragment {
 
     public static final String TAG = "MapFragment";
-    private static final String CATEGORY_FARM = "farms";
-    private static final String CATEGORY_FARMERS_MARKET = "farmersmarket";
     public static final String BASE_URL = "https://api.yelp.com/v3/";
     private static final int MAX_YELP_RADIUS = 40000; // 40,000 meters or ~25 miles
     private static final int YELP_RADIUS_INCREMENT = 8000; // ~ 5 miles
     private static final double METERS_TO_MILE = 1609.34;
-    private static final long UPDATE_INTERVAL = 100000;
-    private static final long FASTEST_INTERVAL = 100000;
+    private static final long UPDATE_INTERVAL = 3000;
+    private static final long FASTEST_INTERVAL = 3000;
     private static final double MIN_DISTANCE_CHANGE = 19312.1;
+    private boolean firstLoad = true;
 
     private SupportMapFragment supportMapFragment;
     private GoogleMap map;
@@ -93,10 +93,7 @@ public class MapFragment extends Fragment {
     private Button btnIncreaseRadius;
     private Button btnDecreaseRadius;
     private TextView tvRadius;
-
     private Integer radius;
-    private List<User> farms = new ArrayList<>();
-    private List<String> farmIds = new ArrayList<>();
     private List<Marker> markers = new ArrayList<>();
     private List<String> farmsInDatabase = new ArrayList<>();
     private LatLngBounds bounds;
@@ -104,6 +101,7 @@ public class MapFragment extends Fragment {
     private MapProfilesAdapter profilesAdapter;
     private RecyclerView.SmoothScroller smoothScroller;
     private LinearLayoutManager linearLayoutManager;
+    DataManager dataManager = DataManager.getInstance();
 
     public MapFragment() {
         // Required empty public constructor
@@ -180,7 +178,7 @@ public class MapFragment extends Fragment {
         tvRadius.setText(String.format(getContext().getString(R.string.radius_string), radius / METERS_TO_MILE));
 
         rvProfiles = view.findViewById(R.id.rvProfiles);
-        profilesAdapter = new MapProfilesAdapter(getContext(), farms);
+        profilesAdapter = new MapProfilesAdapter(getContext(), dataManager.mFarms);
         rvProfiles.setAdapter(profilesAdapter);
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         rvProfiles.setLayoutManager(linearLayoutManager);
@@ -195,19 +193,19 @@ public class MapFragment extends Fragment {
 
         for (int i = 0; i < markers.size(); i++) // farms and their markers always be at the same index? as farms get removed / added so do their markers?
         {
-            if (farms.get(i).getDistance() > radius) { // remove these markers from the map
+            if (dataManager.mFarms.get(i).getDistance() > radius) { // remove these markers from the map
                 markers.get(i).remove();
             } else // keep these ones.
             {
-                nFarms.add(farms.get(i));
+                nFarms.add(dataManager.mFarms.get(i));
                 nMarkers.add(markers.get(i));
-                nFarmIds.add(farmIds.get(i));
+                nFarmIds.add(dataManager.mFarmIds.get(i));
             }
         }
 
-        farms.removeIf(farm -> !nFarms.contains(farm)); // maintain adapter list
+        dataManager.mFarms.removeIf(farm -> !nFarms.contains(farm)); // maintain adapter list
         markers = nMarkers;
-        farmIds = nFarmIds;
+        dataManager.mFarmIds = nFarmIds;
         profilesAdapter.notifyDataSetChanged(); // how to change this to be more specific?
     }
 
@@ -241,13 +239,13 @@ public class MapFragment extends Fragment {
 
         map.setOnMarkerClickListener(marker -> {
             // scroll the adapter to the farm that has been clicked on
-            for(int i = 0; i < farms.size(); i++) {
-                if(farms.get(i) == marker.getTag()) {
+            for(int i = 0; i < dataManager.mFarms.size(); i++) {
+                if(dataManager.mFarms.get(i) == marker.getTag()) {
                     smoothScroller.setTargetPosition(i);
                     linearLayoutManager.startSmoothScroll(smoothScroller);
-                    farms.get(i).expanded = true;
+                    dataManager.mFarms.get(i).expanded = true;
                 } else {
-                    farms.get(i).expanded = false;
+                    dataManager.mFarms.get(i).expanded = false;
                 }
             }
             profilesAdapter.notifyDataSetChanged();
@@ -313,7 +311,7 @@ public class MapFragment extends Fragment {
             bounds = new LatLngBounds(latLng, latLng);
 
             displayLocation();
-        } else if (prevLocation.distanceTo(location) > MIN_DISTANCE_CHANGE) { // location has changed by > 12 miles: set prevLocation to currentLocation and currentLocation to the new location and make request.
+        } else if (prevLocation.distanceTo(location) > MIN_DISTANCE_CHANGE) { // location has changed by significant amount: set prevLocation to currentLocation and currentLocation to the new location and make request.
             prevLocation = currentLocation;
             currentLocation = location;
             displayLocation();
@@ -325,8 +323,13 @@ public class MapFragment extends Fragment {
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
             map.animateCamera(cameraUpdate);
-            getRequest(CATEGORY_FARM);
-            getRequest(CATEGORY_FARMERS_MARKET);
+            if(firstLoad) {
+                dropMarkers(dataManager.mFarms);
+                firstLoad = false;
+            } else {
+                getRequest(User.FARM_USER_TYPE);
+                getRequest(User.FARMERS_MARKET_USER_TYPE);
+            }
         }
     }
 
@@ -336,7 +339,7 @@ public class MapFragment extends Fragment {
         // Define the size from the dimensions file
         int shapeSize = this.getResources().getDimensionPixelSize(R.dimen.custom_marker_value);
 
-        Drawable shapeDrawable = request.equals(CATEGORY_FARM) ? ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_farmhouse, null) : ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_baseline_storefront_24, null);
+        Drawable shapeDrawable = request.equals(User.FARM_USER_TYPE) ? ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_farmhouse, null) : ResourcesCompat.getDrawable(this.getResources(), R.drawable.ic_baseline_storefront_24, null);
         iconGen.setBackground(shapeDrawable);
 
         // Create a view container to set the size
@@ -348,12 +351,12 @@ public class MapFragment extends Fragment {
         return iconGen.makeIcon();
     }
 
-    protected void dropMarkers(List<User> newFarms, String request) {
+    protected void dropMarkers(List<User> newFarms) {
         for (User farm : newFarms) {
             Marker marker = map.addMarker(new MarkerOptions()
                     .position(farm.getCoordinates())
                     .title(farm.getName())
-                    .icon(BitmapDescriptorFactory.fromBitmap(getMarker(request)))
+                    .icon(BitmapDescriptorFactory.fromBitmap(getMarker(farm.getUser().getString(User.KEY_USER_TYPE))))
             );
             assert marker != null;
             marker.setTag(farm); // associate farm --> marker
@@ -367,7 +370,7 @@ public class MapFragment extends Fragment {
         // first make request to Parse database to check for farms nearby
         populateDatabaseFarms(request);
 
-        if(!(farms.size() > 0)) {
+        if(!(dataManager.mFarms.size() > 0)) {
             // only make the request to Yelp if we don't have farms yet in the radius of the user's location.
             YelpService yelpService = retrofit.create(YelpService.class);
             Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, radius);
@@ -380,12 +383,13 @@ public class MapFragment extends Fragment {
                         Log.e(TAG, "Error retrieving response body");
                     } else {
                         List<User> newFarms = new ArrayList<>();
-
+                        Log.i(TAG, "start");
                         for (User farm : response.body().getFarms()) {
-                            if (!farmIds.contains(farm.getId()) && farm.getDistance() < radius) {
+                            Log.i(TAG, farm.getName() + " " + farm.getLocation().getState());
+                            if (!dataManager.mFarmIds.contains(farm.getId()) && farm.getDistance() < radius) {
                                 newFarms.add(farm);
-                                farms.add(farm);
-                                farmIds.add(farm.getId());
+                                dataManager.mFarms.add(farm);
+                                dataManager.mFarmIds.add(farm.getId());
                                 if (!farmsInDatabase.contains(farm.getId())) {
                                     farm.setUser(createUserFromYelpData(farm, request));
                                     farmsInDatabase.add(farm.getId());
@@ -397,8 +401,10 @@ public class MapFragment extends Fragment {
                                 }
                             }
                         }
-                        profilesAdapter.notifyItemRangeInserted(farms.size() - newFarms.size(), newFarms.size());
-                        dropMarkers(newFarms, request);
+                        profilesAdapter.notifyItemRangeInserted(dataManager.mFarms.size() - newFarms.size(), newFarms.size());
+                        dropMarkers(newFarms);
+                        Log.i(TAG, "end");
+
                     }
                 }
 
@@ -444,28 +450,18 @@ public class MapFragment extends Fragment {
         query.whereEqualTo(User.KEY_USER_TYPE, request);
         query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), radius/METERS_TO_MILE);
 
-
-        List<ParseUser> databaseFarms = query.find(); // TODO: put this back on the background thread, but make the UI thread wait()?
+        List<ParseUser> databaseFarms = query.find(); // TODO: put this back on the background thread ?
         List<User> newFarms = new ArrayList<>();
         for(int i = 0; i < databaseFarms.size(); i++) {
-            User farm = new User(databaseFarms.get(i));
-            if(!farmIds.contains(farm.getUser().getString(User.KEY_YELP_ID))) {
-                LatLng latLng = new LatLng(farm.getUser().getParseGeoPoint(User.KEY_LOCATION).getLatitude(), farm.getUser().getParseGeoPoint(User.KEY_LOCATION).getLongitude());
-                farm.setCoordinates(latLng);
-                Location location = new Location(NETWORK_PROVIDER);
-                location.setLatitude(latLng.latitude);
-                location.setLongitude(latLng.longitude);
-                farm.setDistance((double) currentLocation.distanceTo(location));
-                farm.setName(farm.getUser().getString(User.KEY_NAME));
-                farm.setImageUrl(farm.getUser().getString(User.KEY_PROFILE_BACKDROP));
-
+            User farm = new User(databaseFarms.get(i), currentLocation);
+            if(!dataManager.mFarmIds.contains(farm.getUser().getString(User.KEY_YELP_ID))) {
                 newFarms.add(farm);
-                farms.add(farm);
-                farmIds.add(farm.getUser().getString(User.KEY_YELP_ID));
+                dataManager.mFarms.add(farm);
+                dataManager.mFarmIds.add(farm.getUser().getString(User.KEY_YELP_ID));
             }
         }
-        profilesAdapter.notifyItemRangeInserted(farms.size() - newFarms.size(), newFarms.size());
-        dropMarkers(newFarms, request);
+        profilesAdapter.notifyItemRangeInserted(dataManager.mFarms.size() - newFarms.size(), newFarms.size());
+        dropMarkers(newFarms);
     }
 
     public class CenterSmoothScroller extends LinearSmoothScroller {

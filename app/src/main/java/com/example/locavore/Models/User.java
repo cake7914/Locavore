@@ -1,6 +1,10 @@
 package com.example.locavore.Models;
 
 
+import static android.location.LocationManager.NETWORK_PROVIDER;
+
+import android.location.Location;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -17,6 +21,7 @@ public class User {
 
     public static final String FARM_USER_TYPE = "farms";
     public static final String CONSUMER_USER_TYPE = "locavore";
+    public static final String FARMERS_MARKET_USER_TYPE = "farmersmarket";
     public static final String KEY_NAME = "name";
     public static final String KEY_BIO = "bio";
     public static final String KEY_ADDRESS = "address";
@@ -30,6 +35,7 @@ public class User {
     public static final String KEY_LOCATION = "location";
     public static final String KEY_YELP_ID = "yelpID";
     public static final String KEY_RADIUS = "radius";
+    public static final String KEY_EVENTS = "events";
 
     private ParseUser user;
     public boolean expanded;
@@ -190,7 +196,7 @@ public class User {
     public ParseUser getUser() { return user; }
     public void setUser(ParseUser user) { this.user = user; }
 
-    public JSONArray getEvents() { return user.getJSONArray("events"); }
+    public JSONArray getEvents() { return user.getJSONArray(KEY_EVENTS); }
 
     //public void setEvents(JSONArray ) { }
 
@@ -208,8 +214,15 @@ public class User {
         setFollowedFarms(farms);
     }
 
-    public User(ParseUser user) {
-       this.user = user;
+    public User(ParseUser newUser, Location currentLocation) {
+        user = newUser;
+        coordinates = new LatLng(user.getParseGeoPoint(User.KEY_LOCATION).getLatitude(), user.getParseGeoPoint(User.KEY_LOCATION).getLongitude());
+        Location location = new Location(NETWORK_PROVIDER);
+        location.setLatitude(coordinates.latitude);
+        location.setLongitude(coordinates.longitude);
+        distance = (double) currentLocation.distanceTo(location);
+        name = user.getString(User.KEY_NAME);
+        imageUrl = user.getString(User.KEY_PROFILE_BACKDROP);
     }
 
 }

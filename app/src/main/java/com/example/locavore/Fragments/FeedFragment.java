@@ -26,9 +26,11 @@ import android.widget.Button;
 
 import com.example.locavore.Adapters.FarmEventsAdapter;
 import com.example.locavore.Adapters.FarmProfilesAdapter;
+import com.example.locavore.DataManager;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -42,20 +44,18 @@ import java.util.List;
 
 public class FeedFragment extends Fragment implements LocationListener {
     public static final String TAG = "FeedFragment";
-    private static final double METERS_TO_MILE = 1609.34;
     private static final double MIN_DISTANCE_CHANGE = 19312.1;
 
     private RecyclerView rvFarmProfiles;
     private RecyclerView rvFarmEvents;
     private FarmEventsAdapter eventsAdapter;
     private FarmProfilesAdapter profilesAdapter;
-    private List<Event> events;
-    private List<User> farms;
-    private List<String> farmIds;
     private Location location;
     private LocationManager locationManager;
     private String bestProvider;
     private Button btnRefresh;
+    DataManager dataManager = DataManager.getInstance();
+
 
     public FeedFragment() {
         // Required empty public constructor
@@ -75,18 +75,16 @@ public class FeedFragment extends Fragment implements LocationListener {
         super.onViewCreated(view, savedInstanceState);
 
         rvFarmEvents = view.findViewById(R.id.rvFarmEvents);
-        events = new ArrayList<>();
-        eventsAdapter = new FarmEventsAdapter(getContext(), events);
+        eventsAdapter = new FarmEventsAdapter(getContext(), dataManager.mEvents);
         rvFarmEvents.setAdapter(eventsAdapter);
         rvFarmEvents.setLayoutManager(new LinearLayoutManager(getContext()));
 
         rvFarmProfiles = view.findViewById(R.id.rvFarmProfiles);
-        farms = new ArrayList<>();
-        profilesAdapter = new FarmProfilesAdapter(getContext(), farms);
+        profilesAdapter = new FarmProfilesAdapter(getContext(), dataManager.mFarms);
         rvFarmProfiles.setAdapter(profilesAdapter);
         rvFarmProfiles.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.menu_feed);
 
         locationManager = (LocationManager) getContext().getSystemService(getContext().LOCATION_SERVICE);
@@ -98,64 +96,20 @@ public class FeedFragment extends Fragment implements LocationListener {
         locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
 
         location = locationManager.getLastKnownLocation(bestProvider);
-
-        farmIds = new ArrayList<>();
-
-        queryFarms("farms");
-        queryFarms("farmersmarket");
-    }
-
-    private void queryFarms(String request) {
-        ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereEqualTo(User.KEY_USER_TYPE, request);
-        query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(location.getLatitude(), location.getLongitude()), ParseUser.getCurrentUser().getDouble("radius")/METERS_TO_MILE);
-        query.findInBackground((users, e) -> {
-            if (e != null) {
-                Log.e(TAG, "Issue with getting farms ", e);
-            } else {
-                List<User> newFarms = new ArrayList<>();
-
-                for (ParseUser user : users) {
-                    if(!farmIds.contains(user.getObjectId())) { // if we haven't already displayed this farm & its events
-                        User farm = new User(user);
-                        newFarms.add(farm);
-                        farmIds.add(user.getObjectId());
-
-                        // also add any events that this farm has to the events list
-                        JSONArray newEvents = user.getJSONArray("events");
-                        if (newEvents != null) {
-                            for (int i = 0; i < newEvents.length(); i++) {
-                                try {
-                                    String eventId = newEvents.getJSONObject(i).getString("objectId");
-                                    ParseQuery<ParseObject> eventQuery = ParseQuery.getQuery("Event");
-                                    eventQuery.getInBackground(eventId, (event, err) -> {
-                                        if (err != null) {
-                                            Log.e(TAG, "Issue with getting event ", err);
-                                        } else {
-                                            // add this event to the events list
-                                            insertEvent((Event) event);
-                                            eventsAdapter.notifyDataSetChanged(); //TODO: change this
-                                        }
-                                    });
-
-                                } catch (JSONException ex) {
-                                    ex.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-                }
-                profilesAdapter.addAll(newFarms);
-            }
-        });
     }
 
     @Override
     public void onLocationChanged(@NonNull Location newLocation) {
         if(location.distanceTo(newLocation) > MIN_DISTANCE_CHANGE) {
             location = newLocation;
-            queryFarms("farms");
-            queryFarms("farmersmarket");
+            try {
+                dataManager.queryFarms(User.FARM_USER_TYPE, location);
+                dataManager.queryFarms(User.FARMERS_MARKET_USER_TYPE, location);
+                profilesAdapter.notifyDataSetChanged();
+                eventsAdapter.notifyDataSetChanged();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -166,10 +120,10 @@ public class FeedFragment extends Fragment implements LocationListener {
     // first thing to add: if the farm is followed by the user, add weight
 
     public void insertEvent(Event newEvent) {
-        for(int i = 0; i < events.size(); i++) {
+        for(int i = 0; i < dataManager.mEvents.size(); i++) {
             Location eventLocation = new Location(bestProvider);
-            eventLocation.setLatitude(events.get(i).getDouble("latitude"));
-            eventLocation.setLongitude(events.get(i).getDouble("longitude"));
+            eventLocation.setLatitude(dataManager.mEvents.get(i).getDouble("latitude"));
+            eventLocation.setLongitude(dataManager.mEvents.get(i).getDouble("longitude"));
 
             Location newEventLocation = new Location(bestProvider);
             newEventLocation.setLatitude(newEvent.getLatitude());
@@ -177,12 +131,12 @@ public class FeedFragment extends Fragment implements LocationListener {
 
             if(location.distanceTo(newEventLocation) < location.distanceTo(eventLocation)) {
                 // insert this event earlier than previous event
-                events.add(i, newEvent);
+                dataManager.mEvents.add(i, newEvent);
                 return;
             }
         }
         // if we haven't hit the return, that means to just add the event at the end of the list
-        events.add(newEvent);
+        dataManager.mEvents.add(newEvent);
     }
 
     public void weightEvent(Event event) throws JSONException {
@@ -190,7 +144,7 @@ public class FeedFragment extends Fragment implements LocationListener {
 
         // calculate distance: subtract from total weight (want the highest weight to be the first shown)
         Location eventLocation = new Location(bestProvider);
-        eventLocation.setLatitude(event.getDouble("latitude"));
+        eventLocation.setLatitude(event.getDouble("latitude")); //!!TODO change this to be a parse geo location in the database!!
         eventLocation.setLongitude(event.getDouble("longitude"));
         weight -= location.distanceTo(eventLocation);
 
