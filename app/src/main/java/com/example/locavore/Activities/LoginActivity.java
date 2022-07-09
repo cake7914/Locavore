@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import com.example.locavore.AuthenticationManager;
+import com.example.locavore.DataManager;
 import com.example.locavore.R;
 import com.parse.ParseUser;
 

@@ -3,6 +3,7 @@ import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.example.locavore.DataManager;
 import com.parse.ParseException;
+import com.parse.ParseUser;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -14,8 +15,11 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
+
+import java.io.IOException;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashScreenActivity extends Activity {
@@ -24,7 +28,7 @@ public class SplashScreenActivity extends Activity {
     private Location currentLocation;
     private LocationManager locationManager;
     private String bestProvider;
-    DataManager dataManager = DataManager.getInstance();
+    DataManager dataManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +43,15 @@ public class SplashScreenActivity extends Activity {
         bestProvider = locationManager.getBestProvider(criteria, false);
         currentLocation = locationManager.getLastKnownLocation(bestProvider);
 
-        new FarmFetcher().execute();
+        if(ParseUser.getCurrentUser() != null) { // user is logged in
+            dataManager = DataManager.getInstance();
+            new FarmFetcher().execute();
+        } else { // go straight to login screen
+            Log.i(TAG, "no user logged in");
+            Intent i = new Intent(SplashScreenActivity.this, LoginActivity.class);
+            SplashScreenActivity.this.startActivity(i);
+            SplashScreenActivity.this.finish();
+        }
     }
 
     private class FarmFetcher extends AsyncTask<Void, Void, Void> {
@@ -54,7 +66,12 @@ public class SplashScreenActivity extends Activity {
             try {
                 dataManager.queryFarms(User.FARM_USER_TYPE, currentLocation);
                 dataManager.queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
-            } catch (ParseException e) {
+
+                // make the yelp call when the app first loads to check for any new farms nearby
+                dataManager.yelpRequest(User.FARM_USER_TYPE, currentLocation);
+                dataManager.yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+
+            } catch (ParseException | IOException e) {
                 e.printStackTrace();
             }
             return null;
@@ -67,6 +84,5 @@ public class SplashScreenActivity extends Activity {
             SplashScreenActivity.this.startActivity(i);
             SplashScreenActivity.this.finish();
         }
-
     }
 }
