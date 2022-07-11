@@ -3,6 +3,7 @@ package com.example.locavore.Adapters;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,12 +26,15 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.example.locavore.Activities.MainActivity;
+import com.example.locavore.Fragments.FarmProfileFragment;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.parse.ParseException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,13 +104,13 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
         MapProfileTagsAdapter tagsAdapter;
         LinearLayoutManager linearLayoutManager;
         Button btnContract;
+        Button btnGoToFarmProfile;
 
         int shortAnimationDuration = context.getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
 
         int longAnimationDuration = context.getResources().getInteger(
                 android.R.integer.config_longAnimTime);
-
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -123,19 +131,22 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
             rvTags = itemView.findViewById(R.id.rvTags);
 
             btnContract = itemView.findViewById(R.id.btnContract);
-
+            btnGoToFarmProfile = itemView.findViewById(R.id.btnGoToFarmProfile);
         }
 
         public void bind(User farm) throws JSONException, ParseException {
             if(farm.expanded) {
-                btnContract.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        farm.expanded = false;
-                        //collapse(expandedView);
-                        //notifyDataSetChanged();
-                        crossfade(farm);
-                    }
+                btnContract.setOnClickListener(v -> {
+                    farm.expanded = false;
+                    crossfade(farm);
+                });
+
+                btnGoToFarmProfile.setOnClickListener(v -> {
+                    Fragment fragment = new FarmProfileFragment();
+                    Bundle args = new Bundle();
+                    args.putParcelable(User.FARM_USER_TYPE, Parcels.wrap(farm));
+                    fragment.setArguments(args);
+                    ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).commit();
                 });
 
                 normalView.setVisibility(View.GONE);

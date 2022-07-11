@@ -17,9 +17,12 @@ import android.widget.Toast;
 
 import com.example.locavore.Activities.LoginActivity;
 import com.example.locavore.Activities.MainActivity;
+import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
+
+import org.parceler.Parcels;
 
 import java.util.Objects;
 
@@ -45,6 +48,9 @@ public class FarmProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        User farm = Parcels.unwrap(getArguments().getParcelable(User.FARM_USER_TYPE));
+        Log.i(TAG, farm.getName());
+
         btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
         btnCreateEvent.setOnClickListener(v -> {
             showAlertDialog();
@@ -62,6 +68,8 @@ public class FarmProfileFragment extends Fragment {
                 Toast.makeText(getContext(), requireContext().getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
             }
         }));
+
+
 
     }
 
