@@ -361,12 +361,11 @@ public class MapFragment extends Fragment {
 
         // then, only make the yelp request if we have no farms in this area
         if(!(dataManager.mFarms.size() > 0)) {
-            // only make the request to Yelp if we don't have farms yet in the radius of the user's location.
             yelpRequest(request, currentLocation);
         }
     }
 
-    /* requests have to be made from within the class in order to maintain adapters... */
+    /* requests have to be made from within the class in order to maintain adapter list... */
 
     public void queryFarms(String request, Location currentLocation) throws ParseException {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
@@ -374,8 +373,8 @@ public class MapFragment extends Fragment {
 
         if(ParseUser.getCurrentUser() != null && currentLocation != null) {
             query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), dataManager.mRadius / METERS_TO_MILE);
-        } else { // situation where the user has not logged in yet. TODO: should show go straight to login, show the loading splash screen after logging in.
-            query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), MAX_YELP_RADIUS / METERS_TO_MILE);
+        } else {
+            Log.i(TAG, "Something went wrong..");
         }
 
         List<User> newFarms = new ArrayList<>();

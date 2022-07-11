@@ -53,7 +53,6 @@ public class FeedFragment extends Fragment implements LocationListener {
     private Location location;
     private LocationManager locationManager;
     private String bestProvider;
-    private Button btnRefresh;
     DataManager dataManager = DataManager.getInstance();
 
 
