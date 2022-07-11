@@ -179,6 +179,13 @@ public class MapFragment extends Fragment {
         List<Marker> nMarkers = new ArrayList<>();
         List<String> nFarmIds = new ArrayList<>();
 
+        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        LatLngBounds newBounds = new LatLngBounds(latLng, latLng);
+        /*
+        map.setLatLngBoundsForCameraTarget(bounds);
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));*/
+
+
         for (int i = 0; i < markers.size(); i++) // farms and their markers always be at the same index? as farms get removed / added so do their markers?
         {
             if(((User) markers.get(i).getTag()).getDistance() > dataManager.mRadius) { // remove these markers from the map
@@ -188,6 +195,7 @@ public class MapFragment extends Fragment {
                 nFarms.add((User) markers.get(i).getTag());
                 nMarkers.add(markers.get(i));
                 nFarmIds.add(((User) markers.get(i).getTag()).getId());
+                newBounds = newBounds.including(((User) markers.get(i).getTag()).getCoordinates());
             }
         }
 
@@ -195,6 +203,9 @@ public class MapFragment extends Fragment {
         markers = nMarkers;
         dataManager.mFarmIds = nFarmIds;
         profilesAdapter.notifyDataSetChanged(); // how to change this to be more specific?
+        bounds = newBounds;
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+
     }
 
     protected void loadMap(GoogleMap googleMap) {
@@ -246,8 +257,6 @@ public class MapFragment extends Fragment {
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         try {
-                            CameraUpdate point = CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 10);
-                            map.moveCamera(point);
                             onLocationChanged(location);
                         } catch (ParseException | IOException e) {
                             e.printStackTrace();
@@ -308,9 +317,6 @@ public class MapFragment extends Fragment {
 
     private void displayLocation() throws ParseException, IOException {
         if (currentLocation != null) {
-            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
-            map.animateCamera(cameraUpdate);
             if(firstLoad && !dataManager.mFarms.isEmpty()) {
                 dropMarkers(dataManager.mFarms);
             } else {
@@ -350,9 +356,8 @@ public class MapFragment extends Fragment {
             marker.setTag(farm); // associate farm --> marker
             markers.add(marker);
             bounds = bounds.including(farm.getCoordinates());
-            map.setLatLngBoundsForCameraTarget(bounds);
         }
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 20));
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
     }
 
     protected void getRequest(String request) throws ParseException, IOException {
