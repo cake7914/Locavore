@@ -13,9 +13,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
+import com.example.locavore.DataManager;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
@@ -23,6 +25,7 @@ public class CreateEventDialogFragment extends DialogFragment {
 
     private EditText etEventName;
     private EditText etEventDescription;
+    DataManager dataManager = DataManager.getInstance();
 
     public static final String TAG = "CreateEventDialogFragment";
 

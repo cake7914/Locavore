@@ -22,7 +22,7 @@ public class AuthenticationManager {
     public static final int USER_NONEXISTENT_ERROR = 101;
     public static final int USER_ALREADY_EXISTS_ERROR = 202;
     public static final int MIN_PASSWORD_LENGTH = 10;
-
+    private DataManager dataManager = DataManager.getInstance();
 
     public AuthenticationManager(Context context) {
         this.context = context;
@@ -62,7 +62,7 @@ public class AuthenticationManager {
                 }
             }
             return false;
-        } else if (password.length() < MIN_PASSWORD_LENGTH) { // check password complexity/length
+        } else if (Objects.equals(operation, STR_SIGNUP) && password.length() < MIN_PASSWORD_LENGTH) { // check password complexity/length
             Toast.makeText(context, context.getString(R.string.short_password), Toast.LENGTH_SHORT).show();
             return false;
         }  // check email is a valid email
@@ -80,10 +80,10 @@ public class AuthenticationManager {
         user.put(User.KEY_ADDRESS, address);
         user.put(User.KEY_USER_TYPE, userType);
         user.put(User.KEY_RADIUS, radius);
-
         user.signUpInBackground(e -> {
             if(validateFields(e, STR_SIGNUP, userType, name, emailAddress, username, password, bio, address, radius))
             {
+                dataManager.mRadius = radius;
                 goToMainActivity((Activity) context);
                 Toast.makeText(context, context.getString(R.string.success), Toast.LENGTH_SHORT).show();
             }
@@ -94,6 +94,7 @@ public class AuthenticationManager {
         ParseUser.logInInBackground(username, password, (user, e) -> {
             if(validateFields(e, STR_LOGIN, "", "", "", username, password, "", "", 0))
             {
+                dataManager.mRadius = ParseUser.getCurrentUser().getInt(User.KEY_RADIUS);
                 goToMainActivity((Activity) context);
                 Toast.makeText(context, context.getString(R.string.success), Toast.LENGTH_SHORT).show();
             }
