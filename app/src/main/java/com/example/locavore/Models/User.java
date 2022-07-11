@@ -223,6 +223,7 @@ public class User {
         distance = (double) currentLocation.distanceTo(location);
         name = user.getString(User.KEY_NAME);
         imageUrl = user.getString(User.KEY_PROFILE_BACKDROP);
+        id = user.getString(User.KEY_YELP_ID);
     }
 
 }

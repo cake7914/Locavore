@@ -181,13 +181,13 @@ public class MapFragment extends Fragment {
 
         for (int i = 0; i < markers.size(); i++) // farms and their markers always be at the same index? as farms get removed / added so do their markers?
         {
-            if (dataManager.mFarms.get(i).getDistance() > dataManager.mRadius) { // remove these markers from the map
+            if(((User) markers.get(i).getTag()).getDistance() > dataManager.mRadius) { // remove these markers from the map
                 markers.get(i).remove();
             } else // keep these ones.
             {
-                nFarms.add(dataManager.mFarms.get(i));
+                nFarms.add((User) markers.get(i).getTag());
                 nMarkers.add(markers.get(i));
-                nFarmIds.add(dataManager.mFarmIds.get(i));
+                nFarmIds.add(((User) markers.get(i).getTag()).getId());
             }
         }
 

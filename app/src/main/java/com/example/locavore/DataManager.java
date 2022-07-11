@@ -133,7 +133,7 @@ public class DataManager {
                     for (User farm : response.body().getFarms()) {
                         if (!mFarmIds.contains(farm.getId())) {
                             ParseUser user = createUserFromYelpData(farm, request);
-                            if(farm.getDistance() < ParseUser.getCurrentUser().getInt(User.KEY_RADIUS)) {
+                            if(farm.getDistance() < mRadius) {
                                 newFarms.add(farm);
                                 mFarms.add(farm);
                                 mFarmIds.add(farm.getId());
