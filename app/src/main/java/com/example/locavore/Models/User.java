@@ -36,6 +36,8 @@ public class User {
     public static final String KEY_YELP_ID = "yelpID";
     public static final String KEY_RADIUS = "radius";
     public static final String KEY_EVENTS = "events";
+    public static final String KEY_EVENTS_LIKED = "eventsLiked";
+    public static final String KEY_EVENTS_DISLIKED = "eventsDisliked";
 
     private ParseUser user;
     public boolean expanded;
