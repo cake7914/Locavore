@@ -1,10 +1,15 @@
 package com.example.locavore.Adapters;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -90,6 +95,13 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
         RecyclerView rvTags;
         MapProfileTagsAdapter tagsAdapter;
         LinearLayoutManager linearLayoutManager;
+        Button btnContract;
+
+        int shortAnimationDuration = context.getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
+
+        int longAnimationDuration = context.getResources().getInteger(
+                android.R.integer.config_longAnimTime);
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -109,10 +121,23 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
             tvDescription = itemView.findViewById(R.id.tvFarmDescription);
 
             rvTags = itemView.findViewById(R.id.rvTags);
+
+            btnContract = itemView.findViewById(R.id.btnContract);
+
         }
 
         public void bind(User farm) throws JSONException, ParseException {
             if(farm.expanded) {
+                btnContract.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        farm.expanded = false;
+                        //collapse(expandedView);
+                        //notifyDataSetChanged();
+                        crossfade(farm);
+                    }
+                });
+
                 normalView.setVisibility(View.GONE);
                 expandedView.setVisibility(View.VISIBLE);
 
@@ -174,6 +199,43 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                             .into(ivBackgroundPhoto);
                 }
             }
+        }
+
+        private void crossfade(User farm) {
+
+            normalView.setAlpha(0f);
+            normalView.setVisibility(View.VISIBLE);
+
+            normalView.animate()
+                    .alpha(1f)
+                    .setDuration(longAnimationDuration)
+                    .setListener(null);
+
+            tvFarmName.setText(farm.getName());
+            tvDistance.setText(String.format("%.2f miles", farm.getDistance() / METERS_TO_MILE));
+
+            if (farm.getImageUrl() != null) {
+                Glide.with(context)
+                        .load(farm.getImageUrl())
+                        .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
+                        .into(ivBackgroundPhoto);
+            } else {
+                Glide.with(context)
+                        .load(R.drawable.farm_background)
+                        .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
+                        .into(ivBackgroundPhoto);
+            }
+
+            expandedView.animate()
+                    .alpha(0f)
+                    .setDuration(longAnimationDuration)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            expandedView.setVisibility(View.GONE);
+                        }
+                    });
+            expandedView.setAlpha(1f);
         }
     }
 

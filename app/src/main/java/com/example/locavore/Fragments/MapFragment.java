@@ -248,7 +248,6 @@ public class MapFragment extends Fragment {
                 }
             }
             profilesAdapter.notifyDataSetChanged();
-
             return true;
         });
 
