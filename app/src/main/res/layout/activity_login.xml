@@ -8,12 +8,6 @@
     android:orientation="vertical"
     tools:context=".Activities.LoginActivity">
 
-    <ImageView
-        android:id="@+id/ivWaves"
-        android:layout_width="match_parent"
-        android:layout_height="654dp"
-        app:srcCompat="@drawable/login_screen" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"

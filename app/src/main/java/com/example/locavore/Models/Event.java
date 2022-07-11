@@ -5,15 +5,20 @@ import com.parse.ParseFile;
 import com.parse.ParseObject;
 
 @ParseClassName("Event")
-public class Event extends ParseObject {
+public class Event extends ParseObject implements Comparable<Event> {
 
     public static final String KEY_NAME = "name";
     public static final String KEY_DESCRIPTION = "description";
     public static final String KEY_FARM = "farm";
     public static final String KEY_LOCATION = "location";
     public static final String KEY_PHOTO = "photo";
-    public static final String KEY_LATITUDE = "latitude";
-    public static final String KEY_LONGITUDE = "longitude";
+    public int mWeight;
+
+
+    @Override
+    public int compareTo(Event event) {
+        return Integer.compare(mWeight, event.mWeight);
+    }
 
     public String getName() {
         return getString(KEY_NAME);
@@ -45,17 +50,4 @@ public class Event extends ParseObject {
 
     public ParseFile getPhoto() { return getParseFile(KEY_PHOTO); }
     public void setPhoto(ParseFile photo) { put(KEY_PHOTO, photo); }
-
-    public Double getLatitude() {
-        return getDouble(KEY_LATITUDE);
-    }
-    public void setLatitude(Double latitude) {
-        put(KEY_LATITUDE, latitude);
-    }
-
-    public Double getLongitude() {return getDouble(KEY_LONGITUDE);}
-    public void setLongitude(Double longitude) {
-        put(KEY_LONGITUDE, longitude);
-    }
-
 }

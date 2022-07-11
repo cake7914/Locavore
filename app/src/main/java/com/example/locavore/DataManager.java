@@ -1,5 +1,6 @@
 package com.example.locavore;
 
+import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 
 import static com.example.locavore.BuildConfig.YELP_API_KEY;
@@ -29,6 +30,7 @@ import com.parse.ParseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -84,13 +86,12 @@ public class DataManager {
                 mFarms.add(farm);
                 mFarmIds.add(farm.getId());
                 newFarms.add(farm);
-                // also add any events that this farm has to the events list
-                queryEvents(farm);
+                queryEvents(farm, currentLocation);
             }
         }
     }
 
-    private void queryEvents(User farm) {
+    private void queryEvents(User farm, Location currentLocation) {
         JSONArray newEvents = farm.getUser().getJSONArray(User.KEY_EVENTS);
         if (newEvents != null) {
             for (int j = 0; j < newEvents.length(); j++) {
@@ -101,8 +102,13 @@ public class DataManager {
                         if (err != null) {
                             Log.e(TAG, "Issue with getting event ", err);
                         } else {
-                            // add this event to the events list
-                            mEvents.add((Event) event);
+                            // weight this event, then insert it into the events list based on its weight
+                            try {
+                                ((Event) event).mWeight = weightEvent((Event) event, currentLocation);
+                            } catch (JSONException | ParseException e) {
+                                e.printStackTrace();
+                            }
+                            insertEvent((Event) event);
                         }
                     });
 
@@ -112,6 +118,84 @@ public class DataManager {
             }
         }
     }
+
+    public void insertEvent(Event event) {
+        if(mEvents.size() == 0) {
+            mEvents.add(event);
+        } else {
+            for(int i = 0; i < mEvents.size(); i++) {
+                if(event.mWeight > mEvents.get(i).mWeight) { // add in front
+                    mEvents.add(i, event);
+                    break;
+                } else if((event.mWeight < mEvents.get(i).mWeight) && (i == mEvents.size()-1)) {  // add to the end
+                    mEvents.add(event);
+                }
+            }
+        }
+    }
+
+    public int weightEvent(Event event, Location currentLocation) throws JSONException, ParseException {
+        int weight = 0;
+        ParseUser user = ParseUser.getCurrentUser();
+
+        // calculate distance: subtract from total weight (want the highest weight to be the first shown)
+        Location eventLocation = new Location(NETWORK_PROVIDER);
+        eventLocation.setLatitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLatitude());
+        eventLocation.setLongitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLongitude());
+        weight -= currentLocation.distanceTo(eventLocation);
+
+        // if the user follows the farm
+        if(checkUserFollowingFarm(event.getFarm(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) != -1) {
+            weight += 500;
+        }
+
+        // if the user has attended an event at the farm before
+        JSONArray userEvents = user.getJSONArray(User.KEY_EVENTS);
+        for(int i = 0; i < userEvents.length(); i++) {
+            JSONObject attendedEventJSON = userEvents.getJSONObject(i);
+            String eventId = attendedEventJSON.getString("objectId");
+            ParseQuery<ParseObject> eventQuery = ParseQuery.getQuery("Event");
+            ParseObject attendedEvent = eventQuery.get(eventId);
+
+            if(Objects.equals(attendedEvent.getString(Event.KEY_FARM), event.getFarm())) {
+                //if the user liked the attended event, add to weighting; otherwise subtract from the weighting
+                try {
+                    if(checkUserSatisfaction(user.getJSONArray(User.KEY_EVENTS_LIKED),  (Event) attendedEvent)) {
+                        weight += 100;
+                    } else if(checkUserSatisfaction(user.getJSONArray(User.KEY_EVENTS_DISLIKED),  (Event) attendedEvent)) {
+                        weight -= 100;
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return weight;
+    }
+
+    protected int checkUserFollowingFarm(String farmID, JSONArray farmsFollowing) throws JSONException {
+        if(farmsFollowing != null) {
+            for (int i = 0; i < farmsFollowing.length(); i++) {
+                if(farmsFollowing.getString(i).equals(farmID)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    protected boolean checkUserSatisfaction(JSONArray events, Event attendedEvent) throws JSONException {
+        if(events != null) {
+            for(int i = 0; i < events.length(); i++) {
+                String eventId = events.getJSONObject(i).getString("objectId");
+                if(eventId.equals(attendedEvent.getObjectId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     public void yelpRequest(String request, Location currentLocation) throws ParseException, IOException {
         Retrofit retrofit = new Retrofit.Builder()

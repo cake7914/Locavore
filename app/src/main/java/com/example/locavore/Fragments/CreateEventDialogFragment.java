@@ -18,6 +18,7 @@ import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
@@ -69,14 +70,13 @@ public class CreateEventDialogFragment extends DialogFragment {
                 event.put("name", eventName);
                 event.put("description", eventDescription);
                 event.put("farm", ParseUser.getCurrentUser().getObjectId());
-                event.put(Event.KEY_LATITUDE, ParseUser.getCurrentUser().getDouble(User.KEY_LATITUDE));
-                event.put(Event.KEY_LONGITUDE, ParseUser.getCurrentUser().getDouble(User.KEY_LONGITUDE));
+                event.put(Event.KEY_LOCATION, new ParseGeoPoint(ParseUser.getCurrentUser().getDouble(User.KEY_LATITUDE), ParseUser.getCurrentUser().getDouble(User.KEY_LONGITUDE)));
                 event.saveInBackground();
 
                 // assign the event to the farm creating it
                 ParseUser user = ParseUser.getCurrentUser();
                 if (user != null) {
-                    user.add("events", event);
+                    user.add(User.KEY_EVENTS, event.getObjectId());
                     user.saveInBackground();
                 }
                 dialog.dismiss();
