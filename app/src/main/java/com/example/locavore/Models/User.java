@@ -40,6 +40,9 @@ public class User {
     public static final String KEY_EVENTS = "events";
     public static final String KEY_EVENTS_LIKED = "eventsLiked";
     public static final String KEY_EVENTS_DISLIKED = "eventsDisliked";
+    public static final String KEY_OBJECT_ID = "objectId";
+    public static final String KEY_FOLLOWERS = "followers";
+    public static final String KEY_RATING = "rating";
 
     private ParseUser user;
     public boolean expanded;
@@ -231,6 +234,7 @@ public class User {
         name = user.getString(User.KEY_NAME);
         imageUrl = user.getString(User.KEY_PROFILE_BACKDROP);
         id = user.getString(User.KEY_YELP_ID);
+        rating = user.getDouble(User.KEY_RATING);
     }
 
 }
