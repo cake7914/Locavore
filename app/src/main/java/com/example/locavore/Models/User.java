@@ -11,11 +11,13 @@ import com.google.gson.annotations.SerializedName;
 import com.parse.ParseUser;
 
 import org.json.JSONArray;
+import org.parceler.Parcel;
 
 import java.util.List;
 
 import javax.annotation.Generated;
 
+@Parcel
 @Generated("jsonschema2pojo")
 public class User {
 
@@ -41,6 +43,9 @@ public class User {
 
     private ParseUser user;
     public boolean expanded;
+
+    // empty constructor needed by the Parceler library
+    public User() {}
 
     @SerializedName("rating")
     @Expose

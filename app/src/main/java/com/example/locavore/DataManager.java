@@ -72,6 +72,8 @@ public class DataManager {
         return sDataManager;
     }
 
+    // getter methods that evaluate if the data is still valid
+
     public void queryFarms(String request, Location currentLocation) throws ParseException {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
         query.whereEqualTo(User.KEY_USER_TYPE, request);
@@ -170,6 +172,13 @@ public class DataManager {
                 }
             }
         }
+
+        // yelp rating
+
+        // number of followers
+
+        // users liked the events
+
         return weight;
     }
 
