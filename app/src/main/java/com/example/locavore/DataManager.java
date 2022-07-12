@@ -13,10 +13,13 @@ import com.example.locavore.Models.Event;
 import com.example.locavore.Models.FarmSearchResult;
 import com.example.locavore.Models.User;
 import com.example.locavore.Models.UserEvent;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
+import com.parse.ParseSession;
 import com.parse.ParseUser;
+import com.parse.SignUpCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,6 +68,7 @@ public class DataManager {
     public void getFarms(Location currentLocation) throws ParseException, IOException {
         // loop through all of the farms & check if they are within the user's radius still. if not, remove them.
         if(mFarms.size() != 0) {
+            Log.i(TAG, "saved farms exist!");
             List<User> nFarms = new ArrayList<>();
             List<String> nFarmIds = new ArrayList<>();
 
@@ -245,6 +249,8 @@ public class DataManager {
         Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, MAX_YELP_RADIUS);
         List<User> newFarms = new ArrayList<>();
 
+        ParseUser user = ParseUser.getCurrentUser();
+
         call.enqueue(new Callback<FarmSearchResult>() {
             @Override
             public void onResponse(@NonNull Call<FarmSearchResult> call, @NonNull Response<FarmSearchResult> response) {
@@ -278,6 +284,8 @@ public class DataManager {
 
     // populate the parse database with farm user
     public ParseUser createUserFromYelpData(User farm, String request) {
+        String sessionToken = ParseUser.getCurrentSessionToken();
+
         ParseUser user = new ParseUser();
         user.setUsername(farm.getId());
         user.setPassword(farm.getId());
@@ -291,8 +299,19 @@ public class DataManager {
         user.put(User.KEY_BIO, farm.getName() + " is located at " + farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState());
         user.put(User.KEY_YELP_ID, farm.getId());
         user.put(User.KEY_RATING, farm.getRating());
-        user.add(User.KEY_TAGS, farm.getId());
-        user.signUpInBackground();
+        user.add(User.KEY_TAGS, "family-friendly");
+        user.add(User.KEY_TAGS, "animals");
+        user.signUpInBackground(new SignUpCallback() {
+            @Override
+            public void done(ParseException e) {
+                try {
+                    ParseUser.become(sessionToken);
+                } catch (ParseException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
         return user;
     }
 }

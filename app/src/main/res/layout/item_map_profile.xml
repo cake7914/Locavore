@@ -16,34 +16,55 @@
 
         <ImageView
             android:id="@+id/ivBackgroundPhoto"
-            android:layout_width="175dp"
-            android:layout_height="85dp"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
             android:layout_marginEnd="0dp"
             android:layout_marginBottom="5dp"
             android:contentDescription="@string/farm_profile_image"
             app:srcCompat="@drawable/farm_background" />
 
-        <TextView
-            android:id="@+id/tvFarmName"
-            android:layout_width="167dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="5dp"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="March Farms" />
-
-        <TextView
-            android:id="@+id/tvDistance"
+        <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/ivBackgroundPhoto"
+            android:layout_alignParentStart="true"
             android:layout_marginStart="4dp"
-            android:layout_marginTop="56dp"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="10mi" />
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="10dp">
+
+            <TextView
+                android:id="@+id/tvFarmName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:maxLines="2"
+                android:minLines="1"
+                android:textColor="@color/textColor"
+                android:textSize="16sp"
+                tools:text="March Farms" />
+        </androidx.cardview.widget.CardView>
+
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/ivBackgroundPhoto"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="5dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="10dp">
+
+            <TextView
+                android:id="@+id/tvDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:textColor="@color/textColor"
+                android:textSize="16sp"
+                tools:text="10mi" />
+        </androidx.cardview.widget.CardView>
     </RelativeLayout>
 
     <RelativeLayout
@@ -59,45 +80,65 @@
             android:visibility="visible"
             app:srcCompat="@drawable/farm_background" />
 
-        <TextView
-            android:id="@+id/tvFarmNameExpanded"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/vFarmName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="7dp"
-            android:layout_marginTop="12dp"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="Maple Bank Farm" />
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:background="#FFFFFF"
+            app:cardCornerRadius="25dp"
+            app:cardElevation="0dp">
 
-        <TextView
-            android:id="@+id/tvFarmDistanceExpanded"
+            <TextView
+                android:id="@+id/tvFarmNameExpanded"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginHorizontal="2dp"
+                android:textColor="@color/textColor"
+                android:textSize="16sp"
+                tools:text="Maple Bank Farm" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginStart="7dp"
-            android:layout_marginTop="42dp"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            tools:text="10mi" />
+            android:layout_below="@+id/vFarmName"
+            android:layout_alignStart="@+id/vFarmName"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="5dp"
+            app:cardCornerRadius="25dp"
+            app:cardElevation="0dp">
+
+            <TextView
+                android:id="@+id/tvFarmDistanceExpanded"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:elevation="2dp"
+                android:textColor="@color/textColor"
+                android:textSize="16sp"
+                tools:text="10mi" />
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/tvFarmDescription"
             android:layout_width="375dp"
             android:layout_height="61dp"
+            android:layout_alignEnd="@id/view"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="3dp"
+            android:layout_marginHorizontal="3dp"
             android:layout_marginTop="134dp"
             android:elevation="3dp"
             android:textAlignment="center"
-            android:textColor="#000000"
+            android:textColor="@color/textColor"
             android:textSize="16sp"
-            android:textStyle="bold"
             tools:text="On our 200 acres, we grow apples, nectarines, and all other varieties of fruits!" />
 
         <androidx.cardview.widget.CardView

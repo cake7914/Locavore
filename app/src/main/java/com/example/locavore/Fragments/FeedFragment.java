@@ -39,6 +39,7 @@ import com.parse.ParseUser;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,11 +103,10 @@ public class FeedFragment extends Fragment implements LocationListener {
         if(location.distanceTo(newLocation) > MIN_DISTANCE_CHANGE) {
             location = newLocation;
             try {
-                dataManager.queryFarms(User.FARM_USER_TYPE, location);
-                dataManager.queryFarms(User.FARMERS_MARKET_USER_TYPE, location);
+                dataManager.getFarms(location);
                 profilesAdapter.notifyDataSetChanged();
                 eventsAdapter.notifyDataSetChanged();
-            } catch (ParseException e) {
+            } catch (ParseException | IOException e) {
                 e.printStackTrace();
             }
         }
