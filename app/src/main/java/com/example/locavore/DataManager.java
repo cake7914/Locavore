@@ -274,6 +274,7 @@ public class DataManager {
         }
         user.put(User.KEY_BIO, farm.getName() + " is located at " + farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState());
         user.put(User.KEY_YELP_ID, farm.getId());
+        user.put(User.KEY_RATING, farm.getRating());
         user.add(User.KEY_TAGS, farm.getId());
         user.signUpInBackground();
         return user;
