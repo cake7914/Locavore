@@ -88,7 +88,6 @@ public class MapFragment extends Fragment {
     private static final long UPDATE_INTERVAL = 3000;
     private static final long FASTEST_INTERVAL = 3000;
     private static final double MIN_DISTANCE_CHANGE = 19312.1;
-    private boolean firstLoad = true;
 
     private SupportMapFragment supportMapFragment;
     private GoogleMap map;
@@ -181,10 +180,6 @@ public class MapFragment extends Fragment {
 
         LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         LatLngBounds newBounds = new LatLngBounds(latLng, latLng);
-        /*
-        map.setLatLngBoundsForCameraTarget(bounds);
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));*/
-
 
         for (int i = 0; i < markers.size(); i++) // farms and their markers always be at the same index? as farms get removed / added so do their markers?
         {
@@ -205,7 +200,6 @@ public class MapFragment extends Fragment {
         profilesAdapter.notifyDataSetChanged(); // how to change this to be more specific?
         bounds = newBounds;
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
-
     }
 
     protected void loadMap(GoogleMap googleMap) {
@@ -305,25 +299,25 @@ public class MapFragment extends Fragment {
             currentLocation = location;
             LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             bounds = new LatLngBounds(latLng, latLng);
-
             displayLocation();
         } else if (prevLocation.distanceTo(location) > MIN_DISTANCE_CHANGE) { // location has changed by significant amount: set prevLocation to currentLocation and currentLocation to the new location and make request.
             prevLocation = currentLocation;
             currentLocation = location;
+            LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            bounds = new LatLngBounds(latLng, latLng);
             displayLocation();
         }
     }
 
     private void displayLocation() throws ParseException, IOException {
         if (currentLocation != null) {
-            if(firstLoad && !dataManager.mFarms.isEmpty()) {
-                dropMarkers(dataManager.mFarms);
-            } else {
-                getRequest(User.FARM_USER_TYPE);
-                getRequest(User.FARMERS_MARKET_USER_TYPE);
-            }
-            firstLoad = false;
+            map.clear();
+            markers = new ArrayList<>();
+
+            dataManager.getFarms(currentLocation);
+            dropMarkers(dataManager.mFarms);
         }
+        profilesAdapter.notifyDataSetChanged();
     }
 
     public Bitmap getMarker(String request) {
@@ -357,88 +351,6 @@ public class MapFragment extends Fragment {
             bounds = bounds.including(farm.getCoordinates());
         }
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
-    }
-
-    protected void getRequest(String request) throws ParseException, IOException {
-        // first make request to Parse database to check for farms nearby
-        queryFarms(request, currentLocation);
-
-        // then, only make the yelp request if we have no farms in this area
-        if(!(dataManager.mFarms.size() > 0)) {
-            yelpRequest(request, currentLocation);
-        }
-    }
-
-    /* requests have to be made from within the class in order to maintain adapter list... */
-
-    public void queryFarms(String request, Location currentLocation) throws ParseException {
-        ParseQuery<ParseUser> query = ParseUser.getQuery();
-        query.whereEqualTo(User.KEY_USER_TYPE, request);
-
-        if(ParseUser.getCurrentUser() != null && currentLocation != null) {
-            query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), dataManager.mRadius / METERS_TO_MILE);
-        } else {
-            Log.i(TAG, "Something went wrong..");
-        }
-
-        List<User> newFarms = new ArrayList<>();
-
-        List<ParseUser> databaseFarms = query.find();
-        for (int i = 0; i < databaseFarms.size(); i++) {
-            if(!dataManager.mFarmIds.contains(databaseFarms.get(i).getString(User.KEY_YELP_ID))) {
-                User farm = new User(databaseFarms.get(i), currentLocation);
-                dataManager.mFarms.add(farm);
-                dataManager.mFarmIds.add(farm.getId());
-                newFarms.add(farm);
-                // also add any events that this farm has to the events list
-                //queryEvents(farm);
-            }
-        }
-        profilesAdapter.notifyItemRangeInserted(dataManager.mFarms.size() - newFarms.size(), newFarms.size());
-        dropMarkers(newFarms);
-    }
-
-    public void yelpRequest(String request, Location currentLocation) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        YelpService yelpService = retrofit.create(YelpService.class);
-        Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, MAX_YELP_RADIUS);
-        List<User> newFarms = new ArrayList<>();
-
-        call.enqueue(new Callback<FarmSearchResult>() {
-            @Override
-            public void onResponse(@NonNull Call<FarmSearchResult> call, @NonNull Response<FarmSearchResult> response) {
-                Log.i(TAG, "Success! " + response);
-                if (response.body() == null) {
-                    Log.e(TAG, "Error retrieving response body");
-                } else {
-                    for (User farm : response.body().getFarms()) {
-                        if (!dataManager.mFarmIds.contains(farm.getId())) {
-                            ParseUser user = dataManager.createUserFromYelpData(farm, request);
-                            if(farm.getDistance() < ParseUser.getCurrentUser().getInt(User.KEY_RADIUS)) {
-                                newFarms.add(farm);
-                                dataManager.mFarms.add(farm);
-                                dataManager.mFarmIds.add(farm.getId());
-                                farm.setUser(user);
-                                if (Objects.equals(farm.getImageUrl(), "")) {
-                                    farm.setImageUrl(farm.getUser().getString(User.KEY_PROFILE_BACKDROP));
-                                }
-                            }
-                        }
-                    }
-                    profilesAdapter.notifyItemRangeInserted(dataManager.mFarms.size() - newFarms.size(), newFarms.size());
-                    dropMarkers(newFarms);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<FarmSearchResult> call, @NonNull Throwable t) {
-                Log.i(TAG, "Failure " + t);
-            }
-        });
     }
 
     public class CenterSmoothScroller extends LinearSmoothScroller {

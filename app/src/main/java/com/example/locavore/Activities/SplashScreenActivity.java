@@ -67,11 +67,11 @@ public class SplashScreenActivity extends Activity {
                 getMainExecutor(),
                 location -> {
                     currentLocation = location;
-                    if (ParseUser.getCurrentUser() != null) { // user is logged in
+                    if (ParseUser.getCurrentUser() != null) {
                         dataManager = DataManager.getInstance();
                         new FarmFetcher().execute();
-                    } else { // go straight to login screen
-                        Log.i(TAG, "no user logged in");
+                    } else { // go straight to login screen. make request while map screen loading.
+                        // can't do default radius because the user data is required to do event ordering
                         Intent i = new Intent(SplashScreenActivity.this, LoginActivity.class);
                         SplashScreenActivity.this.startActivity(i);
                         SplashScreenActivity.this.finish();
@@ -86,6 +86,7 @@ public class SplashScreenActivity extends Activity {
         if(grantResults[0] != PackageManager.PERMISSION_GRANTED && grantResults[1] != PackageManager.PERMISSION_GRANTED) { // neither permission granted
             Toast.makeText(this, getString(R.string.location_permission), Toast.LENGTH_SHORT).show();
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+            // instead of requesting permissions again, go to login and when the map loads if we don't have permissions, display alert
         } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
             loadLocation();
         }
@@ -101,13 +102,7 @@ public class SplashScreenActivity extends Activity {
         @Override
         protected Void doInBackground(Void... voids) { // find all of the farms and save them in the singleton instance
             try {
-                dataManager.queryFarms(User.FARM_USER_TYPE, currentLocation);
-                dataManager.queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
-
-                // make the yelp call when the app first loads to check for any new farms nearby
-                dataManager.yelpRequest(User.FARM_USER_TYPE, currentLocation);
-                dataManager.yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
-
+                dataManager.getFarms(currentLocation);
             } catch (ParseException | IOException e) {
                 e.printStackTrace();
             }

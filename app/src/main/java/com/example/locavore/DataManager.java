@@ -1,37 +1,25 @@
 package com.example.locavore;
 
-import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 
 import static com.example.locavore.BuildConfig.YELP_API_KEY;
 
-import android.content.Intent;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Adapter;
 
 import androidx.annotation.NonNull;
 
-import com.example.locavore.Activities.LoginActivity;
-import com.example.locavore.Activities.SplashScreenActivity;
-import com.example.locavore.Fragments.MapFragment;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.FarmSearchResult;
 import com.example.locavore.Models.User;
 import com.example.locavore.Models.UserEvent;
-import com.google.android.gms.maps.model.LatLng;
-import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,6 +48,7 @@ public class DataManager {
         if(ParseUser.getCurrentUser() != null) {
             mRadius = ParseUser.getCurrentUser().getInt(User.KEY_RADIUS);
         }
+
         mFarms = new ArrayList<>();
         mFarmIds = new ArrayList<>();
         mEvents = new ArrayList<>();
@@ -73,7 +62,34 @@ public class DataManager {
         return sDataManager;
     }
 
-    //TODO: getter methods that evaluate if the data is still valid
+    public void getFarms(Location currentLocation) throws ParseException, IOException {
+        // loop through all of the farms & check if they are within the user's radius still. if not, remove them.
+        if(mFarms.size() != 0) {
+            List<User> nFarms = new ArrayList<>();
+            List<String> nFarmIds = new ArrayList<>();
+
+            for (int i = 0; i < mFarms.size(); i++) {
+                Location farmLocation = new Location(NETWORK_PROVIDER);
+                farmLocation.setLatitude(mFarms.get(i).getCoordinates().latitude);
+                farmLocation.setLongitude(mFarms.get(i).getCoordinates().longitude);
+                if (currentLocation.distanceTo(farmLocation)<= mRadius) {
+                    nFarms.add(mFarms.get(i));
+                    nFarmIds.add(mFarms.get(i).getId());
+                }
+            }
+
+            mFarms.removeIf(farm -> !nFarms.contains(farm));
+            mFarmIds = nFarmIds;
+        }
+        queryFarms(User.FARM_USER_TYPE, currentLocation);
+        queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+
+        if(mFarms.size() != 0)
+            return;
+
+        yelpRequest(User.FARM_USER_TYPE, currentLocation);
+        yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+    }
 
     public void queryFarms(String request, Location currentLocation) throws ParseException {
         ParseQuery<ParseUser> query = ParseUser.getQuery();
