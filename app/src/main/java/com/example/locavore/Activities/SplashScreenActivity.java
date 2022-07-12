@@ -8,18 +8,25 @@ import com.parse.ParseUser;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashScreenActivity extends Activity {
@@ -30,6 +37,7 @@ public class SplashScreenActivity extends Activity {
     private String bestProvider;
     DataManager dataManager;
 
+    @RequiresApi(api = Build.VERSION_CODES.R)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,19 +47,31 @@ public class SplashScreenActivity extends Activity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
         }
+
+        // callback for after recieving permissions --> if they don't accept, show alert/request again/close
+
         Criteria criteria = new Criteria();
         bestProvider = locationManager.getBestProvider(criteria, false);
-        currentLocation = locationManager.getLastKnownLocation(bestProvider);
+        locationManager.getCurrentLocation(
+                bestProvider,
+                null,
+                getMainExecutor(),
+                new Consumer<Location>() {
+                    @Override
+                    public void accept(Location location) {
+                        currentLocation = location;
 
-        if(ParseUser.getCurrentUser() != null) { // user is logged in
-            dataManager = DataManager.getInstance();
-            new FarmFetcher().execute();
-        } else { // go straight to login screen
-            Log.i(TAG, "no user logged in");
-            Intent i = new Intent(SplashScreenActivity.this, LoginActivity.class);
-            SplashScreenActivity.this.startActivity(i);
-            SplashScreenActivity.this.finish();
-        }
+                        if(ParseUser.getCurrentUser() != null && currentLocation != null) { // user is logged in & has a location
+                            dataManager = DataManager.getInstance();
+                            new FarmFetcher().execute();
+                        } else { // go straight to login screen
+                            Log.i(TAG, "no user logged in");
+                            Intent i = new Intent(SplashScreenActivity.this, LoginActivity.class);
+                            SplashScreenActivity.this.startActivity(i);
+                            SplashScreenActivity.this.finish();
+                        }
+                    }
+                });
     }
 
     private class FarmFetcher extends AsyncTask<Void, Void, Void> {

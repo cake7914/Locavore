@@ -146,7 +146,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                     Bundle args = new Bundle();
                     args.putParcelable(User.FARM_USER_TYPE, Parcels.wrap(farm));
                     fragment.setArguments(args);
-                    ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).commit();
+                    ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).addToBackStack(null).commit();
                 });
 
                 normalView.setVisibility(View.GONE);
