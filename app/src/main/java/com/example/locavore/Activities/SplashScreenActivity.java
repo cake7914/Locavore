@@ -1,4 +1,5 @@
 package com.example.locavore.Activities;
+
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.example.locavore.DataManager;
@@ -20,11 +21,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -44,34 +47,48 @@ public class SplashScreenActivity extends Activity {
         setContentView(R.layout.activity_splash_screen);
 
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        // need to request location
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+        } else { // already have permission
+            loadLocation();
         }
+    }
 
-        // callback for after recieving permissions --> if they don't accept, show alert/request again/close
-
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    public void loadLocation() {
         Criteria criteria = new Criteria();
         bestProvider = locationManager.getBestProvider(criteria, false);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
         locationManager.getCurrentLocation(
                 bestProvider,
                 null,
                 getMainExecutor(),
-                new Consumer<Location>() {
-                    @Override
-                    public void accept(Location location) {
-                        currentLocation = location;
-
-                        if(ParseUser.getCurrentUser() != null && currentLocation != null) { // user is logged in & has a location
-                            dataManager = DataManager.getInstance();
-                            new FarmFetcher().execute();
-                        } else { // go straight to login screen
-                            Log.i(TAG, "no user logged in");
-                            Intent i = new Intent(SplashScreenActivity.this, LoginActivity.class);
-                            SplashScreenActivity.this.startActivity(i);
-                            SplashScreenActivity.this.finish();
-                        }
+                location -> {
+                    currentLocation = location;
+                    if (ParseUser.getCurrentUser() != null) { // user is logged in
+                        dataManager = DataManager.getInstance();
+                        new FarmFetcher().execute();
+                    } else { // go straight to login screen
+                        Log.i(TAG, "no user logged in");
+                        Intent i = new Intent(SplashScreenActivity.this, LoginActivity.class);
+                        SplashScreenActivity.this.startActivity(i);
+                        SplashScreenActivity.this.finish();
                     }
                 });
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.R)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(grantResults[0] != PackageManager.PERMISSION_GRANTED && grantResults[1] != PackageManager.PERMISSION_GRANTED) { // neither permission granted
+            Toast.makeText(this, getString(R.string.location_permission), Toast.LENGTH_SHORT).show();
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
+        } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            loadLocation();
+        }
     }
 
     private class FarmFetcher extends AsyncTask<Void, Void, Void> {

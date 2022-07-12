@@ -47,4 +47,5 @@
     <string name="short_password">Password must be > 10 characters long</string>
     <string name="misc_logout_error">An issue with logout has occurred</string>
     <string name="logout_success">Successful logout</string>
+    <string name="location_permission">This app requires location permission.</string>
 </resources>
