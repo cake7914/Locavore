@@ -42,6 +42,7 @@ public class FarmProfileFragment extends Fragment {
     TextView tvBio;
     ImageView ivBackgroundPhoto;
     ImageView ivProfileImage;
+    ParseUser farm;
 
     public FarmProfileFragment() {
         // Required empty public constructor
@@ -58,7 +59,6 @@ public class FarmProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        User farm = Parcels.unwrap(getArguments().getParcelable(User.FARM_USER_TYPE));
         btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
         btnLogout = view.findViewById(R.id.btnLogout);
         tvFarmName = view.findViewById(R.id.tvFarmName);
@@ -66,7 +66,12 @@ public class FarmProfileFragment extends Fragment {
         ivProfileImage = view.findViewById(R.id.ivProfilePhoto);
         tvBio = view.findViewById(R.id.tvDescription);
 
-        if(farm == null) { // this is a logged in farm, show them their buttons
+        if(getArguments() != null) { // this is a user viewing the farm
+            farm = ((User)Parcels.unwrap(getArguments().getParcelable(User.FARM_USER_TYPE))).getUser();
+            btnCreateEvent.setVisibility(View.GONE);
+            btnLogout.setVisibility(View.GONE);
+        } else { // farmer viewing their own page
+            farm = ParseUser.getCurrentUser();
             btnCreateEvent.setOnClickListener(v -> {
                 showAlertDialog();
             });
@@ -82,19 +87,16 @@ public class FarmProfileFragment extends Fragment {
                     Toast.makeText(getContext(), requireContext().getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
                 }
             }));
-        } else { // user viewing the farm
-            btnCreateEvent.setVisibility(View.GONE);
-            btnLogout.setVisibility(View.GONE);
-
-            tvFarmName.setText(farm.getName());
-            tvBio.setText(farm.getUser().getString(User.KEY_BIO));
-
-            Glide.with(getContext()).load(farm.getUser().getString(User.KEY_PROFILE_PHOTO)).circleCrop().into(ivProfileImage);
-            Glide.with(getContext())
-                    .load(farm.getImageUrl())
-                    .centerCrop()
-                    .into(ivBackgroundPhoto);
         }
+
+        tvFarmName.setText(farm.getString(User.KEY_NAME));
+        tvBio.setText(farm.getString(User.KEY_BIO));
+
+        Glide.with(getContext()).load(farm.getString(User.KEY_PROFILE_PHOTO)).circleCrop().into(ivProfileImage);
+        Glide.with(getContext())
+                .load(farm.getString(User.KEY_PROFILE_BACKDROP))
+                .centerCrop()
+                .into(ivBackgroundPhoto);
     }
 
     private void showAlertDialog() {

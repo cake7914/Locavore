@@ -21,6 +21,7 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 public class CreateEventDialogFragment extends DialogFragment {
 
@@ -67,19 +68,18 @@ public class CreateEventDialogFragment extends DialogFragment {
                 String eventDescription = etEventDescription.getText().toString();
 
                 ParseObject event = ParseObject.create("Event");
-                event.put("name", eventName);
-                event.put("description", eventDescription);
-                event.put("farm", ParseUser.getCurrentUser().getObjectId());
-                event.put(Event.KEY_LOCATION, new ParseGeoPoint(ParseUser.getCurrentUser().getDouble(User.KEY_LATITUDE), ParseUser.getCurrentUser().getDouble(User.KEY_LONGITUDE)));
-                event.saveInBackground();
-
-                // assign the event to the farm creating it
-                ParseUser user = ParseUser.getCurrentUser();
-                if (user != null) {
-                    user.add(User.KEY_EVENTS, event.getObjectId());
-                    user.saveInBackground();
-                }
-                dialog.dismiss();
+                event.put(Event.KEY_NAME, eventName);
+                event.put(Event.KEY_DESCRIPTION, eventDescription);
+                event.put(Event.KEY_FARM, ParseUser.getCurrentUser().getObjectId());
+                event.put(Event.KEY_LOCATION, ParseUser.getCurrentUser().getParseGeoPoint(User.KEY_LOCATION));
+                event.saveInBackground(e -> {
+                    // assign the event to the farm creating it
+                    ParseUser user = ParseUser.getCurrentUser();
+                    if (user != null) {
+                        user.add(User.KEY_EVENTS, event.getObjectId());
+                        user.saveInBackground(e1 -> dialog.dismiss());
+                    }
+                });
             }
         });
 
