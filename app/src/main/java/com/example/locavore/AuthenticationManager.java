@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.locavore.Activities.MainActivity;
+import com.example.locavore.Activities.SplashScreenActivity;
 import com.example.locavore.Models.User;
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -84,7 +85,7 @@ public class AuthenticationManager {
             if(validateFields(e, STR_SIGNUP, userType, name, emailAddress, username, password, bio, address, radius))
             {
                 dataManager.mRadius = radius;
-                goToMainActivity((Activity) context);
+                goToSplashScreenActivity((Activity) context);
                 Toast.makeText(context, context.getString(R.string.success), Toast.LENGTH_SHORT).show();
             }
         });
@@ -95,14 +96,14 @@ public class AuthenticationManager {
             if(validateFields(e, STR_LOGIN, "", "", "", username, password, "", "", 0))
             {
                 dataManager.mRadius = ParseUser.getCurrentUser().getInt(User.KEY_RADIUS);
-                goToMainActivity((Activity) context);
+                goToSplashScreenActivity((Activity) context);
                 Toast.makeText(context, context.getString(R.string.success), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    public void goToMainActivity(Activity activity) {
-        Intent i = new Intent(activity, MainActivity.class);
+    public void goToSplashScreenActivity(Activity activity) {
+        Intent i = new Intent(activity, SplashScreenActivity.class);
         activity.startActivity(i);
         activity.finish();
     }
