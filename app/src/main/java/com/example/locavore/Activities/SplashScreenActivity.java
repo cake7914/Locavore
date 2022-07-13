@@ -102,7 +102,7 @@ public class SplashScreenActivity extends Activity {
         @Override
         protected Void doInBackground(Void... voids) { // find all of the farms and save them in the singleton instance
             try {
-                dataManager.getFarms(currentLocation);
+                dataManager.getFarms(currentLocation, ParseUser.getCurrentUser().getInt(User.KEY_RADIUS));
             } catch (ParseException | IOException e) {
                 e.printStackTrace();
             }

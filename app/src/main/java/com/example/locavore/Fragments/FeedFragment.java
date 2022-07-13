@@ -105,7 +105,7 @@ public class FeedFragment extends Fragment implements LocationListener {
         if(location.distanceTo(newLocation) > MIN_DISTANCE_CHANGE) {
             location = newLocation;
             try {
-                dataManager.getFarms(location);
+                dataManager.getFarms(location, ParseUser.getCurrentUser().getInt(User.KEY_RADIUS));
                 compareFarmInstances();
                 compareEventsInstances();
             } catch (ParseException | IOException e) {

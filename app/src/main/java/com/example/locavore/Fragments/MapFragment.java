@@ -106,6 +106,7 @@ public class MapFragment extends Fragment {
     private LinearLayoutManager linearLayoutManager;
     DataManager dataManager = DataManager.getInstance(currentLocation);
     private List<User> mFarms = dataManager.mFarms;
+    private int mRadius = dataManager.mRadius;
 
     public MapFragment() {
         // Required empty public constructor
@@ -131,10 +132,10 @@ public class MapFragment extends Fragment {
         btnIncreaseRadius = view.findViewById(R.id.btnIncreaseRadius);
         btnIncreaseRadius.setOnClickListener(v -> {
             // increase radius by 5 miles
-            if (dataManager.mRadius < MAX_YELP_RADIUS) //maximum radius allowed by yelp
+            if (mRadius < MAX_YELP_RADIUS) //maximum radius allowed by yelp
             {
-                dataManager.mRadius += YELP_RADIUS_INCREMENT;
-                ParseUser.getCurrentUser().put(User.KEY_RADIUS, dataManager.mRadius);
+                mRadius += YELP_RADIUS_INCREMENT;
+                ParseUser.getCurrentUser().put(User.KEY_RADIUS, mRadius);
                 ParseUser.getCurrentUser().saveInBackground();
             }
             try {
@@ -142,16 +143,16 @@ public class MapFragment extends Fragment {
             } catch (ParseException | IOException e) {
                 e.printStackTrace();
             }
-            tvRadius.setText(String.format(getContext().getString(R.string.radius_string), dataManager.mRadius / METERS_TO_MILE));
+            tvRadius.setText(String.format(getContext().getString(R.string.radius_string), mRadius / METERS_TO_MILE));
         });
 
         btnDecreaseRadius = view.findViewById(R.id.btnDecreaseRadius);
         btnDecreaseRadius.setOnClickListener(v -> {
             // decrease radius by 5 miles
-            if (dataManager.mRadius > YELP_RADIUS_INCREMENT) //min radius ~= 5 miles
+            if (mRadius > YELP_RADIUS_INCREMENT) //min radius ~= 5 miles
             {
-                dataManager.mRadius -= YELP_RADIUS_INCREMENT;
-                ParseUser.getCurrentUser().put(User.KEY_RADIUS, dataManager.mRadius);
+                mRadius -= YELP_RADIUS_INCREMENT;
+                ParseUser.getCurrentUser().put(User.KEY_RADIUS, mRadius);
                 ParseUser.getCurrentUser().saveInBackground();
             }
             try {
@@ -161,11 +162,11 @@ public class MapFragment extends Fragment {
             } catch (ParseException | IOException e) {
                 e.printStackTrace();
             }
-            tvRadius.setText(String.format(getContext().getString(R.string.radius_string), dataManager.mRadius / METERS_TO_MILE));
+            tvRadius.setText(String.format(getContext().getString(R.string.radius_string), mRadius / METERS_TO_MILE));
         });
 
         tvRadius = view.findViewById(R.id.tvRadius);
-        tvRadius.setText(String.format(getContext().getString(R.string.radius_string), dataManager.mRadius / METERS_TO_MILE));
+        tvRadius.setText(String.format(getContext().getString(R.string.radius_string), mRadius / METERS_TO_MILE));
 
         rvProfiles = view.findViewById(R.id.rvProfiles);
         profilesAdapter = new MapProfilesAdapter(getContext(), mFarms);
@@ -291,7 +292,7 @@ public class MapFragment extends Fragment {
             map.clear();
             markers = new ArrayList<>();
 
-            dataManager.getFarms(currentLocation);
+            dataManager.getFarms(currentLocation, mRadius);
             compareInstances();
             dropMarkers(mFarms, firstLoad);
         }

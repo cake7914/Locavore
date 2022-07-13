@@ -67,7 +67,7 @@ public class DataManager {
         return sDataManager;
     }
 
-    public void getFarms(Location currentLocation) throws ParseException, IOException {
+    public void getFarms(Location currentLocation, int radius) throws ParseException, IOException {
         if (mFarms.size() != 0) { // if we have saved farms, remove any that are no longer relevant based on the user's location
             Log.i(TAG, "saved farms exist!");
 
@@ -78,7 +78,7 @@ public class DataManager {
                 Location farmLocation = new Location(NETWORK_PROVIDER);
                 farmLocation.setLatitude(mFarms.get(i).getCoordinates().latitude);
                 farmLocation.setLongitude(mFarms.get(i).getCoordinates().longitude);
-                if (currentLocation.distanceTo(farmLocation) <= mRadius) {
+                if (currentLocation.distanceTo(farmLocation) <= radius) {
                     nFarms.add(mFarms.get(i));
                     nFarmIds.add(mFarms.get(i).getId());
                 }
@@ -88,17 +88,27 @@ public class DataManager {
             mFarmIds = nFarmIds;
         }
 
-        // in either case, query the database as the radius may have changed.
+        // if we have no farms
+        if(mFarms.size() == 0)
+        {
+            queryFarms(User.FARM_USER_TYPE, currentLocation);
+            queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+        }
 
-        queryFarms(User.FARM_USER_TYPE, currentLocation);
-        queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+        // if the radius has increased, query the database.
+        if(mRadius < radius) {
+            mRadius = radius;
+            queryFarms(User.FARM_USER_TYPE, currentLocation);
+            queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+        } else if(mRadius > radius){ //otherwise, just decrease mRadius
+            mRadius = radius;
+        }
 
-        if(mFarms.size() != 0)
-            return;
-
-        // only make the yelp request if necessary-- we have no farms in the database in this area.
-        yelpRequest(User.FARM_USER_TYPE, currentLocation);
-        yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+        // only make the yelp request if necessary-- if we have no saved farms in the database in this area.
+        if(mFarms.size() == 0) {
+            yelpRequest(User.FARM_USER_TYPE, currentLocation);
+            yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+        }
     }
 
     public void queryFarms(String request, Location currentLocation) throws ParseException {
