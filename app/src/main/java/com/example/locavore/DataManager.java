@@ -46,29 +46,30 @@ public class DataManager {
     public List<String> mFarmIds;
     public List<Event> mEvents;
     public int mRadius;
+    public Location mLocation;
 
-    private DataManager() {
+    private DataManager(Location currentLocation) {
         if(ParseUser.getCurrentUser() != null) {
             mRadius = ParseUser.getCurrentUser().getInt(User.KEY_RADIUS);
         }
-
         mFarms = new ArrayList<>();
         mFarmIds = new ArrayList<>();
         mEvents = new ArrayList<>();
+        mLocation = currentLocation;
     }
 
-    public static DataManager getInstance()
+    public static DataManager getInstance(Location currentLocation)
     {
         if (sDataManager == null) { // initialize
-            sDataManager = new DataManager();
+            sDataManager = new DataManager(currentLocation);
         }
         return sDataManager;
     }
 
-    public void getFarms(Location currentLocation) throws ParseException, IOException {
-        // loop through all of the farms & check if they are within the user's radius still. if not, remove them.
-        if(mFarms.size() != 0) {
+    public void getFarms(Location currentLocation, int radius) throws ParseException, IOException {
+        if (mFarms.size() != 0) { // if we have saved farms, remove any that are no longer relevant based on the user's location
             Log.i(TAG, "saved farms exist!");
+
             List<User> nFarms = new ArrayList<>();
             List<String> nFarmIds = new ArrayList<>();
 
@@ -76,7 +77,7 @@ public class DataManager {
                 Location farmLocation = new Location(NETWORK_PROVIDER);
                 farmLocation.setLatitude(mFarms.get(i).getCoordinates().latitude);
                 farmLocation.setLongitude(mFarms.get(i).getCoordinates().longitude);
-                if (currentLocation.distanceTo(farmLocation)<= mRadius) {
+                if (currentLocation.distanceTo(farmLocation) <= radius) {
                     nFarms.add(mFarms.get(i));
                     nFarmIds.add(mFarms.get(i).getId());
                 }
@@ -85,14 +86,28 @@ public class DataManager {
             mFarms.removeIf(farm -> !nFarms.contains(farm));
             mFarmIds = nFarmIds;
         }
-        queryFarms(User.FARM_USER_TYPE, currentLocation);
-        queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
 
-        if(mFarms.size() != 0)
-            return;
+        // if we have no farms
+        if(mFarms.size() == 0)
+        {
+            queryFarms(User.FARM_USER_TYPE, currentLocation);
+            queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+        }
 
-        yelpRequest(User.FARM_USER_TYPE, currentLocation);
-        yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+        // if the radius has increased, query the database.
+        if(mRadius < radius) {
+            mRadius = radius;
+            queryFarms(User.FARM_USER_TYPE, currentLocation);
+            queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+        } else if(mRadius > radius){ //otherwise, just decrease mRadius
+            mRadius = radius;
+        }
+
+        // only make the yelp request if necessary-- if we have no saved farms in the database in this area.
+        if(mFarms.size() == 0) {
+            yelpRequest(User.FARM_USER_TYPE, currentLocation);
+            yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+        }
     }
 
     public void queryFarms(String request, Location currentLocation) throws ParseException {
@@ -100,15 +115,12 @@ public class DataManager {
         query.whereEqualTo(User.KEY_USER_TYPE, request);
         query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), mRadius / METERS_TO_MILE);
 
-        List<User> newFarms = new ArrayList<>();
-
         List<ParseUser> databaseFarms = query.find();
         for (int i = 0; i < databaseFarms.size(); i++) {
             if(!mFarmIds.contains(databaseFarms.get(i).getString(User.KEY_YELP_ID))) {
                 User farm = new User(databaseFarms.get(i), currentLocation);
                 mFarms.add(farm);
                 mFarmIds.add(farm.getId());
-                newFarms.add(farm);
                 queryEvents(farm, currentLocation);
             }
         }
@@ -247,9 +259,6 @@ public class DataManager {
 
         YelpService yelpService = retrofit.create(YelpService.class);
         Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, MAX_YELP_RADIUS);
-        List<User> newFarms = new ArrayList<>();
-
-        ParseUser user = ParseUser.getCurrentUser();
 
         call.enqueue(new Callback<FarmSearchResult>() {
             @Override
@@ -262,7 +271,6 @@ public class DataManager {
                         if (!mFarmIds.contains(farm.getId())) {
                             ParseUser user = createUserFromYelpData(farm, request);
                             if(farm.getDistance() < mRadius) {
-                                newFarms.add(farm);
                                 mFarms.add(farm);
                                 mFarmIds.add(farm.getId());
                                 farm.setUser(user);
@@ -301,14 +309,11 @@ public class DataManager {
         user.put(User.KEY_RATING, farm.getRating());
         user.add(User.KEY_TAGS, "family-friendly");
         user.add(User.KEY_TAGS, "animals");
-        user.signUpInBackground(new SignUpCallback() {
-            @Override
-            public void done(ParseException e) {
-                try {
-                    ParseUser.become(sessionToken);
-                } catch (ParseException ex) {
-                    ex.printStackTrace();
-                }
+        user.signUpInBackground(e -> {
+            try {
+                ParseUser.become(sessionToken);
+            } catch (ParseException ex) {
+                ex.printStackTrace();
             }
         });
 

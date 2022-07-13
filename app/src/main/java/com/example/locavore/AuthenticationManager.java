@@ -23,7 +23,7 @@ public class AuthenticationManager {
     public static final int USER_NONEXISTENT_ERROR = 101;
     public static final int USER_ALREADY_EXISTS_ERROR = 202;
     public static final int MIN_PASSWORD_LENGTH = 10;
-    private DataManager dataManager = DataManager.getInstance();
+    private DataManager dataManager = DataManager.getInstance(null);
 
     public AuthenticationManager(Context context) {
         this.context = context;
