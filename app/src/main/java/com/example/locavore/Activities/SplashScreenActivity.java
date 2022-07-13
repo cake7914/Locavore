@@ -68,7 +68,7 @@ public class SplashScreenActivity extends Activity {
                 location -> {
                     currentLocation = location;
                     if (ParseUser.getCurrentUser() != null) {
-                        dataManager = DataManager.getInstance();
+                        dataManager = DataManager.getInstance(currentLocation);
                         new FarmFetcher().execute();
                     } else { // go straight to login screen. make request while map screen loading.
                         // can't do default radius because the user data is required to do event ordering

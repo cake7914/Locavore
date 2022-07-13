@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -67,6 +68,9 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
         TextView tvEventFarm;
         TextView tvEventName;
         TextView tvDistance;
+        ImageButton btnAttendedEvent;
+        ImageButton btnLikeEvent;
+        ImageButton btnDislikeEvent;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,6 +78,9 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
             tvEventFarm = itemView.findViewById(R.id.tvFarm);
             tvEventName = itemView.findViewById(R.id.tvName);
             tvDistance = itemView.findViewById(R.id.tvDistance);
+            btnAttendedEvent = itemView.findViewById(R.id.btnAttended);
+            btnLikeEvent = itemView.findViewById(R.id.btnLikeEvent);
+            btnDislikeEvent = itemView.findViewById(R.id.btnDislikeEvent);
         }
 
         public void bind(Event event) {
@@ -95,7 +102,36 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
             tvEventName.setText(event.getName());
 
             // calculate distance from event to this user, using current location and the event's address
-            // tvDistance.setText()
+            //tvDistance.setText()
+
+            btnAttendedEvent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // change color to attended color
+                    btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.light_green));
+                    // set visibilities of like/dislike buttons to visible
+                    btnDislikeEvent.setVisibility(View.VISIBLE);
+                    btnLikeEvent.setVisibility(View.VISIBLE);
+                }
+            });
+
+            btnDislikeEvent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // change color to disliked color
+                    btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                    btnLikeEvent.setVisibility(View.INVISIBLE);
+                }
+            });
+
+            btnLikeEvent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // change color to liked color
+                    btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                    btnDislikeEvent.setVisibility(View.INVISIBLE);
+                }
+            });
 
         }
     }

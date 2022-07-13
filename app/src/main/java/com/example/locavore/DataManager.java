@@ -40,35 +40,37 @@ public class DataManager {
     public static final String BASE_URL = "https://api.yelp.com/v3/";
     private static final int MAX_YELP_RADIUS = 40000; // 40,000 meters or ~25 miles
     private static final double METERS_TO_MILE = 1609.34;
+    private static final double MIN_DISTANCE_CHANGE = 19312.1;
     private static DataManager sDataManager = null;
 
     public List<User> mFarms;
     public List<String> mFarmIds;
     public List<Event> mEvents;
     public int mRadius;
+    public Location mLocation;
 
-    private DataManager() {
+    private DataManager(Location currentLocation) {
         if(ParseUser.getCurrentUser() != null) {
             mRadius = ParseUser.getCurrentUser().getInt(User.KEY_RADIUS);
         }
-
         mFarms = new ArrayList<>();
         mFarmIds = new ArrayList<>();
         mEvents = new ArrayList<>();
+        mLocation = currentLocation;
     }
 
-    public static DataManager getInstance()
+    public static DataManager getInstance(Location currentLocation)
     {
         if (sDataManager == null) { // initialize
-            sDataManager = new DataManager();
+            sDataManager = new DataManager(currentLocation);
         }
         return sDataManager;
     }
 
     public void getFarms(Location currentLocation) throws ParseException, IOException {
-        // loop through all of the farms & check if they are within the user's radius still. if not, remove them.
-        if(mFarms.size() != 0) {
+        if (mFarms.size() != 0) { // if we have saved farms, remove any that are no longer relevant based on the user's location
             Log.i(TAG, "saved farms exist!");
+
             List<User> nFarms = new ArrayList<>();
             List<String> nFarmIds = new ArrayList<>();
 
@@ -76,7 +78,7 @@ public class DataManager {
                 Location farmLocation = new Location(NETWORK_PROVIDER);
                 farmLocation.setLatitude(mFarms.get(i).getCoordinates().latitude);
                 farmLocation.setLongitude(mFarms.get(i).getCoordinates().longitude);
-                if (currentLocation.distanceTo(farmLocation)<= mRadius) {
+                if (currentLocation.distanceTo(farmLocation) <= mRadius) {
                     nFarms.add(mFarms.get(i));
                     nFarmIds.add(mFarms.get(i).getId());
                 }
@@ -85,12 +87,16 @@ public class DataManager {
             mFarms.removeIf(farm -> !nFarms.contains(farm));
             mFarmIds = nFarmIds;
         }
+
+        // in either case, query the database as the radius may have changed.
+
         queryFarms(User.FARM_USER_TYPE, currentLocation);
         queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
 
         if(mFarms.size() != 0)
             return;
 
+        // only make the yelp request if necessary-- we have no farms in the database in this area.
         yelpRequest(User.FARM_USER_TYPE, currentLocation);
         yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
     }
@@ -249,8 +255,6 @@ public class DataManager {
         Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, MAX_YELP_RADIUS);
         List<User> newFarms = new ArrayList<>();
 
-        ParseUser user = ParseUser.getCurrentUser();
-
         call.enqueue(new Callback<FarmSearchResult>() {
             @Override
             public void onResponse(@NonNull Call<FarmSearchResult> call, @NonNull Response<FarmSearchResult> response) {
@@ -301,14 +305,11 @@ public class DataManager {
         user.put(User.KEY_RATING, farm.getRating());
         user.add(User.KEY_TAGS, "family-friendly");
         user.add(User.KEY_TAGS, "animals");
-        user.signUpInBackground(new SignUpCallback() {
-            @Override
-            public void done(ParseException e) {
-                try {
-                    ParseUser.become(sessionToken);
-                } catch (ParseException ex) {
-                    ex.printStackTrace();
-                }
+        user.signUpInBackground(e -> {
+            try {
+                ParseUser.become(sessionToken);
+            } catch (ParseException ex) {
+                ex.printStackTrace();
             }
         });
 

@@ -54,7 +54,9 @@ public class FeedFragment extends Fragment implements LocationListener {
     private Location location;
     private LocationManager locationManager;
     private String bestProvider;
-    DataManager dataManager = DataManager.getInstance();
+    DataManager dataManager = DataManager.getInstance(location);
+    private List<User> mFarms = dataManager.mFarms;
+    private List<Event> mEvents = dataManager.mEvents;
 
 
     public FeedFragment() {
@@ -75,12 +77,12 @@ public class FeedFragment extends Fragment implements LocationListener {
         super.onViewCreated(view, savedInstanceState);
 
         rvFarmEvents = view.findViewById(R.id.rvFarmEvents);
-        eventsAdapter = new FarmEventsAdapter(getContext(), dataManager.mEvents);
+        eventsAdapter = new FarmEventsAdapter(getContext(), mEvents);
         rvFarmEvents.setAdapter(eventsAdapter);
         rvFarmEvents.setLayoutManager(new LinearLayoutManager(getContext()));
 
         rvFarmProfiles = view.findViewById(R.id.rvFarmProfiles);
-        profilesAdapter = new FarmProfilesAdapter(getContext(), dataManager.mFarms);
+        profilesAdapter = new FarmProfilesAdapter(getContext(), mFarms);
         rvFarmProfiles.setAdapter(profilesAdapter);
         rvFarmProfiles.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
@@ -104,11 +106,36 @@ public class FeedFragment extends Fragment implements LocationListener {
             location = newLocation;
             try {
                 dataManager.getFarms(location);
-                profilesAdapter.notifyDataSetChanged();
-                eventsAdapter.notifyDataSetChanged();
+                compareFarmInstances();
+                compareEventsInstances();
             } catch (ParseException | IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void compareFarmInstances() {
+        for(int i = 0; i < dataManager.mFarms.size(); i++) {
+            if(!mFarms.contains(dataManager.mFarms.get(i))) {
+                mFarms.add(dataManager.mFarms.get(i));
+                profilesAdapter.notifyItemInserted(mFarms.size()-1);
+            }
+        }
+        // remove if needed
+        mFarms.removeIf(farm -> !dataManager.mFarms.contains(farm));
+        profilesAdapter.notifyDataSetChanged();
+    }
+
+    private void compareEventsInstances() {
+        for(int i = 0; i < dataManager.mEvents.size(); i++) {
+            if(!mEvents.contains(dataManager.mEvents.get(i))) {
+                mEvents.add(dataManager.mEvents.get(i));
+                eventsAdapter.notifyItemInserted(mEvents.size()-1);
+            }
+        }
+
+        // remove if needed
+        mEvents.removeIf(event -> !dataManager.mEvents.contains(event));
+        eventsAdapter.notifyDataSetChanged();
     }
 }

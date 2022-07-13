@@ -69,6 +69,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
@@ -103,14 +104,11 @@ public class MapFragment extends Fragment {
     private MapProfilesAdapter profilesAdapter;
     private RecyclerView.SmoothScroller smoothScroller;
     private LinearLayoutManager linearLayoutManager;
-    DataManager dataManager = DataManager.getInstance();
+    DataManager dataManager = DataManager.getInstance(currentLocation);
+    private List<User> mFarms = dataManager.mFarms;
 
     public MapFragment() {
         // Required empty public constructor
-    }
-
-    public MapProfilesAdapter getProfilesAdapter() {
-        return profilesAdapter;
     }
 
     @Override
@@ -156,8 +154,13 @@ public class MapFragment extends Fragment {
                 ParseUser.getCurrentUser().put(User.KEY_RADIUS, dataManager.mRadius);
                 ParseUser.getCurrentUser().saveInBackground();
             }
-            //adjust the map accordingly-- have to remove out of range markers
-            adjustRange();
+            try {
+                LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                bounds = new LatLngBounds(latLng, latLng);
+                displayLocation();
+            } catch (ParseException | IOException e) {
+                e.printStackTrace();
+            }
             tvRadius.setText(String.format(getContext().getString(R.string.radius_string), dataManager.mRadius / METERS_TO_MILE));
         });
 
@@ -165,41 +168,12 @@ public class MapFragment extends Fragment {
         tvRadius.setText(String.format(getContext().getString(R.string.radius_string), dataManager.mRadius / METERS_TO_MILE));
 
         rvProfiles = view.findViewById(R.id.rvProfiles);
-        profilesAdapter = new MapProfilesAdapter(getContext(), dataManager.mFarms);
+        profilesAdapter = new MapProfilesAdapter(getContext(), mFarms);
         rvProfiles.setAdapter(profilesAdapter);
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         rvProfiles.setLayoutManager(linearLayoutManager);
 
         smoothScroller = new CenterSmoothScroller(getContext());
-    }
-
-    protected void adjustRange() {
-        List<User> nFarms = new ArrayList<>();
-        List<Marker> nMarkers = new ArrayList<>();
-        List<String> nFarmIds = new ArrayList<>();
-
-        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        LatLngBounds newBounds = new LatLngBounds(latLng, latLng);
-
-        for (int i = 0; i < markers.size(); i++) // farms and their markers always be at the same index? as farms get removed / added so do their markers?
-        {
-            if(((User) markers.get(i).getTag()).getDistance() > dataManager.mRadius) { // remove these markers from the map
-                markers.get(i).remove();
-            } else // keep these ones.
-            {
-                nFarms.add((User) markers.get(i).getTag());
-                nMarkers.add(markers.get(i));
-                nFarmIds.add(((User) markers.get(i).getTag()).getId());
-                newBounds = newBounds.including(((User) markers.get(i).getTag()).getCoordinates());
-            }
-        }
-
-        dataManager.mFarms.removeIf(farm -> !nFarms.contains(farm)); // maintain adapter list
-        markers = nMarkers;
-        dataManager.mFarmIds = nFarmIds;
-        profilesAdapter.notifyDataSetChanged(); // how to change this to be more specific?
-        bounds = newBounds;
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
     }
 
     protected void loadMap(GoogleMap googleMap) {
@@ -232,16 +206,17 @@ public class MapFragment extends Fragment {
 
         map.setOnMarkerClickListener(marker -> {
             // scroll the adapter to the farm that has been clicked on
-            for(int i = 0; i < dataManager.mFarms.size(); i++) {
-                if(dataManager.mFarms.get(i) == marker.getTag()) {
+            for(int i = 0; i < mFarms.size(); i++) {
+                if(mFarms.get(i) == marker.getTag()) {
                     smoothScroller.setTargetPosition(i);
                     linearLayoutManager.startSmoothScroll(smoothScroller);
-                    dataManager.mFarms.get(i).expanded = true;
-                } else {
-                    dataManager.mFarms.get(i).expanded = false;
+                    mFarms.get(i).expanded = true;
+                    profilesAdapter.notifyItemChanged(i);
+                } else if (mFarms.get(i).expanded){
+                    mFarms.get(i).expanded = false;
+                    profilesAdapter.notifyItemChanged(i);
                 }
             }
-            profilesAdapter.notifyDataSetChanged();
             return true;
         });
 
@@ -311,14 +286,30 @@ public class MapFragment extends Fragment {
 
     private void displayLocation() throws ParseException, IOException {
         if (currentLocation != null) {
+            boolean firstLoad = markers.size() == 0;
+
             map.clear();
             markers = new ArrayList<>();
 
             dataManager.getFarms(currentLocation);
-            dropMarkers(dataManager.mFarms);
+            compareInstances();
+            dropMarkers(mFarms, firstLoad);
         }
+    }
+
+    private void compareInstances() {
+        for(int i = 0; i < dataManager.mFarms.size(); i++) {
+            if(!mFarms.contains(dataManager.mFarms.get(i))) {
+                mFarms.add(dataManager.mFarms.get(i));
+                profilesAdapter.notifyItemInserted(mFarms.size()-1);
+            }
+        }
+        // remove if needed
+        mFarms.removeIf(farm -> !dataManager.mFarms.contains(farm));
         profilesAdapter.notifyDataSetChanged();
     }
+
+
 
     public Bitmap getMarker(String request) {
         IconGenerator iconGen = new IconGenerator(getContext());
@@ -338,7 +329,7 @@ public class MapFragment extends Fragment {
         return iconGen.makeIcon();
     }
 
-    public void dropMarkers(List<User> newFarms) {
+    public void dropMarkers(List<User> newFarms, boolean firstLoad) {
         for (User farm : newFarms) {
             Marker marker = map.addMarker(new MarkerOptions()
                     .position(farm.getCoordinates())
@@ -350,7 +341,11 @@ public class MapFragment extends Fragment {
             markers.add(marker);
             bounds = bounds.including(farm.getCoordinates());
         }
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+        // if this is the first load, then moveCamera rather than animateCamera
+        if(firstLoad)
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+        else
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
     }
 
     public class CenterSmoothScroller extends LinearSmoothScroller {

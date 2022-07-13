@@ -27,7 +27,7 @@ public class CreateEventDialogFragment extends DialogFragment {
 
     private EditText etEventName;
     private EditText etEventDescription;
-    DataManager dataManager = DataManager.getInstance();
+    DataManager dataManager = DataManager.getInstance(null);
 
     public static final String TAG = "CreateEventDialogFragment";
 
