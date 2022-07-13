@@ -40,7 +40,6 @@ public class DataManager {
     public static final String BASE_URL = "https://api.yelp.com/v3/";
     private static final int MAX_YELP_RADIUS = 40000; // 40,000 meters or ~25 miles
     private static final double METERS_TO_MILE = 1609.34;
-    private static final double MIN_DISTANCE_CHANGE = 19312.1;
     private static DataManager sDataManager = null;
 
     public List<User> mFarms;
@@ -116,15 +115,12 @@ public class DataManager {
         query.whereEqualTo(User.KEY_USER_TYPE, request);
         query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), mRadius / METERS_TO_MILE);
 
-        List<User> newFarms = new ArrayList<>();
-
         List<ParseUser> databaseFarms = query.find();
         for (int i = 0; i < databaseFarms.size(); i++) {
             if(!mFarmIds.contains(databaseFarms.get(i).getString(User.KEY_YELP_ID))) {
                 User farm = new User(databaseFarms.get(i), currentLocation);
                 mFarms.add(farm);
                 mFarmIds.add(farm.getId());
-                newFarms.add(farm);
                 queryEvents(farm, currentLocation);
             }
         }
@@ -263,7 +259,6 @@ public class DataManager {
 
         YelpService yelpService = retrofit.create(YelpService.class);
         Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, MAX_YELP_RADIUS);
-        List<User> newFarms = new ArrayList<>();
 
         call.enqueue(new Callback<FarmSearchResult>() {
             @Override
@@ -276,7 +271,6 @@ public class DataManager {
                         if (!mFarmIds.contains(farm.getId())) {
                             ParseUser user = createUserFromYelpData(farm, request);
                             if(farm.getDistance() < mRadius) {
-                                newFarms.add(farm);
                                 mFarms.add(farm);
                                 mFarmIds.add(farm.getId());
                                 farm.setUser(user);
