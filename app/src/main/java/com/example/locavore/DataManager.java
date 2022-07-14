@@ -13,13 +13,10 @@ import com.example.locavore.Models.Event;
 import com.example.locavore.Models.FarmSearchResult;
 import com.example.locavore.Models.User;
 import com.example.locavore.Models.UserEvent;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
-import com.parse.ParseSession;
 import com.parse.ParseUser;
-import com.parse.SignUpCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -175,65 +172,71 @@ public class DataManager {
         Location eventLocation = new Location(NETWORK_PROVIDER);
         eventLocation.setLatitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLatitude());
         eventLocation.setLongitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLongitude());
-        weight -= currentLocation.distanceTo(eventLocation);
+        weight -= (currentLocation.distanceTo(eventLocation) / METERS_TO_MILE);
+        Log.i(TAG, "1 " + weight);
 
-        // if the user follows the farm
+        // if the user follows the farm, add a lot of weight
         if(checkUserFollowingFarm(event.getFarm(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) != -1) {
             weight += 500;
         }
+        Log.i(TAG, "2 " + weight);
 
-        // if the user has attended an event at the farm before & liked it
-        weight = checkAttendedEvents(event, currentLocation, weight);
 
-        // factor in farm's yelp rating
-        weight += farm.getRating() * 100;
+        // if the user has attended an event at the farm before, add 100 for each liked event, and subtract 100 for each disliked
+        weight = checkAttendedEvents(event, weight);
+        Log.i(TAG, "3 " + weight);
 
-        // factor in farm's number of followers
+
+        // factor in farm's yelp rating--> multiply by factor of 50
+        weight += farm.getRating() * 50;
+        Log.i(TAG, "4 " + weight);
+
+
+        // factor in farm's number of followers--> 10 for each follower
         JSONArray followers = farm.getUser().getJSONArray(User.KEY_FOLLOWERS);
         if(followers != null)
         {
-            weight += (followers.length() * 100);
+            weight += (followers.length() * 10);
         }
+        Log.i(TAG, "5 " + weight);
 
-        // factor in how many users have liked this event
-        weight = quantityUsersLiked(event, currentLocation, weight);
 
+        // factor in how many users have liked/disliked this event--> +-25 for each user.
+        weight = quantityUsersLiked(event, weight);
+
+        Log.i(TAG, farm.getName() + ": " + event.getName() + " " + weight + " weighting.");
         return weight;
     }
 
-    protected int quantityUsersLiked(Event event, Location currentLocation, int weight) throws ParseException {
+    protected int quantityUsersLiked(Event event, int weight) throws ParseException {
         ParseQuery<UserEvent> query = ParseQuery.getQuery("UserEvent");
         query.whereEqualTo(UserEvent.KEY_EVENT_ID, event.getObjectId());
-        query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), mRadius / METERS_TO_MILE);
 
         List<UserEvent> userEvents;
 
-        userEvents = query.find();
+        userEvents = query.find(); //find in background?
         for (int i = 0; i < userEvents.size(); i++) {
-            if(userEvents.get(i).getLiked()) {
+            if(userEvents.get(i).getLiked() == UserEvent.LIKED) {
                 weight += 25;
-            } else if(!userEvents.get(i).getLiked()) {
+            } else if(userEvents.get(i).getLiked() == UserEvent.DISLIKED) {
                 weight -= 25;
             }
         }
         return weight;
     }
 
-    protected int checkAttendedEvents(Event event, Location currentLocation, int weight) throws ParseException {
+    protected int checkAttendedEvents(Event event, int weight) throws ParseException {
         ParseUser user = ParseUser.getCurrentUser();
 
         ParseQuery<UserEvent> query = ParseQuery.getQuery("UserEvent");
         query.whereEqualTo(UserEvent.KEY_USER_ID, user.getObjectId());
         query.whereEqualTo(UserEvent.KEY_FARM_ID, event.getFarm());
-        query.whereWithinMiles(User.KEY_LOCATION, new ParseGeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()), mRadius / METERS_TO_MILE);
 
-        List<UserEvent> userEvents;
-
-        userEvents = query.find();
+        List<UserEvent> userEvents = query.find(); //findinbackground?
         for (int i = 0; i < userEvents.size(); i++) {
-            if(userEvents.get(i).getLiked()) {
+            if(((UserEvent)userEvents.get(i)).getLiked() == UserEvent.LIKED) {
                 weight += 100;
-            } else if(!userEvents.get(i).getLiked()) {
+            } else if(((UserEvent)userEvents.get(i)).getLiked() == UserEvent.DISLIKED) {
                 weight -= 100;
             }
         }

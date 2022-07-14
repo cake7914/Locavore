@@ -17,13 +17,21 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.locavore.Models.User;
+import com.parse.FindCallback;
+import com.parse.FunctionCallback;
+import com.parse.GetCallback;
+import com.parse.Parse;
+import com.parse.ParseCloud;
 import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapter.ViewHolder> {
@@ -110,11 +118,17 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
                 public void onClick(View v) {
                     ParseUser user = ParseUser.getCurrentUser();
                     try {
+                        // initializing params for cloudcode call
+                        HashMap<String, String> params = new HashMap();
+                        params.put("objectId", farm.getUser().getObjectId());
+                        params.put("followerId", user.getObjectId());
+
                         int pos = checkUserFollowingFarm(farm.getUser().getObjectId(), user.getJSONArray(User.KEY_FARMS_FOLLOWING));
                         if(pos == -1) {
                             user.add(User.KEY_FARMS_FOLLOWING, farm.getUser().getObjectId());
                             btnFollow.setText(R.string.following);
                             btnFollow.setBackgroundColor(context.getResources().getColor(R.color.dark_yellow));
+                            params.put("following", "true");
                         } else {
                             JSONArray farms = user.getJSONArray(User.KEY_FARMS_FOLLOWING);
                             assert farms != null;
@@ -122,7 +136,15 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
                             user.put(User.KEY_FARMS_FOLLOWING, farms);
                             btnFollow.setText(R.string.follow);
                             btnFollow.setBackgroundColor(context.getResources().getColor(R.color.light_yellow));
+                            params.put("following", "false");
                         }
+                        ParseCloud.callFunctionInBackground("updateFollowers", params, (FunctionCallback<ParseObject>) (obj, e) -> {
+                            if (e == null) {
+                                Log.i(TAG, "non error");
+                            }else{
+                                Log.i(TAG, "error" + e.getMessage());
+                            }
+                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

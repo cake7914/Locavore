@@ -18,11 +18,13 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+        buildConfigField("String", "PARSE_MASTER_KEY", apikeyProperties['PARSE_MASTER_KEY'])
         buildConfigField("String", "PARSE_APPLICATION_ID", apikeyProperties['PARSE_APPLICATION_ID'])
         buildConfigField("String", "CLIENT_KEY", apikeyProperties['CLIENT_KEY'])
         buildConfigField("String", "GOOGLE_MAPS_API_KEY", apikeyProperties['GOOGLE_MAPS_API_KEY'])
         buildConfigField("String", "YELP_CLIENT_ID", apikeyProperties['YELP_CLIENT_ID'])
         buildConfigField("String", "YELP_API_KEY", apikeyProperties['YELP_API_KEY'])
+
     }
 
     buildTypes {
