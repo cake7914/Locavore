@@ -11,6 +11,9 @@ public class UserEvent extends ParseObject {
     public static final String KEY_FARM_ID = "farmId";
     public static final String KEY_EVENT_ID = "eventId";
     public static final String KEY_LIKED = "liked";
+    public static final int LIKED = 1;
+    public static final int DISLIKED = -1;
+    public static final int NEUTRAL = 0;
 
     public String getUserId() {
         return getString(KEY_USER_ID);
@@ -33,10 +36,10 @@ public class UserEvent extends ParseObject {
         put(KEY_EVENT_ID, eventId);
     }
 
-    public boolean getLiked() {
-        return getBoolean(KEY_LIKED);
+    public int getLiked() {
+        return getInt(KEY_LIKED);
     }
-    public void setLiked(boolean liked) {
+    public void setLiked(int liked) {
         put(KEY_LIKED, liked);
     }
 

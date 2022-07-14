@@ -55,8 +55,8 @@ public class FeedFragment extends Fragment implements LocationListener {
     private LocationManager locationManager;
     private String bestProvider;
     DataManager dataManager = DataManager.getInstance(location);
-    private List<User> mFarms = dataManager.mFarms;
-    private List<Event> mEvents = dataManager.mEvents;
+    private List<User> mFarms = new ArrayList<>(dataManager.mFarms);
+    private List<Event> mEvents = new ArrayList<>(dataManager.mEvents);
 
 
     public FeedFragment() {

@@ -105,7 +105,7 @@ public class MapFragment extends Fragment {
     private RecyclerView.SmoothScroller smoothScroller;
     private LinearLayoutManager linearLayoutManager;
     DataManager dataManager = DataManager.getInstance(currentLocation);
-    private List<User> mFarms = dataManager.mFarms;
+    private List<User> mFarms = new ArrayList<>(dataManager.mFarms);
     private int mRadius = dataManager.mRadius;
 
     public MapFragment() {
@@ -305,7 +305,7 @@ public class MapFragment extends Fragment {
                 profilesAdapter.notifyItemInserted(mFarms.size()-1);
             }
         }
-        // remove if needed
+        // remove if needed by counting backwards
         mFarms.removeIf(farm -> !dataManager.mFarms.contains(farm));
         profilesAdapter.notifyDataSetChanged();
     }

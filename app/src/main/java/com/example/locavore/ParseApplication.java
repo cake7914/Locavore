@@ -6,6 +6,7 @@ import static com.example.locavore.BuildConfig.CLIENT_KEY;
 import static com.example.locavore.BuildConfig.PARSE_APPLICATION_ID;
 
 import com.example.locavore.Models.Event;
+import com.example.locavore.Models.UserEvent;
 import com.parse.Parse;
 import com.parse.ParseObject;
 
@@ -16,6 +17,7 @@ public class ParseApplication extends Application {
         super.onCreate();
 
         ParseObject.registerSubclass(Event.class);
+        ParseObject.registerSubclass(UserEvent.class);
 
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId(PARSE_APPLICATION_ID)

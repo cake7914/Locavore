@@ -1,6 +1,12 @@
 package com.example.locavore.Adapters;
 
+import static android.location.LocationManager.NETWORK_PROVIDER;
+
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.location.Location;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,17 +21,28 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.example.locavore.DataManager;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
+import com.example.locavore.Models.UserEvent;
 import com.example.locavore.R;
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.List;
+import java.util.Objects;
 
 public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.ViewHolder> {
+    public static final String TAG = "FarmEventsAdapter";
+    private static final double METERS_TO_MILE = 1609.34;
+
     private Context context;
     private List<Event> events;
+    DataManager dataManager = DataManager.getInstance(null);
+
 
     public FarmEventsAdapter(Context context, List<Event> events) {
         this.context = context;
@@ -61,7 +78,6 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
         notifyItemRangeInserted(events.size() - newEvents.size(), newEvents.size());
     }
 
-
     class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView ivEventPhoto;
@@ -94,43 +110,119 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                 ivEventPhoto.setImageBitmap(null);
             }
 
-            String farmID = event.getFarm();
-            ParseQuery<ParseUser> query = ParseUser.getQuery();
-            query.whereEqualTo("objectId", farmID);
-            query.findInBackground((objects, e) -> tvEventFarm.setText(objects.get(0).getString(User.KEY_NAME)));
-
             tvEventName.setText(event.getName());
-
-            // calculate distance from event to this user, using current location and the event's address
-            //tvDistance.setText()
-
-            btnAttendedEvent.setOnClickListener(new View.OnClickListener() {
+            ParseQuery<ParseUser> query = ParseUser.getQuery();
+            query.getInBackground(event.getFarm(), new GetCallback<ParseUser>() {
                 @Override
-                public void onClick(View v) {
-                    // change color to attended color
-                    btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.light_green));
-                    // set visibilities of like/dislike buttons to visible
-                    btnDislikeEvent.setVisibility(View.VISIBLE);
-                    btnLikeEvent.setVisibility(View.VISIBLE);
+                public void done(ParseUser farm, ParseException e) {
+                    tvEventFarm.setText(farm.getString(User.KEY_NAME));
+                    Location eventLocation = new Location(NETWORK_PROVIDER);
+                    eventLocation.setLongitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLongitude());
+                    eventLocation.setLatitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLatitude());
+                    Log.i(TAG, String.valueOf(dataManager.mLocation));
+                    tvDistance.setText(String.format(context.getResources().getString(R.string.distance_calc), eventLocation.distanceTo(dataManager.mLocation) / METERS_TO_MILE));
                 }
             });
 
-            btnDislikeEvent.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // change color to disliked color
-                    btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+            // display depending on attended or not, and liked or not
+            ParseQuery<UserEvent> eventQuery = ParseQuery.getQuery("UserEvent");
+            eventQuery.whereEqualTo(UserEvent.KEY_USER_ID, ParseUser.getCurrentUser().getObjectId());
+            eventQuery.whereEqualTo(UserEvent.KEY_EVENT_ID, event.getObjectId());
+            eventQuery.getFirstInBackground((object, e) -> {
+                if(object != null) {
+                    btnAttendedEvent.setVisibility(View.VISIBLE);
+                    btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.light_green));
+                    if(object.getLiked() == UserEvent.NEUTRAL)
+                    {
+                        btnLikeEvent.setVisibility(View.VISIBLE);
+                        btnDislikeEvent.setVisibility(View.VISIBLE);
+                    }
+                    else if(object.getLiked() == UserEvent.LIKED)
+                    {
+                        btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                        btnLikeEvent.setVisibility(View.VISIBLE);
+                        btnDislikeEvent.setVisibility(View.GONE);
+                    } else if(object.getLiked() == UserEvent.DISLIKED){
+                        btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                        btnDislikeEvent.setVisibility(View.VISIBLE);
+                        btnLikeEvent.setVisibility(View.INVISIBLE);
+                    }
+                } else { // set normal coloring & hide buttons
+                    btnAttendedEvent.setVisibility(View.VISIBLE);
+                    btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                    btnDislikeEvent.setVisibility(View.INVISIBLE);
                     btnLikeEvent.setVisibility(View.INVISIBLE);
                 }
             });
 
-            btnLikeEvent.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // change color to liked color
-                    btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
-                    btnDislikeEvent.setVisibility(View.INVISIBLE);
-                }
+            btnAttendedEvent.setOnClickListener(v -> {
+                ParseQuery<UserEvent> userEventQuery = ParseQuery.getQuery("UserEvent");
+                userEventQuery.whereEqualTo(UserEvent.KEY_USER_ID, ParseUser.getCurrentUser().getObjectId());
+                userEventQuery.whereEqualTo(UserEvent.KEY_EVENT_ID, event.getObjectId());
+                userEventQuery.getFirstInBackground((object, e) -> {
+                    if(object != null) { // it already exists; they want to mark as no longer attending
+                        object.deleteInBackground();
+                        btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                        // set visibilities of like/dislike buttons to visible // remove color filters
+                        btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                        btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                        btnDislikeEvent.setVisibility(View.INVISIBLE);
+                        btnLikeEvent.setVisibility(View.INVISIBLE);
+                    } else { // it does not exist; they want to mark as attending
+                        // change color to attended color
+                        btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.light_green));
+                        // set visibilities of like/dislike buttons to visible
+                        btnDislikeEvent.setVisibility(View.VISIBLE);
+                        btnLikeEvent.setVisibility(View.VISIBLE);
+
+                        // save attending into database: create new UserEvent
+                        ParseObject userEvent = ParseObject.create("UserEvent");
+                        userEvent.put(UserEvent.KEY_EVENT_ID, event.getObjectId());
+                        userEvent.put(UserEvent.KEY_USER_ID, ParseUser.getCurrentUser().getObjectId());
+                        userEvent.put(UserEvent.KEY_FARM_ID, event.getFarm());
+                        userEvent.saveInBackground();
+                    }
+                });
+            });
+
+            btnDislikeEvent.setOnClickListener(v -> {
+                ParseQuery<UserEvent> userEventQuery = ParseQuery.getQuery("UserEvent");
+                userEventQuery.whereEqualTo(UserEvent.KEY_USER_ID, ParseUser.getCurrentUser().getObjectId());
+                userEventQuery.whereEqualTo(UserEvent.KEY_EVENT_ID, event.getObjectId());
+                userEventQuery.getFirstInBackground((userEvent, e) -> {
+                    if(userEvent != null) {
+                        if(userEvent.getLiked() == UserEvent.DISLIKED) { // already disliked: undislike
+                            btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                            btnLikeEvent.setVisibility(View.VISIBLE);
+                            userEvent.put(UserEvent.KEY_LIKED, UserEvent.NEUTRAL);
+                        } else { // dislike; change color to disliked color & save in background
+                            btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                            btnLikeEvent.setVisibility(View.INVISIBLE);
+                            userEvent.setLiked(UserEvent.DISLIKED);
+                        }
+                        userEvent.saveInBackground();
+                    }
+                });
+            });
+
+            btnLikeEvent.setOnClickListener(v -> {
+                ParseQuery<UserEvent> userEventQuery = ParseQuery.getQuery("UserEvent");
+                userEventQuery.whereEqualTo(UserEvent.KEY_USER_ID, ParseUser.getCurrentUser().getObjectId());
+                userEventQuery.whereEqualTo(UserEvent.KEY_EVENT_ID, event.getObjectId());
+                userEventQuery.getFirstInBackground((userEvent, e) -> {
+                    if(userEvent != null) {
+                        if(userEvent.getLiked() == UserEvent.LIKED) { // already liked: unlike
+                            btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                            btnDislikeEvent.setVisibility(View.VISIBLE);
+                            userEvent.put(UserEvent.KEY_LIKED, UserEvent.NEUTRAL);
+                        } else { // like; change color to liked color & save in background
+                            btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                            btnDislikeEvent.setVisibility(View.GONE);
+                            userEvent.setLiked(UserEvent.LIKED);
+                        }
+                        userEvent.saveInBackground();
+                    }
+                });
             });
 
         }

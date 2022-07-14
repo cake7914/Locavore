@@ -165,7 +165,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                 }
 
                 tvFarmNameExpanded.setText(farm.getName());
-                tvDistanceExpanded.setText(String.format("%.2f miles", farm.getDistance() / METERS_TO_MILE));
+                tvDistanceExpanded.setText(String.format(context.getResources().getString(R.string.distance_calc), farm.getDistance() / METERS_TO_MILE));
                 if (farm.getUser() != null) {
                     if (farm.getUser().getString(User.KEY_BIO) != null) {
                         tvDescription.setText(farm.getUser().getString(User.KEY_BIO));
@@ -196,7 +196,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                 expandedView.setVisibility(View.GONE);
 
                 tvFarmName.setText(farm.getName());
-                tvDistance.setText(String.format("%.2f miles", farm.getDistance() / METERS_TO_MILE));
+                tvDistance.setText(String.format(context.getResources().getString(R.string.distance_calc), farm.getDistance() / METERS_TO_MILE));
 
                 if (farm.getImageUrl() != null) {
                     Glide.with(context)
@@ -223,7 +223,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                     .setListener(null);
 
             tvFarmName.setText(farm.getName());
-            tvDistance.setText(String.format("%.2f miles", farm.getDistance() / METERS_TO_MILE));
+            tvDistance.setText(String.format(context.getResources().getString(R.string.distance_calc), farm.getDistance() / METERS_TO_MILE));
 
             if (farm.getImageUrl() != null) {
                 Glide.with(context)
