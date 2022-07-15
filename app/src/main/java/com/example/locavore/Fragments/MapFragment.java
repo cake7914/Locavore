@@ -1,8 +1,5 @@
 package com.example.locavore.Fragments;
 
-import static android.location.LocationManager.NETWORK_PROVIDER;
-import static com.example.locavore.BuildConfig.YELP_API_KEY;
-import static com.example.locavore.DataManager.BASE_URL;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 import android.Manifest;
@@ -33,12 +30,9 @@ import android.widget.TextView;
 
 import com.example.locavore.Adapters.CustomWindowAdapter;
 import com.example.locavore.Adapters.MapProfilesAdapter;
-import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
-import com.example.locavore.Models.FarmSearchResult;
 import com.example.locavore.DataManager;
-import com.example.locavore.YelpService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -46,7 +40,6 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -57,30 +50,18 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.ui.IconGenerator;
 import com.parse.ParseException;
-import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 @RuntimePermissions
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements MapProfilesAdapter.ExpansionResponse {
 
     public static final String TAG = "MapFragment";
     private static final int MAX_YELP_RADIUS = 40000; // 40,000 meters or ~25 miles
@@ -118,6 +99,7 @@ public class MapFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_map, container, false);
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -143,7 +125,7 @@ public class MapFragment extends Fragment {
             } catch (ParseException | IOException e) {
                 e.printStackTrace();
             }
-            tvRadius.setText(String.format(getContext().getString(R.string.radius_string), mRadius / METERS_TO_MILE));
+            tvRadius.setText(String.format(requireContext().getString(R.string.radius_string), mRadius / METERS_TO_MILE));
         });
 
         btnDecreaseRadius = view.findViewById(R.id.btnDecreaseRadius);
@@ -162,14 +144,15 @@ public class MapFragment extends Fragment {
             } catch (ParseException | IOException e) {
                 e.printStackTrace();
             }
-            tvRadius.setText(String.format(getContext().getString(R.string.radius_string), mRadius / METERS_TO_MILE));
+            tvRadius.setText(String.format(requireContext().getString(R.string.radius_string), mRadius / METERS_TO_MILE));
         });
 
         tvRadius = view.findViewById(R.id.tvRadius);
-        tvRadius.setText(String.format(getContext().getString(R.string.radius_string), mRadius / METERS_TO_MILE));
+        tvRadius.setText(String.format(requireContext().getString(R.string.radius_string), mRadius / METERS_TO_MILE));
 
         rvProfiles = view.findViewById(R.id.rvProfiles);
         profilesAdapter = new MapProfilesAdapter(getContext(), mFarms);
+        profilesAdapter.expansionResponse = this;
         rvProfiles.setAdapter(profilesAdapter);
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         rvProfiles.setLayoutManager(linearLayoutManager);
@@ -188,6 +171,30 @@ public class MapFragment extends Fragment {
     }
 
     @Override
+    public void onExpansion(int pos) {
+        for(int i = 0; i < mFarms.size(); i++) {
+            if(i == pos) {
+                smoothScroller.setTargetPosition(i);
+                linearLayoutManager.startSmoothScroll(smoothScroller);
+                mFarms.get(i).expanded = true;
+                profilesAdapter.notifyItemChanged(i);
+                markers.get(i).showInfoWindow();
+            } else if (mFarms.get(i).expanded){
+                mFarms.get(i).expanded = false;
+                profilesAdapter.notifyItemChanged(i);
+            }
+        }
+    }
+
+    @Override
+    public void onContraction() {
+        for(int i = 0; i < mFarms.size(); i++) {
+            markers.get(i).hideInfoWindow();
+        }
+    }
+
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         MapFragmentPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
@@ -196,7 +203,7 @@ public class MapFragment extends Fragment {
     @SuppressLint("PotentialBehaviorOverride")
     @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     void getMyLocation() {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         map.setMyLocationEnabled(true);
@@ -213,6 +220,7 @@ public class MapFragment extends Fragment {
                     linearLayoutManager.startSmoothScroll(smoothScroller);
                     mFarms.get(i).expanded = true;
                     profilesAdapter.notifyItemChanged(i);
+                    markers.get(i).showInfoWindow();
                 } else if (mFarms.get(i).expanded){
                     mFarms.get(i).expanded = false;
                     profilesAdapter.notifyItemChanged(i);
@@ -221,7 +229,7 @@ public class MapFragment extends Fragment {
             return true;
         });
 
-        FusedLocationProviderClient locationClient = getFusedLocationProviderClient(getContext());
+        FusedLocationProviderClient locationClient = getFusedLocationProviderClient(requireContext());
         locationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
@@ -249,20 +257,20 @@ public class MapFragment extends Fragment {
         builder.addLocationRequest(locationRequest);
         LocationSettingsRequest locationSettingsRequest = builder.build();
 
-        SettingsClient settingsClient = LocationServices.getSettingsClient(getContext());
+        SettingsClient settingsClient = LocationServices.getSettingsClient(requireContext());
         settingsClient.checkLocationSettings(locationSettingsRequest);
         //noinspection MissingPermission
-        getFusedLocationProviderClient(getContext()).requestLocationUpdates(locationRequest, new LocationCallback() {
-                    @Override
-                    public void onLocationResult(@NonNull LocationResult locationResult) {
-                        try {
-                            onLocationChanged(locationResult.getLastLocation());
-                        } catch (ParseException | IOException e) {
-                            e.printStackTrace();
-                        }
+        getFusedLocationProviderClient(requireContext()).requestLocationUpdates(locationRequest, new LocationCallback() {
+                @Override
+                public void onLocationResult(@NonNull LocationResult locationResult) {
+                    try {
+                        onLocationChanged(locationResult.getLastLocation());
+                    } catch (ParseException | IOException e) {
+                        e.printStackTrace();
                     }
-                },
-                Looper.myLooper());
+                }
+            },
+            Looper.myLooper());
     }
 
     public void onLocationChanged(Location location) throws ParseException, IOException {
@@ -306,8 +314,12 @@ public class MapFragment extends Fragment {
             }
         }
         // remove if needed by counting backwards
-        mFarms.removeIf(farm -> !dataManager.mFarms.contains(farm));
-        profilesAdapter.notifyDataSetChanged();
+        for(int i = mFarms.size()-1; i >= 0; i--) {
+            if(!dataManager.mFarms.contains(mFarms.get(i))) {
+                mFarms.remove(i);
+                profilesAdapter.notifyItemRemoved(i);
+            }
+        }
     }
 
 
@@ -335,7 +347,7 @@ public class MapFragment extends Fragment {
             Marker marker = map.addMarker(new MarkerOptions()
                     .position(farm.getCoordinates())
                     .title(farm.getName())
-                    .icon(BitmapDescriptorFactory.fromBitmap(getMarker(farm.getUser().getString(User.KEY_USER_TYPE))))
+                    .icon(BitmapDescriptorFactory.fromBitmap(getMarker(Objects.requireNonNull(farm.getUser().getString(User.KEY_USER_TYPE)))))
             );
             assert marker != null;
             marker.setTag(farm); // associate farm --> marker
@@ -349,7 +361,7 @@ public class MapFragment extends Fragment {
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
     }
 
-    public class CenterSmoothScroller extends LinearSmoothScroller {
+    public static class CenterSmoothScroller extends LinearSmoothScroller {
 
         public CenterSmoothScroller(Context context) {
             super(context);
