@@ -14,10 +14,7 @@ import com.google.android.gms.maps.model.Marker;
 public class CustomWindowAdapter implements GoogleMap.InfoWindowAdapter {
     LayoutInflater mInflater;
     TextView tvFarmName;
-    TextView tvFarmAddress;
-    TextView tvFarmBio;
     User farm;
-    YelpLocation location;
 
     public CustomWindowAdapter(LayoutInflater i){
         mInflater = i;
@@ -27,16 +24,9 @@ public class CustomWindowAdapter implements GoogleMap.InfoWindowAdapter {
     public View getInfoContents(Marker marker) {
         View v = mInflater.inflate(R.layout.activity_custom_window_adapter, null);
         farm = (User) marker.getTag();
-        location = farm.getLocation();
 
         tvFarmName = (TextView) v.findViewById(R.id.tvFarmName);
         tvFarmName.setText(farm.getName());
-
-        tvFarmAddress = (TextView) v.findViewById(R.id.tvAddress);
-        tvFarmAddress.setText(location.getAddress1() + ", " + location.getCity() + ", " + location.getState());
-
-        tvFarmBio = (TextView) v.findViewById(R.id.tvBio);
-
 
         return v;
     }

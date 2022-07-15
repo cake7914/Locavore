@@ -8,8 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.Transformation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,8 +15,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,7 +22,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.example.locavore.Activities.MainActivity;
 import com.example.locavore.Fragments.FarmProfileFragment;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
@@ -45,6 +40,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
     private Context context;
     private List<User> farms;
+    public ExpansionResponse expansionResponse;
 
     public MapProfilesAdapter(Context context, List<User> farms)
     {
@@ -64,6 +60,10 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
         User farm = farms.get(position);
         try {
             holder.bind(farm);
+            holder.normalView.setOnLongClickListener(v -> {
+                expansionResponse.onExpansion(holder.getAdapterPosition());
+                return false;
+            });
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
@@ -83,6 +83,11 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
     public void addAll(List<User> newFarms) {
         farms.addAll(newFarms);
         notifyItemRangeInserted(farms.size()-newFarms.size(), newFarms.size());
+    }
+
+    public interface ExpansionResponse {
+        void onExpansion(int pos);
+        void onContraction();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -136,92 +141,16 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
         public void bind(User farm) throws JSONException, ParseException {
             if(farm.expanded) {
-                btnContract.setOnClickListener(v -> {
-                    farm.expanded = false;
-                    crossfade(farm);
-                });
-
-                btnGoToFarmProfile.setOnClickListener(v -> {
-                    Fragment fragment = new FarmProfileFragment();
-                    Bundle args = new Bundle();
-                    args.putParcelable(User.FARM_USER_TYPE, Parcels.wrap(farm));
-                    fragment.setArguments(args);
-                    ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).addToBackStack(null).commit();
-                });
-
-                normalView.setVisibility(View.GONE);
-                expandedView.setVisibility(View.VISIBLE);
-
-                if (farm.getImageUrl() != null) {
-                    Glide.with(context)
-                            .load(farm.getImageUrl())
-                            .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
-                            .into(ivBackgroundEnlarged);
-                } else {
-                    Glide.with(context)
-                            .load(R.drawable.farm_background)
-                            .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
-                            .into(ivBackgroundEnlarged);
-                }
-
-                tvFarmNameExpanded.setText(farm.getName());
-                tvDistanceExpanded.setText(String.format(context.getResources().getString(R.string.distance_calc), farm.getDistance() / METERS_TO_MILE));
-                if (farm.getUser() != null) {
-                    if (farm.getUser().getString(User.KEY_BIO) != null) {
-                        tvDescription.setText(farm.getUser().getString(User.KEY_BIO));
-                    } else {
-                        Log.i(TAG, "bio is null " + farm.getUser().getUsername());
-                    }
-                } else {
-                    Log.i(TAG, "farm user is null");
-                }
-
-                JSONArray JSONtags = farm.getUser().getJSONArray("tags");
-                if(JSONtags != null) {
-                    List<String> tags = new ArrayList<>();
-                    tagsAdapter = new MapProfileTagsAdapter(context, tags);
-                    rvTags.setAdapter(tagsAdapter);
-                    linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
-                    rvTags.setLayoutManager(linearLayoutManager);
-
-                    for (int i = 0; i < JSONtags.length(); i++) {
-                        tags.add(JSONtags.getString(i));
-                        Log.i(TAG, tags.get(i));
-                    }
-                    tagsAdapter.notifyDataSetChanged();
-                }
+                createExpandedView(farm);
 
             } else {
                 normalView.setVisibility(View.VISIBLE);
                 expandedView.setVisibility(View.GONE);
-
-                tvFarmName.setText(farm.getName());
-                tvDistance.setText(String.format(context.getResources().getString(R.string.distance_calc), farm.getDistance() / METERS_TO_MILE));
-
-                if (farm.getImageUrl() != null) {
-                    Glide.with(context)
-                            .load(farm.getImageUrl())
-                            .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
-                            .into(ivBackgroundPhoto);
-                } else {
-                    Glide.with(context)
-                            .load(R.drawable.farm_background)
-                            .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
-                            .into(ivBackgroundPhoto);
-                }
+                createNormalView(farm);
             }
         }
 
-        private void crossfade(User farm) {
-
-            normalView.setAlpha(0f);
-            normalView.setVisibility(View.VISIBLE);
-
-            normalView.animate()
-                    .alpha(1f)
-                    .setDuration(longAnimationDuration)
-                    .setListener(null);
-
+        private void createNormalView(User farm) {
             tvFarmName.setText(farm.getName());
             tvDistance.setText(String.format(context.getResources().getString(R.string.distance_calc), farm.getDistance() / METERS_TO_MILE));
 
@@ -236,6 +165,76 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                         .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
                         .into(ivBackgroundPhoto);
             }
+        }
+
+        private void createExpandedView(User farm) throws JSONException {
+            btnContract.setOnClickListener(v -> {
+                farm.expanded = false;
+                expansionResponse.onContraction();
+                crossfade(farm);
+            });
+
+            btnGoToFarmProfile.setOnClickListener(v -> {
+                Fragment fragment = new FarmProfileFragment();
+                Bundle args = new Bundle();
+                args.putParcelable(User.FARM_USER_TYPE, Parcels.wrap(farm));
+                fragment.setArguments(args);
+                ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).addToBackStack(null).commit();
+            });
+
+            normalView.setVisibility(View.GONE);
+            expandedView.setVisibility(View.VISIBLE);
+
+            if (farm.getImageUrl() != null) {
+                Glide.with(context)
+                        .load(farm.getImageUrl())
+                        .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
+                        .into(ivBackgroundEnlarged);
+            } else {
+                Glide.with(context)
+                        .load(R.drawable.farm_background)
+                        .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
+                        .into(ivBackgroundEnlarged);
+            }
+
+            tvFarmNameExpanded.setText(farm.getName());
+            tvDistanceExpanded.setText(String.format(context.getResources().getString(R.string.distance_calc), farm.getDistance() / METERS_TO_MILE));
+            if (farm.getUser() != null) {
+                if (farm.getUser().getString(User.KEY_BIO) != null) {
+                    tvDescription.setText(farm.getUser().getString(User.KEY_BIO));
+                } else {
+                    Log.i(TAG, "bio is null " + farm.getUser().getUsername());
+                }
+            } else {
+                Log.i(TAG, "farm user is null");
+            }
+
+            JSONArray JSONtags = farm.getUser().getJSONArray("tags");
+            if(JSONtags != null) {
+                List<String> tags = new ArrayList<>();
+                tagsAdapter = new MapProfileTagsAdapter(context, tags);
+                rvTags.setAdapter(tagsAdapter);
+                linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+                rvTags.setLayoutManager(linearLayoutManager);
+
+                for (int i = 0; i < JSONtags.length(); i++) {
+                    tags.add(JSONtags.getString(i));
+                }
+                tagsAdapter.notifyItemRangeInserted(0, JSONtags.length());
+            }
+        }
+
+        private void crossfade(User farm) {
+
+            normalView.setAlpha(0f);
+            normalView.setVisibility(View.VISIBLE);
+
+            normalView.animate()
+                    .alpha(1f)
+                    .setDuration(longAnimationDuration)
+                    .setListener(null);
+
+            createNormalView(farm);
 
             expandedView.animate()
                     .alpha(0f)

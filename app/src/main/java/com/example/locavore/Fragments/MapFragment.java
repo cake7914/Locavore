@@ -1,8 +1,5 @@
 package com.example.locavore.Fragments;
 
-import static android.location.LocationManager.NETWORK_PROVIDER;
-import static com.example.locavore.BuildConfig.YELP_API_KEY;
-import static com.example.locavore.DataManager.BASE_URL;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 import android.Manifest;
@@ -33,12 +30,9 @@ import android.widget.TextView;
 
 import com.example.locavore.Adapters.CustomWindowAdapter;
 import com.example.locavore.Adapters.MapProfilesAdapter;
-import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
-import com.example.locavore.Models.FarmSearchResult;
 import com.example.locavore.DataManager;
-import com.example.locavore.YelpService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -46,7 +40,6 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -57,30 +50,17 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.ui.IconGenerator;
 import com.parse.ParseException;
-import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 @RuntimePermissions
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements MapProfilesAdapter.ExpansionResponse {
 
     public static final String TAG = "MapFragment";
     private static final int MAX_YELP_RADIUS = 40000; // 40,000 meters or ~25 miles
@@ -170,6 +150,8 @@ public class MapFragment extends Fragment {
 
         rvProfiles = view.findViewById(R.id.rvProfiles);
         profilesAdapter = new MapProfilesAdapter(getContext(), mFarms);
+        profilesAdapter.expansionResponse = this;
+        profilesAdapter.expansionResponse = this;
         rvProfiles.setAdapter(profilesAdapter);
         linearLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         rvProfiles.setLayoutManager(linearLayoutManager);
@@ -186,6 +168,30 @@ public class MapFragment extends Fragment {
             MapFragmentPermissionsDispatcher.startLocationUpdatesWithPermissionCheck(this);
         }
     }
+
+    @Override
+    public void onExpansion(int pos) {
+        for(int i = 0; i < mFarms.size(); i++) {
+            if(i == pos) {
+                smoothScroller.setTargetPosition(i);
+                linearLayoutManager.startSmoothScroll(smoothScroller);
+                mFarms.get(i).expanded = true;
+                profilesAdapter.notifyItemChanged(i);
+                markers.get(i).showInfoWindow();
+            } else if (mFarms.get(i).expanded){
+                mFarms.get(i).expanded = false;
+                profilesAdapter.notifyItemChanged(i);
+            }
+        }
+    }
+
+    @Override
+    public void onContraction() {
+        for(int i = 0; i < mFarms.size(); i++) {
+            markers.get(i).hideInfoWindow();
+        }
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -213,6 +219,7 @@ public class MapFragment extends Fragment {
                     linearLayoutManager.startSmoothScroll(smoothScroller);
                     mFarms.get(i).expanded = true;
                     profilesAdapter.notifyItemChanged(i);
+                    markers.get(i).showInfoWindow();
                 } else if (mFarms.get(i).expanded){
                     mFarms.get(i).expanded = false;
                     profilesAdapter.notifyItemChanged(i);
