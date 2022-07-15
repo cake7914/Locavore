@@ -141,6 +141,9 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
         public void bind(User farm) throws JSONException, ParseException {
             if(farm.expanded) {
+                normalView.setVisibility(View.GONE);
+                expandedView.setVisibility(View.VISIBLE);
+                expandedView.setAlpha(1f);
                 createExpandedView(farm);
 
             } else {
@@ -181,9 +184,6 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
                 fragment.setArguments(args);
                 ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).addToBackStack(null).commit();
             });
-
-            normalView.setVisibility(View.GONE);
-            expandedView.setVisibility(View.VISIBLE);
 
             if (farm.getImageUrl() != null) {
                 Glide.with(context)

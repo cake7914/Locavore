@@ -174,11 +174,11 @@ public class MapFragment extends Fragment implements MapProfilesAdapter.Expansio
     public void onExpansion(int pos) {
         for(int i = 0; i < mFarms.size(); i++) {
             if(i == pos) {
-                smoothScroller.setTargetPosition(i);
-                linearLayoutManager.startSmoothScroll(smoothScroller);
                 mFarms.get(i).expanded = true;
                 profilesAdapter.notifyItemChanged(i);
                 markers.get(i).showInfoWindow();
+                smoothScroller.setTargetPosition(i);
+                linearLayoutManager.startSmoothScroll(smoothScroller);
             } else if (mFarms.get(i).expanded){
                 mFarms.get(i).expanded = false;
                 profilesAdapter.notifyItemChanged(i);
@@ -216,11 +216,11 @@ public class MapFragment extends Fragment implements MapProfilesAdapter.Expansio
             // scroll the adapter to the farm that has been clicked on
             for(int i = 0; i < mFarms.size(); i++) {
                 if(mFarms.get(i) == marker.getTag()) {
-                    smoothScroller.setTargetPosition(i);
-                    linearLayoutManager.startSmoothScroll(smoothScroller);
                     mFarms.get(i).expanded = true;
                     profilesAdapter.notifyItemChanged(i);
                     markers.get(i).showInfoWindow();
+                    smoothScroller.setTargetPosition(i);
+                    linearLayoutManager.startSmoothScroll(smoothScroller);
                 } else if (mFarms.get(i).expanded){
                     mFarms.get(i).expanded = false;
                     profilesAdapter.notifyItemChanged(i);
