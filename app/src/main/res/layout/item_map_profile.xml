@@ -148,7 +148,7 @@
             android:layout_alignParentTop="true"
             android:layout_marginTop="70dp"
             android:background="#FFFFFF"
-            app:cardCornerRadius="25dp">
+            app:cardCornerRadius="20dp">
 
         </androidx.cardview.widget.CardView>
 

@@ -59,11 +59,11 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
     public void onBindViewHolder(@NonNull MapProfilesAdapter.ViewHolder holder, int position) {
         User farm = farms.get(position);
         try {
-            holder.bind(farm);
             holder.normalView.setOnLongClickListener(v -> {
                 expansionResponse.onExpansion(holder.getAdapterPosition());
                 return false;
             });
+            holder.bind(farm);
         } catch (JSONException | ParseException e) {
             e.printStackTrace();
         }
