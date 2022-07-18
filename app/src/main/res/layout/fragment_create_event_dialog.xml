@@ -1,27 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="10dp"
-    android:orientation="vertical"
-    tools:context=".Fragments.CreateEventDialogFragment">
-
-    <EditText
-        android:id="@+id/etEventName"
+    android:layout_height="match_parent">
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/event_name"
-        android:inputType="textPersonName"
-        android:autofillHints="@string/event_name" />
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        tools:context=".Fragments.CreateEventDialogFragment">
 
-    <EditText
-        android:id="@+id/etEventDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="@string/event_description"
-        android:inputType="textPersonName"
-        android:autofillHints="@string/event_description" />
-</LinearLayout>
+        <EditText
+            android:id="@+id/etEventName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="@string/event_name"
+            android:ems="10"
+            android:hint="@string/event_name"
+            android:inputType="textShortMessage" />
+
+        <EditText
+            android:id="@+id/etEventDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="@string/event_description"
+            android:ems="10"
+            android:hint="@string/event_description"
+            android:inputType="textMultiLine"
+            android:minLines="2" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TimePicker
+                android:id="@+id/tpStartTime"
+                android:layout_width="215dp"
+                android:layout_height="130dp"
+                android:layout_below="@+id/tvStartTime"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="-25dp"
+                android:layout_marginTop="-20dp"
+                android:scaleX=".75"
+                android:scaleY=".75"
+                android:timePickerMode="spinner">
+
+            </TimePicker>
+
+            <TextView
+                android:id="@+id/tvStartTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="67dp"
+                android:layout_marginTop="0dp"
+                android:text="@string/start_time" />
+
+            <TextView
+                android:id="@+id/tvEndTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="100dp"
+                android:layout_marginTop="0dp"
+                android:layout_toEndOf="@+id/tvStartTime"
+                android:text="@string/end_time" />
+
+            <TimePicker
+                android:id="@+id/tpEndTime"
+                android:layout_width="215dp"
+                android:layout_height="130dp"
+                android:layout_below="@+id/tvEndTime"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="-20dp"
+                android:layout_marginEnd="-25dp"
+                android:scaleX=".75"
+                android:scaleY=".75"
+                android:timePickerMode="spinner">
+
+            </TimePicker>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tvStartDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="65dp"
+                android:layout_marginTop="5dp"
+                android:text="@string/start_date" />
+
+            <TextView
+                android:id="@+id/tvEndDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="100dp"
+                android:layout_marginTop="5dp"
+                android:layout_toEndOf="@+id/tvStartDate"
+                android:text="@string/end_date" />
+
+            <DatePicker
+                android:id="@+id/dpStartDate"
+                android:layout_width="218dp"
+                android:layout_height="141dp"
+                android:layout_below="@+id/tvStartDate"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="-25dp"
+                android:layout_marginTop="-20dp"
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner"
+                android:scaleX=".75"
+                android:scaleY=".75"
+                android:startYear="2022">
+
+            </DatePicker>
+
+            <DatePicker
+                android:id="@+id/dpEndDate"
+                android:layout_width="218dp"
+                android:layout_height="141dp"
+                android:layout_below="@+id/tvEndDate"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="-20dp"
+                android:layout_marginEnd="-25dp"
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner"
+                android:scaleX=".75"
+                android:scaleY=".75"
+                android:startYear="2022">
+
+            </DatePicker>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/cbMonday"
+                android:layout_width="45dp"
+                android:layout_height="wrap_content"
+                android:text="@string/monday" />
+
+            <CheckBox
+                android:id="@+id/cbTuesday"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="@string/tuesday" />
+
+            <CheckBox
+                android:id="@+id/cbWednesday"
+                android:layout_width="45dp"
+                android:layout_height="wrap_content"
+                android:text="@string/wednesday" />
+
+            <CheckBox
+                android:id="@+id/cbThursday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/thursday" />
+
+            <CheckBox
+                android:id="@+id/cbFriday"
+                android:layout_width="40dp"
+                android:layout_height="match_parent"
+                android:text="@string/friday" />
+
+            <CheckBox
+                android:id="@+id/cbSaturday"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="@string/saturday" />
+
+            <CheckBox
+                android:id="@+id/cbSunday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sunday" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

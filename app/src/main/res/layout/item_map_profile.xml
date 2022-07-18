@@ -130,7 +130,7 @@
             android:id="@+id/tvFarmDescription"
             android:layout_width="375dp"
             android:layout_height="61dp"
-            android:layout_alignEnd="@id/view"
+            android:layout_alignEnd="@id/rlView"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_marginHorizontal="3dp"
@@ -142,7 +142,7 @@
             tools:text="On our 200 acres, we grow apples, nectarines, and all other varieties of fruits!" />
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/view"
+            android:id="@+id/rlView"
             android:layout_width="375dp"
             android:layout_height="130dp"
             android:layout_alignParentTop="true"
