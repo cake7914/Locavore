@@ -135,7 +135,7 @@ public class CreateEventDialogFragment extends DialogFragment {
                 ParseObject event = ParseObject.create("Event");
                 event.put(Event.KEY_NAME, etEventName.getText().toString());
                 event.put(Event.KEY_DESCRIPTION, etEventDescription.getText().toString());
-                event.put(Event.KEY_FARM, ParseUser.getCurrentUser().getObjectId());
+                event.put(Event.KEY_FARM, ParseUser.getCurrentUser().getString(User.KEY_YELP_ID));
                 event.put(Event.KEY_LOCATION, ParseUser.getCurrentUser().getParseGeoPoint(User.KEY_LOCATION));
                 event.put(Event.KEY_LOCATION_STR, ParseUser.getCurrentUser().getString(User.KEY_ADDRESS));
                 event.put(Event.KEY_START_DATE, new Date(dpStartDate.getYear()-1900, dpStartDate.getMonth(), dpStartDate.getDayOfMonth(), tpStartTime.getHour(), tpStartTime.getMinute()));

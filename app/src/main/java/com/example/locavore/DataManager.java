@@ -44,6 +44,7 @@ public class DataManager {
     public List<Event> mEvents;
     public int mRadius;
     public Location mLocation;
+    public UpdateResponse updateResponse;
 
     private DataManager(Location currentLocation) {
         if(ParseUser.getCurrentUser() != null) {
@@ -63,25 +64,24 @@ public class DataManager {
         return sDataManager;
     }
 
+    public interface UpdateResponse {
+        void onUpdate(List<User> farms, List<Event> events);
+    }
+
     public void getFarms(Location currentLocation, int radius) throws ParseException, IOException {
-        if (mFarms.size() != 0) { // if we have saved farms, remove any that are no longer relevant based on the user's location
+        if (mFarms.size() != 0) { // if we have saved farms, remove any & their events that are no longer relevant based on the user's location
             Log.i(TAG, "saved farms exist!");
 
-            List<User> nFarms = new ArrayList<>();
-            List<String> nFarmIds = new ArrayList<>();
-
-            for (int i = 0; i < mFarms.size(); i++) {
+            for (int i = mFarms.size()-1; i >=0; i--) {
                 Location farmLocation = new Location(NETWORK_PROVIDER);
                 farmLocation.setLatitude(mFarms.get(i).getCoordinates().latitude);
                 farmLocation.setLongitude(mFarms.get(i).getCoordinates().longitude);
-                if (currentLocation.distanceTo(farmLocation) <= radius) {
-                    nFarms.add(mFarms.get(i));
-                    nFarmIds.add(mFarms.get(i).getId());
+                if (currentLocation.distanceTo(farmLocation) > radius) {
+                    mFarms.remove(i);
+                    mFarmIds.remove(i);
                 }
             }
-
-            mFarms.removeIf(farm -> !nFarms.contains(farm));
-            mFarmIds = nFarmIds;
+            mEvents.removeIf(event -> !mFarmIds.contains(event.getFarm()));
         }
 
         // if we have no farms
@@ -121,9 +121,44 @@ public class DataManager {
                 queryEvents(farm, currentLocation);
             }
         }
+
+        if(updateResponse != null)
+            updateResponse.onUpdate(mFarms, mEvents);
     }
 
     private void queryEvents(User farm, Location currentLocation) {
+        JSONArray newEvents = farm.getUser().getJSONArray(User.KEY_EVENTS);
+        if (newEvents != null) {
+            for (int j = 0; j < newEvents.length(); j++) {
+                try {
+                    String eventId = newEvents.getString(j);
+                    ParseQuery<Event> eventQuery = ParseQuery.getQuery("Event");
+                    Event event = eventQuery.get(eventId);
+                    event.mWeight = weightEvent(event, currentLocation, farm);
+                    insertEvent(event);
+
+                    /*eventQuery.getInBackground(eventId, (event, err) -> {
+                        if (err != null) {
+                            Log.e(TAG, "Issue with getting event ", err);
+                        } else {
+                            // weight this event, then insert it into the events list based on its weight
+                            try {
+                                event.mWeight = weightEvent(event, currentLocation, farm);
+                                insertEvent(event);
+                            } catch (JSONException | ParseException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });*/
+
+                } catch (JSONException | ParseException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /*private void queryEvents(User farm, Location currentLocation) {
         JSONArray newEvents = farm.getUser().getJSONArray(User.KEY_EVENTS);
         if (newEvents != null) {
             for (int j = 0; j < newEvents.length(); j++) {
@@ -149,7 +184,7 @@ public class DataManager {
                 }
             }
         }
-    }
+    }*/
 
     public void insertEvent(Event event) {
         if(mEvents.size() == 0) {

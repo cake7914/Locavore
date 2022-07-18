@@ -10,10 +10,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.example.locavore.FarmsDiffCallback;
+import com.example.locavore.Fragments.FeedFragment;
 import com.example.locavore.R;
 
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.locavore.Models.User;
@@ -36,12 +39,20 @@ import java.util.List;
 
 public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapter.ViewHolder> {
     private Context context;
-    private List<User> farms;
+    private List<User> mFarms;
     public static final String TAG = "FarmProfilesAdapter";
 
     public FarmProfilesAdapter(Context context, List<User> farms) {
         this.context = context;
-        this.farms = farms;
+        this.mFarms = farms;
+    }
+
+    public void updateList(List <User> newFarms) {
+        FarmsDiffCallback diffCallback = new FarmsDiffCallback(mFarms, newFarms);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+        mFarms.clear();
+        mFarms.addAll(newFarms);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     @NonNull
@@ -53,7 +64,7 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        User farm = farms.get(position);
+        User farm = mFarms.get(position);
         try {
             holder.bind(farm);
         } catch (JSONException e) {
@@ -63,18 +74,18 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
 
     @Override
     public int getItemCount() {
-        return farms.size();
+        return mFarms.size();
     }
 
     public void clear() {
-        int size = farms.size();
-        farms.clear();
+        int size = mFarms.size();
+        mFarms.clear();
         notifyItemRangeRemoved(0, size);
     }
 
     public void addAll(List<User> newFarms) {
-        farms.addAll(newFarms);
-        notifyItemRangeInserted(farms.size() - newFarms.size(), newFarms.size());
+        mFarms.addAll(newFarms);
+        notifyItemRangeInserted(mFarms.size() - newFarms.size(), newFarms.size());
     }
 
 

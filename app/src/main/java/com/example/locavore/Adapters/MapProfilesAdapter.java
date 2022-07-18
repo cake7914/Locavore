@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,6 +23,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.example.locavore.FarmsDiffCallback;
 import com.example.locavore.Fragments.FarmProfileFragment;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
@@ -39,13 +41,21 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
     public static final String TAG = "MapProfilesAdapter";
 
     private Context context;
-    private List<User> farms;
+    private List<User> mFarms;
     public ExpansionResponse expansionResponse;
 
     public MapProfilesAdapter(Context context, List<User> farms)
     {
         this.context = context;
-        this.farms = farms;
+        this.mFarms = farms;
+    }
+
+    public void updateList(List <User> newFarms) {
+        FarmsDiffCallback diffCallback = new FarmsDiffCallback(mFarms, newFarms);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+        mFarms.clear();
+        mFarms.addAll(newFarms);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     @NonNull
@@ -57,7 +67,7 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull MapProfilesAdapter.ViewHolder holder, int position) {
-        User farm = farms.get(position);
+        User farm = mFarms.get(position);
         try {
             holder.normalView.setOnLongClickListener(v -> {
                 expansionResponse.onExpansion(holder.getAdapterPosition());
@@ -71,18 +81,18 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
     @Override
     public int getItemCount() {
-        return farms.size();
+        return mFarms.size();
     }
 
     public void clear() {
-        int size = farms.size();
-        farms.clear();
+        int size = mFarms.size();
+        mFarms.clear();
         notifyItemRangeRemoved(0, size);
     }
 
     public void addAll(List<User> newFarms) {
-        farms.addAll(newFarms);
-        notifyItemRangeInserted(farms.size()-newFarms.size(), newFarms.size());
+        mFarms.addAll(newFarms);
+        notifyItemRangeInserted(mFarms.size()-newFarms.size(), newFarms.size());
     }
 
     public interface ExpansionResponse {

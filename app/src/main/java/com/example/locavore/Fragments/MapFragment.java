@@ -300,29 +300,12 @@ public class MapFragment extends Fragment implements MapProfilesAdapter.Expansio
             map.clear();
             markers = new ArrayList<>();
 
+            // should be on background thread !
             dataManager.getFarms(currentLocation, mRadius);
-            compareInstances();
+            profilesAdapter.updateList(dataManager.mFarms);
             dropMarkers(mFarms, firstLoad);
         }
     }
-
-    private void compareInstances() {
-        for(int i = 0; i < dataManager.mFarms.size(); i++) {
-            if(!mFarms.contains(dataManager.mFarms.get(i))) {
-                mFarms.add(dataManager.mFarms.get(i));
-                profilesAdapter.notifyItemInserted(mFarms.size()-1);
-            }
-        }
-        // remove if needed by counting backwards
-        for(int i = mFarms.size()-1; i >= 0; i--) {
-            if(!dataManager.mFarms.contains(mFarms.get(i))) {
-                mFarms.remove(i);
-                profilesAdapter.notifyItemRemoved(i);
-            }
-        }
-    }
-
-
 
     public Bitmap getMarker(String request) {
         IconGenerator iconGen = new IconGenerator(getContext());

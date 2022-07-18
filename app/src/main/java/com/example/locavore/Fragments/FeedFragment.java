@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,10 +44,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FeedFragment extends Fragment implements LocationListener {
+public class FeedFragment extends Fragment implements DataManager.UpdateResponse {
     public static final String TAG = "FeedFragment";
-    private static final double MIN_DISTANCE_CHANGE = 19312.1;
-
     private RecyclerView rvFarmProfiles;
     private RecyclerView rvFarmEvents;
     private FarmEventsAdapter eventsAdapter;
@@ -95,47 +94,15 @@ public class FeedFragment extends Fragment implements LocationListener {
         }
         Criteria criteria = new Criteria();
         bestProvider = locationManager.getBestProvider(criteria, false);
-        locationManager.requestLocationUpdates(bestProvider, 0, 0, this);
 
         location = locationManager.getLastKnownLocation(bestProvider);
+
+        dataManager.updateResponse = this;
     }
 
-    @Override // REMOVE
-    public void onLocationChanged(@NonNull Location newLocation) {
-        if(location.distanceTo(newLocation) > MIN_DISTANCE_CHANGE) {
-            location = newLocation;
-            try {
-                dataManager.getFarms(location, ParseUser.getCurrentUser().getInt(User.KEY_RADIUS));
-                compareFarmInstances();
-                compareEventsInstances();
-            } catch (ParseException | IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void compareFarmInstances() {
-        for(int i = 0; i < dataManager.mFarms.size(); i++) {
-            if(!mFarms.contains(dataManager.mFarms.get(i))) {
-                mFarms.add(dataManager.mFarms.get(i));
-                profilesAdapter.notifyItemInserted(mFarms.size()-1);
-            }
-        }
-        // remove if needed
-        mFarms.removeIf(farm -> !dataManager.mFarms.contains(farm));
-        profilesAdapter.notifyDataSetChanged();
-    }
-
-    private void compareEventsInstances() {
-        for(int i = 0; i < dataManager.mEvents.size(); i++) {
-            if(!mEvents.contains(dataManager.mEvents.get(i))) {
-                mEvents.add(dataManager.mEvents.get(i));
-                eventsAdapter.notifyItemInserted(mEvents.size()-1);
-            }
-        }
-
-        // remove if needed
-        mEvents.removeIf(event -> !dataManager.mEvents.contains(event));
-        eventsAdapter.notifyDataSetChanged();
+    @Override
+    public void onUpdate(List<User> farms, List<Event> events) {
+        eventsAdapter.updateList(events);
+        profilesAdapter.updateList(farms);
     }
 }

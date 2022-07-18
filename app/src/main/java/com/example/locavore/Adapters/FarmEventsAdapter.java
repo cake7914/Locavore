@@ -3,8 +3,6 @@ package com.example.locavore.Adapters;
 import static android.location.LocationManager.NETWORK_PROVIDER;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,13 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -27,6 +25,7 @@ import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.DataManager;
+import com.example.locavore.EventsDiffCallback;
 import com.example.locavore.Fragments.EventDetailsFragment;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
@@ -41,20 +40,27 @@ import com.parse.ParseUser;
 import org.parceler.Parcels;
 
 import java.util.List;
-import java.util.Objects;
 
 public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.ViewHolder> {
     public static final String TAG = "FarmEventsAdapter";
     private static final double METERS_TO_MILE = 1609.34;
 
     private Context context;
-    private List<Event> events;
+    private List<Event> mEvents;
     DataManager dataManager = DataManager.getInstance(null);
 
 
     public FarmEventsAdapter(Context context, List<Event> events) {
         this.context = context;
-        this.events = events;
+        this.mEvents = events;
+    }
+
+    public void updateList(List <Event> newEvents) {
+        EventsDiffCallback diffCallback = new EventsDiffCallback(mEvents, newEvents);
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+        mEvents.clear();
+        mEvents.addAll(newEvents);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     @NonNull
@@ -66,24 +72,24 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Event event = events.get(position);
+        Event event = mEvents.get(position);
         holder.bind(event);
     }
 
     @Override
     public int getItemCount() {
-        return events.size();
+        return mEvents.size();
     }
 
     public void clear() {
-        int size = events.size();
-        events.clear();
+        int size = mEvents.size();
+        mEvents.clear();
         notifyItemRangeRemoved(0, size);
     }
 
     public void addAll(List<Event> newEvents) {
-        events.addAll(newEvents);
-        notifyItemRangeInserted(events.size() - newEvents.size(), newEvents.size());
+        mEvents.addAll(newEvents);
+        notifyItemRangeInserted(mEvents.size() - newEvents.size(), newEvents.size());
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -135,7 +141,8 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
 
             tvEventName.setText(event.getName());
             ParseQuery<ParseUser> query = ParseUser.getQuery();
-            query.getInBackground(event.getFarm(), new GetCallback<ParseUser>() {
+            query.whereEqualTo(User.KEY_YELP_ID, event.getFarm());
+            query.getFirstInBackground(new GetCallback<ParseUser>() {
                 @Override
                 public void done(ParseUser farm, ParseException e) {
                     tvEventFarm.setText(farm.getString(User.KEY_NAME));
