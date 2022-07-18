@@ -24,7 +24,8 @@ Locavore is an app that helps users find local farms and agritourism events.
 ### Satisfying Project Requirements:
 
 **Your app provides multiple opportunities for you to overcome difficult/ambiguous technical problems:**
-* filtering algorithm (radius, tags, etc)
+* sorting algorithm for events.
+* optimization of database & network requests.
 
 **Your app interacts with a database (e.g. Parse)**
 * Parse database
@@ -33,7 +34,6 @@ Locavore is an app that helps users find local farms and agritourism events.
 * Google Maps
 * Yelp!
 * Google Calendar
-* USDA farmers' market API
 
 **You can log in/log out of your app as a user**
 * Using Parse database
@@ -52,7 +52,7 @@ Locavore is an app that helps users find local farms and agritourism events.
 
 **Your app uses at least one animation (e.g. fade in/out, e.g. animating a view growing and shrinking)**
 * Fancy scrolling animation within profile
-* within map screen, scrolling of the recyclerview depending on farm clicked on (and details view growing as well)
+* within map screen, scrolling of the recyclerview depending on farm clicked on (and details view expanding/collapsing as well)
 
 ### 1. User Stories (Required and Optional)
 
