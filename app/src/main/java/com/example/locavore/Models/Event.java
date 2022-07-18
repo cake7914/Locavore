@@ -2,6 +2,7 @@ package com.example.locavore.Models;
 
 import com.parse.ParseClassName;
 import com.parse.ParseFile;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 
 @ParseClassName("Event")
@@ -12,6 +13,10 @@ public class Event extends ParseObject implements Comparable<Event> {
     public static final String KEY_FARM = "farm";
     public static final String KEY_LOCATION = "location";
     public static final String KEY_PHOTO = "photo";
+    public static final String KEY_LOCATION_STR = "locationString";
+    public static final String KEY_START_DATE = "startDate";
+    public static final String KEY_END_DATE = "endDate";
+    public static final String KEY_DAYS_OF_WEEK = "daysOfWeek";
     public int mWeight;
 
 
@@ -41,13 +46,21 @@ public class Event extends ParseObject implements Comparable<Event> {
         put(KEY_FARM, farm);
     }
 
-    public String getLocation() {
-        return getString(KEY_LOCATION);
+    public ParseGeoPoint getLocation() {
+        return getParseGeoPoint(KEY_LOCATION);
     }
-    public void setLocation(String location) {
+    public void setLocation(ParseGeoPoint location) {
         put(KEY_LOCATION, location);
     }
 
     public ParseFile getPhoto() { return getParseFile(KEY_PHOTO); }
     public void setPhoto(ParseFile photo) { put(KEY_PHOTO, photo); }
+
+    public String getLocationString() {
+        return getString(KEY_LOCATION_STR);
+    }
+    public void setLocationString(String locationString) {
+        put(KEY_LOCATION_STR, locationString);
+    }
+
 }

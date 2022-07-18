@@ -6,15 +6,20 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.location.Location;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -22,6 +27,7 @@ import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.DataManager;
+import com.example.locavore.Fragments.EventDetailsFragment;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
 import com.example.locavore.Models.UserEvent;
@@ -31,6 +37,8 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import org.parceler.Parcels;
 
 import java.util.List;
 import java.util.Objects;
@@ -87,6 +95,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
         ImageButton btnAttendedEvent;
         ImageButton btnLikeEvent;
         ImageButton btnDislikeEvent;
+        View containerView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -97,9 +106,23 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
             btnAttendedEvent = itemView.findViewById(R.id.btnAttended);
             btnLikeEvent = itemView.findViewById(R.id.btnLikeEvent);
             btnDislikeEvent = itemView.findViewById(R.id.btnDislikeEvent);
+            containerView = itemView;
         }
 
         public void bind(Event event) {
+
+            containerView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    FragmentManager fragmentManager = ((AppCompatActivity)context).getSupportFragmentManager();
+                    Fragment eventDetailsFragment = new EventDetailsFragment();
+                    Bundle args = new Bundle();
+                    args.putParcelable("Event", Parcels.wrap(event));
+                    eventDetailsFragment.setArguments(args);
+                    fragmentManager.beginTransaction().add(R.id.flContainer, eventDetailsFragment).addToBackStack(null).commit();
+                    return true;
+                }
+            });
 
             if(event.getPhoto() != null) {
                 Glide.with(context)
@@ -117,8 +140,8 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                 public void done(ParseUser farm, ParseException e) {
                     tvEventFarm.setText(farm.getString(User.KEY_NAME));
                     Location eventLocation = new Location(NETWORK_PROVIDER);
-                    eventLocation.setLongitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLongitude());
-                    eventLocation.setLatitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLatitude());
+                    eventLocation.setLongitude(event.getLocation().getLongitude());
+                    eventLocation.setLatitude(event.getLocation().getLatitude());
                     Log.i(TAG, String.valueOf(dataManager.mLocation));
                     tvDistance.setText(String.format(context.getResources().getString(R.string.distance_calc), eventLocation.distanceTo(dataManager.mLocation) / METERS_TO_MILE));
                 }

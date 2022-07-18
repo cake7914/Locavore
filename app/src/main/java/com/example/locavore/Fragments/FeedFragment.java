@@ -100,7 +100,7 @@ public class FeedFragment extends Fragment implements LocationListener {
         location = locationManager.getLastKnownLocation(bestProvider);
     }
 
-    @Override
+    @Override // REMOVE
     public void onLocationChanged(@NonNull Location newLocation) {
         if(location.distanceTo(newLocation) > MIN_DISTANCE_CHANGE) {
             location = newLocation;

@@ -248,5 +248,4 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
             expandedView.setAlpha(1f);
         }
     }
-
 }

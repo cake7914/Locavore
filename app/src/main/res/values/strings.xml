@@ -49,4 +49,15 @@
     <string name="logout_success">Successful logout</string>
     <string name="location_permission">This app requires location permission.</string>
     <string name="distance_calc">%.2f mi</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time">End Time</string>
+    <string name="monday">M</string>
+    <string name="wednesday">W</string>
+    <string name="thursday">Th</string>
+    <string name="friday">F</string>
+    <string name="saturday">S</string>
+    <string name="sunday">Su</string>
+    <string name="tuesday">T</string>
 </resources>

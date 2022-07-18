@@ -170,41 +170,30 @@ public class DataManager {
 
         // calculate distance: subtract from total weight (want the highest weight to be the first shown)
         Location eventLocation = new Location(NETWORK_PROVIDER);
-        eventLocation.setLatitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLatitude());
-        eventLocation.setLongitude(event.getParseGeoPoint(Event.KEY_LOCATION).getLongitude());
+        eventLocation.setLatitude(event.getLocation().getLatitude());
+        eventLocation.setLongitude(event.getLocation().getLongitude());
         weight -= (currentLocation.distanceTo(eventLocation) / METERS_TO_MILE);
-        Log.i(TAG, "1 " + weight);
 
         // if the user follows the farm, add a lot of weight
         if(checkUserFollowingFarm(event.getFarm(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) != -1) {
             weight += 500;
         }
-        Log.i(TAG, "2 " + weight);
-
 
         // if the user has attended an event at the farm before, add 100 for each liked event, and subtract 100 for each disliked
         weight = checkAttendedEvents(event, weight);
-        Log.i(TAG, "3 " + weight);
-
 
         // factor in farm's yelp rating--> multiply by factor of 50
         weight += farm.getRating() * 50;
-        Log.i(TAG, "4 " + weight);
-
 
         // factor in farm's number of followers--> 10 for each follower
         JSONArray followers = farm.getUser().getJSONArray(User.KEY_FOLLOWERS);
-        if(followers != null)
-        {
+        if(followers != null) {
             weight += (followers.length() * 10);
         }
-        Log.i(TAG, "5 " + weight);
-
 
         // factor in how many users have liked/disliked this event--> +-25 for each user.
         weight = quantityUsersLiked(event, weight);
 
-        Log.i(TAG, farm.getName() + ": " + event.getName() + " " + weight + " weighting.");
         return weight;
     }
 
