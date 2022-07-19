@@ -10,7 +10,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.locavore.Models.Event;
+import com.example.locavore.Models.FarmReviewsSearchResult;
 import com.example.locavore.Models.FarmSearchResult;
+import com.example.locavore.Models.Review;
 import com.example.locavore.Models.User;
 import com.example.locavore.Models.UserEvent;
 import com.parse.ParseException;
@@ -158,34 +160,6 @@ public class DataManager {
         }
     }
 
-    /*private void queryEvents(User farm, Location currentLocation) {
-        JSONArray newEvents = farm.getUser().getJSONArray(User.KEY_EVENTS);
-        if (newEvents != null) {
-            for (int j = 0; j < newEvents.length(); j++) {
-                try {
-                    String eventId = newEvents.getString(j);
-                    ParseQuery<Event> eventQuery = ParseQuery.getQuery("Event");
-                    eventQuery.getInBackground(eventId, (event, err) -> {
-                        if (err != null) {
-                            Log.e(TAG, "Issue with getting event ", err);
-                        } else {
-                            // weight this event, then insert it into the events list based on its weight
-                            try {
-                                event.mWeight = weightEvent(event, currentLocation, farm);
-                                insertEvent(event);
-                            } catch (JSONException | ParseException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                } catch (JSONException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-    }*/
-
     public void insertEvent(Event event) {
         if(mEvents.size() == 0) {
             mEvents.add(event);
@@ -278,6 +252,35 @@ public class DataManager {
         return -1;
     }
 
+    public void yelpReviewsRequest(ParseUser farm, List<Review> reviews) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        YelpService yelpService = retrofit.create(YelpService.class);
+        Call<FarmReviewsSearchResult> call = yelpService.findBusinessReviews("Bearer " + YELP_API_KEY, farm.getString(User.KEY_YELP_ID));
+        call.enqueue(new Callback<FarmReviewsSearchResult>() {
+            @Override
+            public void onResponse(Call<FarmReviewsSearchResult> call, Response<FarmReviewsSearchResult> response) {
+                Log.i(TAG, "Success! ");
+                List<Review> newReviews = new ArrayList<>();
+
+                // add all reviews to the new reviews list
+                for(Review review : response.body().getReviews()) {
+                    Log.i(TAG, review.getText());
+                }
+                newReviews.addAll(response.body().getReviews());
+
+            }
+
+            @Override
+            public void onFailure(Call<FarmReviewsSearchResult> call, Throwable t) {
+                Log.i(TAG, "Failure " + t);
+            }
+        });
+    }
+
     public void yelpRequest(String request, Location currentLocation) throws ParseException, IOException {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -285,6 +288,7 @@ public class DataManager {
                 .build();
 
         YelpService yelpService = retrofit.create(YelpService.class);
+
         Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, MAX_YELP_RADIUS);
 
         call.enqueue(new Callback<FarmSearchResult>() {

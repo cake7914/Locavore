@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="5dp"
+    android:backgroundTint="#989393">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_margin="5dp"
+        android:background="#FFFFFF">
+
+        <TextView
+            android:id="@+id/tvReviewer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="11dp"
+            android:textSize="20sp"
+            tools:text="Darcy McLellan" />
+
+        <TextView
+            android:id="@+id/tvReview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvReviewer"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="10dp"
+            tools:layout_editor_absoluteX="81dp"
+            tools:layout_editor_absoluteY="62dp"
+            tools:text="love this place to pieces!" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="238dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="3dp"
+            android:clickable="false"
+            android:isIndicator="true"
+            android:numStars="5"
+            android:scaleX=".75"
+            android:scaleY=".75" />
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

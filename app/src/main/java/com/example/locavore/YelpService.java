@@ -1,5 +1,6 @@
 package com.example.locavore;
 
+import com.example.locavore.Models.FarmReviewsSearchResult;
 import com.example.locavore.Models.FarmSearchResult;
 
 import retrofit2.Call;
@@ -23,11 +24,12 @@ public interface YelpService {
     @GET("businesses/{id}")
     Call<FarmSearchResult> findBusinessDetails(
             @Path("id") String id,
+            @Header("Authorization") String authHeader
+    );
+
+    @GET("businesses/{id}/reviews")
+    Call<FarmReviewsSearchResult> findBusinessReviews(
             @Header("Authorization") String authHeader,
-            @Query("latitude") double latitude,
-            @Query("longitude") double longitude,
-            @Query("categories") String categories,
-            @Query("limit") int limit,
-            @Query("radius") int radius
+            @Path("id") String id
     );
 }

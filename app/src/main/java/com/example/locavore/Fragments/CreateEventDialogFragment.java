@@ -153,7 +153,6 @@ public class CreateEventDialogFragment extends DialogFragment {
                 });
             }
         });
-        //gKOW9W_kQAg8hg07gKS9Fg
 
         alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override

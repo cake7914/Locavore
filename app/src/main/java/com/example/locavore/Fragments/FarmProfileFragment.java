@@ -1,12 +1,17 @@
 package com.example.locavore.Fragments;
 
+import static com.example.locavore.BuildConfig.YELP_API_KEY;
+
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,25 +28,52 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.Activities.LoginActivity;
 import com.example.locavore.Activities.MainActivity;
+import com.example.locavore.Activities.SplashScreenActivity;
+import com.example.locavore.Adapters.FarmProfileEventsAdapter;
+import com.example.locavore.Adapters.FarmProfileReviewsAdapter;
+import com.example.locavore.DataManager;
+import com.example.locavore.Models.Event;
+import com.example.locavore.Models.FarmReviewsSearchResult;
+import com.example.locavore.Models.Review;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
+import com.example.locavore.YelpService;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class FarmProfileFragment extends Fragment {
 
     public static final String TAG = "FarmProfileFragment";
+    public static final String BASE_URL = "https://api.yelp.com/v3/";
     Button btnCreateEvent;
     Button btnLogout;
     TextView tvFarmName;
     TextView tvBio;
     ImageView ivBackgroundPhoto;
     ImageView ivProfileImage;
+    RecyclerView rvEvents;
+    FarmProfileEventsAdapter eventsAdapter;
+    RecyclerView rvReviews;
+    FarmProfileReviewsAdapter reviewsAdapter;
+    List<Event> mEvents = new ArrayList<>();
+    List<Review> mReviews = new ArrayList<>();
+    DataManager dataManager = DataManager.getInstance(null);
+
     ParseUser farm;
 
     public FarmProfileFragment() {
@@ -65,6 +97,18 @@ public class FarmProfileFragment extends Fragment {
         ivBackgroundPhoto = view.findViewById(R.id.ivBackgroundPhoto);
         ivProfileImage = view.findViewById(R.id.ivProfilePhoto);
         tvBio = view.findViewById(R.id.tvDescription);
+        rvReviews = view.findViewById(R.id.rvReviews);
+        rvEvents = view.findViewById(R.id.rvEvents);
+
+
+        eventsAdapter = new FarmProfileEventsAdapter(getContext(), mEvents);
+        rvEvents.setAdapter(eventsAdapter);
+        rvEvents.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+
+        rvReviews = view.findViewById(R.id.rvReviews);
+        reviewsAdapter = new FarmProfileReviewsAdapter(getContext(), mReviews);
+        rvReviews.setAdapter(reviewsAdapter);
+        rvReviews.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
         if(getArguments() != null) { // this is a user viewing the farm
             farm = ((User)Parcels.unwrap(getArguments().getParcelable(User.FARM_USER_TYPE))).getUser();
@@ -89,6 +133,13 @@ public class FarmProfileFragment extends Fragment {
             }));
         }
 
+        // parse events for this farm from data
+        getFarmEvents(dataManager.mEvents, farm);
+
+        // fetch reviews for this farm
+        yelpReviewsRequest(farm);
+
+
         tvFarmName.setText(farm.getString(User.KEY_NAME));
         tvBio.setText(farm.getString(User.KEY_BIO));
 
@@ -105,4 +156,35 @@ public class FarmProfileFragment extends Fragment {
         alertDialog.show(fragmentManager, "fragment_alert");
     }
 
+    private void getFarmEvents(List<Event> allEvents, ParseUser farm) {
+        for(Event event: allEvents) {
+            if(event.getFarm().equals(farm.getString(User.KEY_YELP_ID))) {
+                mEvents.add(event);
+            }
+        }
+        eventsAdapter.notifyItemRangeInserted(0, mEvents.size());
+    }
+
+    private void yelpReviewsRequest(ParseUser farm) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        YelpService yelpService = retrofit.create(YelpService.class);
+        Call<FarmReviewsSearchResult> call = yelpService.findBusinessReviews("Bearer " + YELP_API_KEY, farm.getString(User.KEY_YELP_ID));
+        call.enqueue(new Callback<FarmReviewsSearchResult>() {
+            @Override
+            public void onResponse(Call<FarmReviewsSearchResult> call, Response<FarmReviewsSearchResult> response) {
+                Log.i(TAG, "Success! ");
+                if(response.body() != null)
+                    reviewsAdapter.addAll(response.body().getReviews());
+            }
+
+            @Override
+            public void onFailure(Call<FarmReviewsSearchResult> call, Throwable t) {
+                Log.i(TAG, "Failure " + t);
+            }
+        });
+    }
 }

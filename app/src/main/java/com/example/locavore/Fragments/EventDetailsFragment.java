@@ -72,6 +72,7 @@ public class EventDetailsFragment extends Fragment {
         tvEventName.setText(event.getName());
         tvEventDescription.setText(event.getDescription());
         tvEventLocation.setText(event.getLocationString());
+        //TODO: use Calendar instead
         Date startDate = event.getDate(Event.KEY_START_DATE);
         Date endDate = event.getDate(Event.KEY_END_DATE);
         tvDate.setText(startDate.getMonth() + "/" + startDate.getDay() + " - " + endDate.getMonth() + "/" + endDate.getDay());
