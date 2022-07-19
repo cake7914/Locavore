@@ -77,9 +77,9 @@
             android:id="@+id/tvDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ivBackgroundPhoto"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
+            android:layout_below="@+id/tvAboutUs"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginTop="6dp"
             android:textColor="#000000"
             tools:text="A beautiful organic farm with fresh veggies, fruits, and wool!" />
 
@@ -107,6 +107,59 @@
             android:text="@string/reviews"
             android:textSize="25sp"
             android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvPhoneNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ivBackgroundPhoto"
+            android:layout_marginTop="5dp"
+            android:textSize="16sp"
+            app:drawableStartCompat="@drawable/ic_baseline_phone_24"
+            tools:text="203-266-7989" />
+
+        <TextView
+            android:id="@+id/tvAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvPhoneNumber"
+            android:layout_marginTop="3dp"
+            android:textSize="16sp"
+            tools:text="250 Church St, New Haven CT"
+            app:drawableStartCompat="@drawable/ic_baseline_map_24" />
+
+        <TextView
+            android:id="@+id/tvAboutUs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvAddress"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="2dp"
+            android:text="@string/about_us"
+            android:textColor="#000000"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/tvPhoneNumber"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="9dp"
+            android:drawableEnd="@drawable/ic_baseline_star_rate_24"
+            android:textSize="20sp"
+            tools:text="4.5/5" />
+
+        <TextView
+            android:id="@+id/tvReviewCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/rvEvents"
+            android:layout_marginStart="13dp"
+            android:layout_marginTop="12dp"
+            android:layout_toEndOf="@+id/tvReviews"
+            tools:text="350" />
 
     </RelativeLayout>
 </ScrollView>

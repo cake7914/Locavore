@@ -149,7 +149,6 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                     Location eventLocation = new Location(NETWORK_PROVIDER);
                     eventLocation.setLongitude(event.getLocation().getLongitude());
                     eventLocation.setLatitude(event.getLocation().getLatitude());
-                    Log.i(TAG, String.valueOf(dataManager.mLocation));
                     tvDistance.setText(String.format(context.getResources().getString(R.string.distance_calc), eventLocation.distanceTo(dataManager.mLocation) / METERS_TO_MILE));
                 }
             });
@@ -254,7 +253,6 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                     }
                 });
             });
-
         }
     }
 

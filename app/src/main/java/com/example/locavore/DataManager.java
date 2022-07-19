@@ -15,6 +15,7 @@ import com.example.locavore.Models.FarmSearchResult;
 import com.example.locavore.Models.Review;
 import com.example.locavore.Models.User;
 import com.example.locavore.Models.UserEvent;
+import com.example.locavore.Models.YelpCategory;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
@@ -71,6 +72,7 @@ public class DataManager {
     }
 
     public void getFarms(Location currentLocation, int radius) throws ParseException, IOException {
+        mLocation = currentLocation;
         if (mFarms.size() != 0) { // if we have saved farms, remove any & their events that are no longer relevant based on the user's location
             Log.i(TAG, "saved farms exist!");
 
@@ -338,8 +340,10 @@ public class DataManager {
         user.put(User.KEY_BIO, farm.getName() + " is located at " + farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState());
         user.put(User.KEY_YELP_ID, farm.getId());
         user.put(User.KEY_RATING, farm.getRating());
-        user.add(User.KEY_TAGS, "family-friendly");
-        user.add(User.KEY_TAGS, "animals");
+        user.put(User.KEY_PHONE, farm.getPhone());
+        user.put(User.KEY_REVIEW_COUNT, farm.getReviewCount());
+        for(YelpCategory category : farm.getCategories())
+            user.add(User.KEY_TAGS, category.getTitle());
         user.signUpInBackground(e -> {
             try {
                 ParseUser.become(sessionToken);
@@ -347,7 +351,6 @@ public class DataManager {
                 ex.printStackTrace();
             }
         });
-
         return user;
     }
 }

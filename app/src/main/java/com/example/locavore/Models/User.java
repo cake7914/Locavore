@@ -43,6 +43,8 @@ public class User {
     public static final String KEY_OBJECT_ID = "objectId";
     public static final String KEY_FOLLOWERS = "followers";
     public static final String KEY_RATING = "rating";
+    public static final String KEY_PHONE = "phone";
+    public static final String KEY_REVIEW_COUNT = "reviewCount";
 
     private ParseUser user;
     public boolean expanded;
@@ -235,6 +237,7 @@ public class User {
         imageUrl = user.getString(User.KEY_PROFILE_BACKDROP);
         id = user.getString(User.KEY_YELP_ID);
         rating = user.getDouble(User.KEY_RATING);
+        phone = user.getString(User.KEY_PHONE);
+        reviewCount = user.getInt(User.KEY_REVIEW_COUNT);
     }
-
 }

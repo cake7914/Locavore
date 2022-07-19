@@ -3,6 +3,7 @@ package com.example.locavore.Fragments;
 import static com.example.locavore.BuildConfig.YELP_API_KEY;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -62,10 +63,17 @@ public class FarmProfileFragment extends Fragment {
     public static final String BASE_URL = "https://api.yelp.com/v3/";
     Button btnCreateEvent;
     Button btnLogout;
+
     TextView tvFarmName;
     TextView tvBio;
+    TextView tvPhoneNumber;
+    TextView tvAddress;
+    TextView tvRating;
+    TextView tvReviewCount;
+
     ImageView ivBackgroundPhoto;
     ImageView ivProfileImage;
+
     RecyclerView rvEvents;
     FarmProfileEventsAdapter eventsAdapter;
     RecyclerView rvReviews;
@@ -94,12 +102,15 @@ public class FarmProfileFragment extends Fragment {
         btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
         btnLogout = view.findViewById(R.id.btnLogout);
         tvFarmName = view.findViewById(R.id.tvFarmName);
+        tvPhoneNumber = view.findViewById(R.id.tvPhoneNumber);
         ivBackgroundPhoto = view.findViewById(R.id.ivBackgroundPhoto);
         ivProfileImage = view.findViewById(R.id.ivProfilePhoto);
         tvBio = view.findViewById(R.id.tvDescription);
         rvReviews = view.findViewById(R.id.rvReviews);
         rvEvents = view.findViewById(R.id.rvEvents);
-
+        tvAddress = view.findViewById(R.id.tvAddress);
+        tvRating = view.findViewById(R.id.tvRating);
+        tvReviewCount = view.findViewById(R.id.tvReviewCount);
 
         eventsAdapter = new FarmProfileEventsAdapter(getContext(), mEvents);
         rvEvents.setAdapter(eventsAdapter);
@@ -139,9 +150,22 @@ public class FarmProfileFragment extends Fragment {
         // fetch reviews for this farm
         yelpReviewsRequest(farm);
 
-
         tvFarmName.setText(farm.getString(User.KEY_NAME));
         tvBio.setText(farm.getString(User.KEY_BIO));
+        tvAddress.setText(farm.getString(User.KEY_ADDRESS));
+        tvPhoneNumber.setText(farm.getString(User.KEY_PHONE));
+        tvRating.setText(String.valueOf(farm.getInt(User.KEY_RATING)));
+        tvReviewCount.setText(String.valueOf(farm.getInt(User.KEY_REVIEW_COUNT)));
+
+        tvPhoneNumber.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + farm.getString(User.KEY_PHONE)));
+            startActivity(intent);
+        });
+
+        tvAddress.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + farm.getString(User.KEY_ADDRESS)));
+            startActivity(intent);
+        });
 
         Glide.with(getContext()).load(farm.getString(User.KEY_PROFILE_PHOTO)).circleCrop().into(ivProfileImage);
         Glide.with(getContext())
