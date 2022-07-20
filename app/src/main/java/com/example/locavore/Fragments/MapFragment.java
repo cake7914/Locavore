@@ -5,10 +5,12 @@ import static com.google.android.gms.location.LocationServices.getFusedLocationP
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -28,6 +30,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.locavore.Activities.LoginActivity;
+import com.example.locavore.Activities.SplashScreenActivity;
 import com.example.locavore.Adapters.CustomWindowAdapter;
 import com.example.locavore.Adapters.MapProfilesAdapter;
 import com.example.locavore.Models.User;
@@ -297,13 +301,14 @@ public class MapFragment extends Fragment implements MapProfilesAdapter.Expansio
         if (currentLocation != null) {
             boolean firstLoad = markers.size() == 0;
 
-            map.clear();
-            markers = new ArrayList<>();
-
-            // should be on background thread !
-            dataManager.getFarms(currentLocation, mRadius);
-            profilesAdapter.updateList(dataManager.mFarms);
-            dropMarkers(mFarms, firstLoad);
+            if(firstLoad) {
+                profilesAdapter.updateList(dataManager.mFarms);
+                dropMarkers(mFarms, true);
+            } else {
+                map.clear();
+                markers = new ArrayList<>();
+                new FarmFetcher().execute();
+            }
         }
     }
 
@@ -353,6 +358,31 @@ public class MapFragment extends Fragment implements MapProfilesAdapter.Expansio
         @Override
         public int calculateDtToFit(int viewStart, int viewEnd, int boxStart, int boxEnd, int snapPreference) {
             return (boxStart + (boxEnd - boxStart) / 2) - (viewStart + (viewEnd - viewStart) / 2);
+        }
+    }
+
+    private class FarmFetcher extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                dataManager.getFarms(currentLocation, mRadius);
+            } catch (ParseException | IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            // super.onPostExecute(unused);
+            profilesAdapter.updateList(dataManager.mFarms);
+            dropMarkers(mFarms, false);
         }
     }
 }

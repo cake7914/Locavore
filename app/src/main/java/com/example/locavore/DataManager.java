@@ -104,8 +104,8 @@ public class DataManager {
             mRadius = radius;
         }
 
-        // only make the yelp request if necessary-- if we have no saved farms in the database in this area.
-        if(mFarms.size() == 0) {
+        // only make the yelp request if necessary-- if we have very few saved farms in this radius
+        if(mFarms.size() <= 5) {
             yelpRequest(User.FARM_USER_TYPE, currentLocation);
             yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
         }
