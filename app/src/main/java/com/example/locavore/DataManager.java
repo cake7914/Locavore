@@ -10,9 +10,12 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.locavore.Models.Event;
+import com.example.locavore.Models.FarmReviewsSearchResult;
 import com.example.locavore.Models.FarmSearchResult;
+import com.example.locavore.Models.Review;
 import com.example.locavore.Models.User;
 import com.example.locavore.Models.UserEvent;
+import com.example.locavore.Models.YelpCategory;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
@@ -69,6 +72,7 @@ public class DataManager {
     }
 
     public void getFarms(Location currentLocation, int radius) throws ParseException, IOException {
+        mLocation = currentLocation;
         if (mFarms.size() != 0) { // if we have saved farms, remove any & their events that are no longer relevant based on the user's location
             Log.i(TAG, "saved farms exist!");
 
@@ -136,55 +140,12 @@ public class DataManager {
                     Event event = eventQuery.get(eventId);
                     event.mWeight = weightEvent(event, currentLocation, farm);
                     insertEvent(event);
-
-                    /*eventQuery.getInBackground(eventId, (event, err) -> {
-                        if (err != null) {
-                            Log.e(TAG, "Issue with getting event ", err);
-                        } else {
-                            // weight this event, then insert it into the events list based on its weight
-                            try {
-                                event.mWeight = weightEvent(event, currentLocation, farm);
-                                insertEvent(event);
-                            } catch (JSONException | ParseException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });*/
-
                 } catch (JSONException | ParseException ex) {
                     ex.printStackTrace();
                 }
             }
         }
     }
-
-    /*private void queryEvents(User farm, Location currentLocation) {
-        JSONArray newEvents = farm.getUser().getJSONArray(User.KEY_EVENTS);
-        if (newEvents != null) {
-            for (int j = 0; j < newEvents.length(); j++) {
-                try {
-                    String eventId = newEvents.getString(j);
-                    ParseQuery<Event> eventQuery = ParseQuery.getQuery("Event");
-                    eventQuery.getInBackground(eventId, (event, err) -> {
-                        if (err != null) {
-                            Log.e(TAG, "Issue with getting event ", err);
-                        } else {
-                            // weight this event, then insert it into the events list based on its weight
-                            try {
-                                event.mWeight = weightEvent(event, currentLocation, farm);
-                                insertEvent(event);
-                            } catch (JSONException | ParseException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-                } catch (JSONException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-    }*/
 
     public void insertEvent(Event event) {
         if(mEvents.size() == 0) {
@@ -285,6 +246,7 @@ public class DataManager {
                 .build();
 
         YelpService yelpService = retrofit.create(YelpService.class);
+
         Call<FarmSearchResult> call = yelpService.searchFarms("Bearer " + YELP_API_KEY, currentLocation.getLatitude(), currentLocation.getLongitude(), request, 50, MAX_YELP_RADIUS);
 
         call.enqueue(new Callback<FarmSearchResult>() {
@@ -334,8 +296,10 @@ public class DataManager {
         user.put(User.KEY_BIO, farm.getName() + " is located at " + farm.getLocation().getAddress1() + " " + farm.getLocation().getCity() + " " + farm.getLocation().getState());
         user.put(User.KEY_YELP_ID, farm.getId());
         user.put(User.KEY_RATING, farm.getRating());
-        user.add(User.KEY_TAGS, "family-friendly");
-        user.add(User.KEY_TAGS, "animals");
+        user.put(User.KEY_PHONE, farm.getPhone());
+        user.put(User.KEY_REVIEW_COUNT, farm.getReviewCount());
+        for(YelpCategory category : farm.getCategories())
+            user.add(User.KEY_TAGS, category.getTitle());
         user.signUpInBackground(e -> {
             try {
                 ParseUser.become(sessionToken);
@@ -343,7 +307,6 @@ public class DataManager {
                 ex.printStackTrace();
             }
         });
-
         return user;
     }
 }
