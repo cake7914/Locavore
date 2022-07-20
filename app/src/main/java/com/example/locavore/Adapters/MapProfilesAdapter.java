@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
@@ -27,6 +28,9 @@ import com.example.locavore.FarmsDiffCallback;
 import com.example.locavore.Fragments.FarmProfileFragment;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
 import com.parse.ParseException;
 
 import org.json.JSONArray;
@@ -117,7 +121,8 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
         RecyclerView rvTags;
         MapProfileTagsAdapter tagsAdapter;
-        LinearLayoutManager linearLayoutManager;
+
+        FlexboxLayoutManager flexboxLayoutManager;
         Button btnContract;
         Button btnGoToFarmProfile;
 
@@ -209,23 +214,18 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
 
             tvFarmNameExpanded.setText(farm.getName());
             tvDistanceExpanded.setText(String.format(context.getResources().getString(R.string.distance_calc), farm.getDistance() / METERS_TO_MILE));
-            if (farm.getUser() != null) {
-                if (farm.getUser().getString(User.KEY_BIO) != null) {
-                    tvDescription.setText(farm.getUser().getString(User.KEY_BIO));
-                } else {
-                    Log.i(TAG, "bio is null " + farm.getUser().getUsername());
-                }
-            } else {
-                Log.i(TAG, "farm user is null");
-            }
+
+            if(farm.getUser().getString(User.KEY_BIO).length() >= 50)
+                tvDescription.setText(farm.getUser().getString(User.KEY_BIO).substring(0, 125) + "...");
 
             JSONArray JSONtags = farm.getUser().getJSONArray("tags");
             if(JSONtags != null) {
                 List<String> tags = new ArrayList<>();
                 tagsAdapter = new MapProfileTagsAdapter(context, tags);
                 rvTags.setAdapter(tagsAdapter);
-                linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
-                rvTags.setLayoutManager(linearLayoutManager);
+                flexboxLayoutManager = new FlexboxLayoutManager(context);
+                flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+                rvTags.setLayoutManager(flexboxLayoutManager);
 
                 for (int i = 0; i < JSONtags.length(); i++) {
                     tags.add(JSONtags.getString(i));

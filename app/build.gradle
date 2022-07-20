@@ -70,6 +70,8 @@ dependencies {
     implementation 'org.parceler:parceler-api:1.1.12'
     annotationProcessor 'org.parceler:parceler:1.1.12'
 
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
+
     // Required -- JUnit 4 framework
     testImplementation "junit:junit:1.8.2"
 
