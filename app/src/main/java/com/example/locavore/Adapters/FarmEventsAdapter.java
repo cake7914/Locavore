@@ -47,13 +47,13 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
     public static final String TAG = "FarmEventsAdapter";
     private static final double METERS_TO_MILE = 1609.34;
 
-    private Context context;
+    private Context mContext;
     private List<Event> mEvents;
     DataManager dataManager = DataManager.getInstance(null);
 
 
     public FarmEventsAdapter(Context context, List<Event> events) {
-        this.context = context;
+        this.mContext = context;
         this.mEvents = events;
     }
 
@@ -68,7 +68,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_farm_event, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.item_farm_event, parent, false);
         return new ViewHolder(view);
     }
 
@@ -120,7 +120,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
         public void bind(Event event) {
 
             containerView.setOnTouchListener(new View.OnTouchListener() {
-                private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+                private GestureDetector gestureDetector = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
                     @Override
                     public boolean onDoubleTap(MotionEvent e) {
                         ParseQuery<UserEvent> userEventQuery = ParseQuery.getQuery("UserEvent");
@@ -129,7 +129,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                         userEventQuery.getFirstInBackground((userEvent, err) -> {
                             if(userEvent != null) { // is attended
                                 if(userEvent.getLiked() != UserEvent.LIKED){  // like; change color to liked color & save in background
-                                    btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                                    btnLikeEvent.setColorFilter(mContext.getResources().getColor(R.color.dark_yellow));
                                     btnDislikeEvent.setVisibility(View.GONE);
                                     userEvent.setLiked(UserEvent.LIKED);
                                     userEvent.saveInBackground();
@@ -141,7 +141,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
 
                     @Override
                     public void onLongPress(MotionEvent e) {
-                        FragmentManager fragmentManager = ((AppCompatActivity)context).getSupportFragmentManager();
+                        FragmentManager fragmentManager = ((AppCompatActivity)mContext).getSupportFragmentManager();
                         Fragment eventDetailsFragment = new EventDetailsFragment();
                         Bundle args = new Bundle();
                         args.putParcelable("Event", Parcels.wrap(event));
@@ -159,7 +159,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
             });
 
             if(event.getPhoto() != null) {
-                Glide.with(context)
+                Glide.with(mContext)
                         .load(event.getPhoto().getUrl())
                         .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
                         .into(ivEventPhoto);
@@ -177,7 +177,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                     Location eventLocation = new Location(NETWORK_PROVIDER);
                     eventLocation.setLongitude(event.getLocation().getLongitude());
                     eventLocation.setLatitude(event.getLocation().getLatitude());
-                    tvDistance.setText(String.format(context.getResources().getString(R.string.distance_calc), eventLocation.distanceTo(dataManager.mLocation) / METERS_TO_MILE));
+                    tvDistance.setText(String.format(mContext.getResources().getString(R.string.distance_calc), eventLocation.distanceTo(dataManager.mLocation) / METERS_TO_MILE));
                 }
             });
 
@@ -188,7 +188,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
             eventQuery.getFirstInBackground((object, e) -> {
                 if(object != null) {
                     btnAttendedEvent.setVisibility(View.VISIBLE);
-                    btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.light_green));
+                    btnAttendedEvent.setColorFilter(mContext.getResources().getColor(R.color.light_green));
                     if(object.getLiked() == UserEvent.NEUTRAL)
                     {
                         btnLikeEvent.setVisibility(View.VISIBLE);
@@ -196,17 +196,17 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                     }
                     else if(object.getLiked() == UserEvent.LIKED)
                     {
-                        btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                        btnLikeEvent.setColorFilter(mContext.getResources().getColor(R.color.dark_yellow));
                         btnLikeEvent.setVisibility(View.VISIBLE);
                         btnDislikeEvent.setVisibility(View.GONE);
                     } else if(object.getLiked() == UserEvent.DISLIKED){
-                        btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                        btnDislikeEvent.setColorFilter(mContext.getResources().getColor(R.color.dark_yellow));
                         btnDislikeEvent.setVisibility(View.VISIBLE);
                         btnLikeEvent.setVisibility(View.INVISIBLE);
                     }
                 } else { // set normal coloring & hide buttons
                     btnAttendedEvent.setVisibility(View.VISIBLE);
-                    btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                    btnAttendedEvent.setColorFilter(mContext.getResources().getColor(R.color.gray));
                     btnDislikeEvent.setVisibility(View.INVISIBLE);
                     btnLikeEvent.setVisibility(View.INVISIBLE);
                 }
@@ -219,15 +219,15 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                 userEventQuery.getFirstInBackground((object, e) -> {
                     if(object != null) { // it already exists; they want to mark as no longer attending
                         object.deleteInBackground();
-                        btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                        btnAttendedEvent.setColorFilter(mContext.getResources().getColor(R.color.gray));
                         // set visibilities of like/dislike buttons to visible // remove color filters
-                        btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.gray));
-                        btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                        btnLikeEvent.setColorFilter(mContext.getResources().getColor(R.color.gray));
+                        btnDislikeEvent.setColorFilter(mContext.getResources().getColor(R.color.gray));
                         btnDislikeEvent.setVisibility(View.INVISIBLE);
                         btnLikeEvent.setVisibility(View.INVISIBLE);
                     } else { // it does not exist; they want to mark as attending
                         // change color to attended color
-                        btnAttendedEvent.setColorFilter(context.getResources().getColor(R.color.light_green));
+                        btnAttendedEvent.setColorFilter(mContext.getResources().getColor(R.color.light_green));
                         // set visibilities of like/dislike buttons to visible
                         btnDislikeEvent.setVisibility(View.VISIBLE);
                         btnLikeEvent.setVisibility(View.VISIBLE);
@@ -249,11 +249,11 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                 userEventQuery.getFirstInBackground((userEvent, e) -> {
                     if(userEvent != null) {
                         if(userEvent.getLiked() == UserEvent.DISLIKED) { // already disliked: undislike
-                            btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                            btnDislikeEvent.setColorFilter(mContext.getResources().getColor(R.color.gray));
                             btnLikeEvent.setVisibility(View.VISIBLE);
                             userEvent.put(UserEvent.KEY_LIKED, UserEvent.NEUTRAL);
                         } else { // dislike; change color to disliked color & save in background
-                            btnDislikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                            btnDislikeEvent.setColorFilter(mContext.getResources().getColor(R.color.dark_yellow));
                             btnLikeEvent.setVisibility(View.INVISIBLE);
                             userEvent.setLiked(UserEvent.DISLIKED);
                         }
@@ -269,11 +269,11 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                 userEventQuery.getFirstInBackground((userEvent, e) -> {
                     if(userEvent != null) {
                         if(userEvent.getLiked() == UserEvent.LIKED) { // already liked: unlike
-                            btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.gray));
+                            btnLikeEvent.setColorFilter(mContext.getResources().getColor(R.color.gray));
                             btnDislikeEvent.setVisibility(View.VISIBLE);
                             userEvent.put(UserEvent.KEY_LIKED, UserEvent.NEUTRAL);
                         } else { // like; change color to liked color & save in background
-                            btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                            btnLikeEvent.setColorFilter(mContext.getResources().getColor(R.color.dark_yellow));
                             btnDislikeEvent.setVisibility(View.GONE);
                             userEvent.setLiked(UserEvent.LIKED);
                         }
