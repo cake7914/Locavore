@@ -140,21 +140,6 @@ public class DataManager {
                     Event event = eventQuery.get(eventId);
                     event.mWeight = weightEvent(event, currentLocation, farm);
                     insertEvent(event);
-
-                    /*eventQuery.getInBackground(eventId, (event, err) -> {
-                        if (err != null) {
-                            Log.e(TAG, "Issue with getting event ", err);
-                        } else {
-                            // weight this event, then insert it into the events list based on its weight
-                            try {
-                                event.mWeight = weightEvent(event, currentLocation, farm);
-                                insertEvent(event);
-                            } catch (JSONException | ParseException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });*/
-
                 } catch (JSONException | ParseException ex) {
                     ex.printStackTrace();
                 }
@@ -252,35 +237,6 @@ public class DataManager {
             }
         }
         return -1;
-    }
-
-    public void yelpReviewsRequest(ParseUser farm, List<Review> reviews) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        YelpService yelpService = retrofit.create(YelpService.class);
-        Call<FarmReviewsSearchResult> call = yelpService.findBusinessReviews("Bearer " + YELP_API_KEY, farm.getString(User.KEY_YELP_ID));
-        call.enqueue(new Callback<FarmReviewsSearchResult>() {
-            @Override
-            public void onResponse(Call<FarmReviewsSearchResult> call, Response<FarmReviewsSearchResult> response) {
-                Log.i(TAG, "Success! ");
-                List<Review> newReviews = new ArrayList<>();
-
-                // add all reviews to the new reviews list
-                for(Review review : response.body().getReviews()) {
-                    Log.i(TAG, review.getText());
-                }
-                newReviews.addAll(response.body().getReviews());
-
-            }
-
-            @Override
-            public void onFailure(Call<FarmReviewsSearchResult> call, Throwable t) {
-                Log.i(TAG, "Failure " + t);
-            }
-        });
     }
 
     public void yelpRequest(String request, Location currentLocation) throws ParseException, IOException {
