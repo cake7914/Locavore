@@ -6,7 +6,9 @@ import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -117,15 +119,41 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
 
         public void bind(Event event) {
 
-            containerView.setOnLongClickListener(new View.OnLongClickListener() {
+            containerView.setOnTouchListener(new View.OnTouchListener() {
+                private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onDoubleTap(MotionEvent e) {
+                        ParseQuery<UserEvent> userEventQuery = ParseQuery.getQuery("UserEvent");
+                        userEventQuery.whereEqualTo(UserEvent.KEY_USER_ID, ParseUser.getCurrentUser().getObjectId());
+                        userEventQuery.whereEqualTo(UserEvent.KEY_EVENT_ID, event.getObjectId());
+                        userEventQuery.getFirstInBackground((userEvent, err) -> {
+                            if(userEvent != null) { // is attended
+                                if(userEvent.getLiked() != UserEvent.LIKED){  // like; change color to liked color & save in background
+                                    btnLikeEvent.setColorFilter(context.getResources().getColor(R.color.dark_yellow));
+                                    btnDislikeEvent.setVisibility(View.GONE);
+                                    userEvent.setLiked(UserEvent.LIKED);
+                                    userEvent.saveInBackground();
+                                }
+                            }
+                        });
+                        return super.onDoubleTap(e);
+                    }
+
+                    @Override
+                    public void onLongPress(MotionEvent e) {
+                        FragmentManager fragmentManager = ((AppCompatActivity)context).getSupportFragmentManager();
+                        Fragment eventDetailsFragment = new EventDetailsFragment();
+                        Bundle args = new Bundle();
+                        args.putParcelable("Event", Parcels.wrap(event));
+                        eventDetailsFragment.setArguments(args);
+                        fragmentManager.beginTransaction().add(R.id.flContainer, eventDetailsFragment).addToBackStack(null).commit();
+                        super.onLongPress(e);
+                    }
+                });
+
                 @Override
-                public boolean onLongClick(View v) {
-                    FragmentManager fragmentManager = ((AppCompatActivity)context).getSupportFragmentManager();
-                    Fragment eventDetailsFragment = new EventDetailsFragment();
-                    Bundle args = new Bundle();
-                    args.putParcelable("Event", Parcels.wrap(event));
-                    eventDetailsFragment.setArguments(args);
-                    fragmentManager.beginTransaction().add(R.id.flContainer, eventDetailsFragment).addToBackStack(null).commit();
+                public boolean onTouch(View v, MotionEvent event) {
+                    gestureDetector.onTouchEvent(event);
                     return true;
                 }
             });
