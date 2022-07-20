@@ -11,11 +11,24 @@
         android:layout_height="wrap_content"
         tools:context=".Fragments.FarmProfileFragment">
 
+        <Button
+            android:id="@+id/btnFollow2"
+            android:layout_width="111dp"
+            android:layout_height="34dp"
+            android:layout_below="@+id/ivBackgroundPhoto"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="-2dp"
+            android:layout_marginEnd="5dp"
+            android:backgroundTint="#F0C201"
+            android:text="@string/follow"
+            android:textSize="11sp"
+            app:cornerRadius="90dp" />
+
         <TextView
             android:id="@+id/tvEvents"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/scrollView"
+            android:layout_below="@id/rvTags"
             android:layout_marginStart="5dp"
             android:layout_marginTop="3dp"
             android:text="@string/events"
@@ -184,6 +197,13 @@
             android:textColor="#000000"
             android:textSize="17sp"
             android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTags"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_below="@+id/scrollView"
+            android:layout_marginTop="8dp" />
 
     </RelativeLayout>
 </ScrollView>

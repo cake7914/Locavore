@@ -28,6 +28,7 @@ import com.bumptech.glide.Glide;
 import com.example.locavore.Activities.LoginActivity;
 import com.example.locavore.Adapters.FarmProfileEventsAdapter;
 import com.example.locavore.Adapters.FarmProfileReviewsAdapter;
+import com.example.locavore.Adapters.MapProfileTagsAdapter;
 import com.example.locavore.DataManager;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.FarmReviewsSearchResult;
@@ -35,11 +36,19 @@ import com.example.locavore.Models.Review;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.example.locavore.YelpService;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.parse.FunctionCallback;
+import com.parse.ParseCloud;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit2.Call;
@@ -55,6 +64,7 @@ public class FarmProfileFragment extends Fragment {
     public static final String BASE_URL = "https://api.yelp.com/v3/";
     Button btnCreateEvent;
     Button btnLogout;
+    Button btnFollow;
 
     TextView tvFarmName;
     TextView tvBio;
@@ -72,6 +82,9 @@ public class FarmProfileFragment extends Fragment {
     FarmProfileEventsAdapter eventsAdapter;
     RecyclerView rvReviews;
     FarmProfileReviewsAdapter reviewsAdapter;
+    RecyclerView rvTags;
+    MapProfileTagsAdapter tagsAdapter;
+
     List<Event> mEvents = new ArrayList<>();
     List<Review> mReviews = new ArrayList<>();
     DataManager dataManager = DataManager.getInstance(null);
@@ -103,10 +116,12 @@ public class FarmProfileFragment extends Fragment {
         tvBio = view.findViewById(R.id.tvDescription);
         rvReviews = view.findViewById(R.id.rvReviews);
         rvEvents = view.findViewById(R.id.rvEvents);
+        rvTags = view.findViewById(R.id.rvTags);
         tvAddress = view.findViewById(R.id.tvAddress);
         tvRating = view.findViewById(R.id.tvRating);
         tvReviewCount = view.findViewById(R.id.tvReviewCount);
         scrollView = view.findViewById(R.id.scrollView);
+        btnFollow = view.findViewById(R.id.btnFollow2);
 
         eventsAdapter = new FarmProfileEventsAdapter(getContext(), mEvents);
         rvEvents.setAdapter(eventsAdapter);
@@ -175,6 +190,90 @@ public class FarmProfileFragment extends Fragment {
                 .load(farm.getString(User.KEY_PROFILE_BACKDROP))
                 .centerCrop()
                 .into(ivBackgroundPhoto);
+
+        JSONArray JSONtags = farm.getJSONArray("tags");
+        if(JSONtags != null) {
+            List<String> tags = new ArrayList<>();
+            MapProfileTagsAdapter tagsAdapter = new MapProfileTagsAdapter(requireContext(), tags);
+            rvTags.setAdapter(tagsAdapter);
+            FlexboxLayoutManager flexboxLayoutManager = new FlexboxLayoutManager(requireContext());
+            flexboxLayoutManager.setFlexDirection(FlexDirection.ROW);
+            rvTags.setLayoutManager(flexboxLayoutManager);
+
+            for (int i = 0; i < JSONtags.length(); i++) {
+                try {
+                    tags.add(JSONtags.getString(i));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            tagsAdapter.notifyItemRangeInserted(0, JSONtags.length());
+        }
+
+        try {
+            if(checkUserFollowingFarm(farm.getObjectId(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) == -1) {
+                btnFollow.setText(R.string.follow);
+                btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.light_yellow));
+            } else {
+                btnFollow.setText(R.string.following);
+                btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_yellow));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        btnFollow.setOnClickListener(v -> {
+            ParseUser user = ParseUser.getCurrentUser();
+            try {
+                // initializing params for cloudcode call
+                HashMap<String, String> params = new HashMap();
+                params.put("objectId", farm.getObjectId());
+                params.put("followerId", user.getObjectId());
+
+                int pos = checkUserFollowingFarm(farm.getObjectId(), user.getJSONArray(User.KEY_FARMS_FOLLOWING));
+                if(pos == -1) {
+                    user.add(User.KEY_FARMS_FOLLOWING, farm.getObjectId());
+                    btnFollow.setText(R.string.following);
+                    btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_yellow));
+                    params.put("following", "true");
+                } else {
+                    JSONArray farms = user.getJSONArray(User.KEY_FARMS_FOLLOWING);
+                    assert farms != null;
+                    farms.remove(pos);
+                    user.put(User.KEY_FARMS_FOLLOWING, farms);
+                    btnFollow.setText(R.string.follow);
+                    btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.light_yellow));
+                    params.put("following", "false");
+                }
+                ParseCloud.callFunctionInBackground("updateFollowers", params, (FunctionCallback<ParseObject>) (obj, e) -> {
+                    if (e == null) {
+                        Log.i(TAG, "non error");
+                    }else{
+                        Log.i(TAG, "error" + e.getMessage());
+                    }
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            user.saveInBackground(e -> {
+                if (e != null) {
+                    Log.i(TAG, "Something has happened", e);
+                } else {
+                    Log.i(TAG, "Save successful");
+                }
+            });
+        });
+    }
+
+    protected int checkUserFollowingFarm(String farmID, JSONArray farmsFollowing) throws JSONException {
+        if(farmsFollowing != null) {
+            for (int i = 0; i < farmsFollowing.length(); i++) {
+                if(farmsFollowing.getString(i).equals(farmID)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 
     private void showAlertDialog() {

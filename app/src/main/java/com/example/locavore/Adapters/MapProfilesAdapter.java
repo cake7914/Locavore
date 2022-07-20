@@ -215,8 +215,10 @@ public class MapProfilesAdapter extends RecyclerView.Adapter<MapProfilesAdapter.
             tvFarmNameExpanded.setText(farm.getName());
             tvDistanceExpanded.setText(String.format(context.getResources().getString(R.string.distance_calc), farm.getDistance() / METERS_TO_MILE));
 
-            if(farm.getUser().getString(User.KEY_BIO).length() >= 50)
+            if(farm.getUser().getString(User.KEY_BIO).length() >= 128)
                 tvDescription.setText(farm.getUser().getString(User.KEY_BIO).substring(0, 125) + "...");
+            else
+                tvDescription.setText(farm.getUser().getString(User.KEY_BIO));
 
             JSONArray JSONtags = farm.getUser().getJSONArray("tags");
             if(JSONtags != null) {
