@@ -2,9 +2,9 @@ package com.example.locavore.Fragments;
 
 import static com.example.locavore.BuildConfig.YELP_API_KEY;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,16 +20,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.locavore.Activities.LoginActivity;
-import com.example.locavore.Activities.MainActivity;
-import com.example.locavore.Activities.SplashScreenActivity;
 import com.example.locavore.Adapters.FarmProfileEventsAdapter;
 import com.example.locavore.Adapters.FarmProfileReviewsAdapter;
 import com.example.locavore.DataManager;
@@ -39,16 +35,12 @@ import com.example.locavore.Models.Review;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.example.locavore.YelpService;
-import com.parse.ParseException;
-import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,6 +66,8 @@ public class FarmProfileFragment extends Fragment {
     ImageView ivBackgroundPhoto;
     ImageView ivProfileImage;
 
+    ScrollView scrollView;
+
     RecyclerView rvEvents;
     FarmProfileEventsAdapter eventsAdapter;
     RecyclerView rvReviews;
@@ -95,6 +89,7 @@ public class FarmProfileFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_farm_profile, container, false);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -111,6 +106,7 @@ public class FarmProfileFragment extends Fragment {
         tvAddress = view.findViewById(R.id.tvAddress);
         tvRating = view.findViewById(R.id.tvRating);
         tvReviewCount = view.findViewById(R.id.tvReviewCount);
+        scrollView = view.findViewById(R.id.scrollView);
 
         eventsAdapter = new FarmProfileEventsAdapter(getContext(), mEvents);
         rvEvents.setAdapter(eventsAdapter);
@@ -152,6 +148,13 @@ public class FarmProfileFragment extends Fragment {
 
         tvFarmName.setText(farm.getString(User.KEY_NAME));
         tvBio.setText(farm.getString(User.KEY_BIO));
+
+        // allow scrolling within child scrollView
+        scrollView.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            return false;
+        });
+
         tvAddress.setText(farm.getString(User.KEY_ADDRESS));
         tvPhoneNumber.setText(farm.getString(User.KEY_PHONE));
         tvRating.setText(String.valueOf(farm.getInt(User.KEY_RATING)));

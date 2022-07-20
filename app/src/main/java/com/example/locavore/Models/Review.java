@@ -16,7 +16,7 @@ public class Review {
     private Integer rating;
     @SerializedName("user")
     @Expose
-    private User user;
+    private YelpUser user;
     @SerializedName("text")
     @Expose
     private String text;
@@ -43,11 +43,11 @@ public class Review {
         this.rating = rating;
     }
 
-    public User getUser() {
+    public YelpUser getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(YelpUser user) {
         this.user = user;
     }
 

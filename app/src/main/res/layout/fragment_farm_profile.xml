@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parentScrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -14,7 +15,7 @@
             android:id="@+id/tvEvents"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tvDescription"
+            android:layout_below="@id/scrollView"
             android:layout_marginStart="5dp"
             android:layout_marginTop="3dp"
             android:text="@string/events"
@@ -73,15 +74,23 @@
                 tools:text="Maple Bank Farm" />
         </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/tvDescription"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="383dp"
+            android:layout_height="130dp"
             android:layout_below="@+id/tvAboutUs"
-            android:layout_marginHorizontal="10dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="6dp"
-            android:textColor="#000000"
-            tools:text="A beautiful organic farm with fresh veggies, fruits, and wool!" />
+            android:layout_marginEnd="5dp">
+
+            <TextView
+                android:id="@+id/tvDescription"
+                android:layout_width="383dp"
+                android:layout_height="130dp"
+                android:scrollbars="vertical"
+                android:textColor="#000000"
+                tools:text="Maple Bank Farm is one of the oldest family-run farms in the United States. It has been in the Hurlbut family since its formation in the late 1700’s. Jonathon Hurlbut has farmed in Roxbury since the early 1700’s. The Hurlbut’s settled the original farm in the center of Roxbury on six acres, granted to him by the King of England. He established what is now Maple Bank Farm in 1730, (with a tiny house within 100 feet of the current farm stand). The original foundation can still be seen today. Started as a subsistence farm with cows, sheep, and pigs Maple Bank Farm grew under the stewardship of descendants of Jonathon into 83 acres providing fruit, vegetables, wool, and much more. In the early 1900’s, the Hurlbut’s began growing products for the market. Orchards were established which are the origins of the heirloom apple varieties still being sold. Eggs and poultry were delivered to households in nearby towns and cities. In the 1950’s, Lewis and Alden Hurlbut expanded the retail routes to Danbury and Waterbury, selling fresh produce and eggs out of a pick up truck three days a week. A picnic table next to the farm driveway, piled daily with fresh pickings, served the locals, often on a self-service basis. Alden and Lewis built a more permanent small roadside stand in the style of a gable barn in 1963. Cathy and Howie Bronson have been operating Maple Bank Farm since 1980. Both farmers have a strong background in agriculture. Howie grew up in Washington, CT on his father’s dairy farm. This solid foundation grew as he studied agriculture at the University of New Hampshire. Howie’s love of the land spread from dairy to include fruit and vegetable farming. Cathy grew up on Maple Bank Farm, learning with a hands-on approach. Cathy and Howie married in 1978 and have two children, Linnea and Christopher. Cathy (Lewis’s daughter) and Howard Bronson Jr., are living in the farmhouse built in 1830 by the Hurlbut’s. Focusing on the local customer’s, Cathy and Howie built a new stand in 1986, to handle an expanded line of farm products, ranging from mixed baby salad greens to custom knitted wool stockings. The roadside market has a backdrop of sloping hills dotted with sheep and cows who wander down to the split rail fence hoping for a snack of fresh vegetables or fruits. Cathy and Howie feel very rooted in the values so often associated with farming, as their love of living off the land is deeply ingrained. They take joy in sharing the fruits of their labors with so many loyal and appreciative customers. Maple Bank Farm continues on in the rhythm of the seasons, carrying on so much of what was treasured by earlier generations." />
+        </ScrollView>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvEvents"
@@ -112,8 +121,9 @@
             android:id="@+id/tvPhoneNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/ivBackgroundPhoto"
-            android:layout_marginTop="5dp"
+            android:layout_below="@+id/tvContact"
+            android:layout_marginTop="4dp"
+            android:autoLink="phone"
             android:textSize="16sp"
             app:drawableStartCompat="@drawable/ic_baseline_phone_24"
             tools:text="203-266-7989" />
@@ -124,19 +134,21 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvPhoneNumber"
             android:layout_marginTop="3dp"
+            android:autoLink="map"
             android:textSize="16sp"
-            tools:text="250 Church St, New Haven CT"
-            app:drawableStartCompat="@drawable/ic_baseline_map_24" />
+            app:drawableStartCompat="@drawable/ic_baseline_map_24"
+            tools:text="250 Church St, New Haven CT" />
 
         <TextView
             android:id="@+id/tvAboutUs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvAddress"
-            android:layout_centerHorizontal="true"
+            android:layout_marginStart="5dp"
             android:layout_marginTop="2dp"
             android:text="@string/about_us"
             android:textColor="#000000"
+            android:textSize="17sp"
             android:textStyle="bold" />
 
         <TextView
@@ -160,6 +172,18 @@
             android:layout_marginTop="12dp"
             android:layout_toEndOf="@+id/tvReviews"
             tools:text="350" />
+
+        <TextView
+            android:id="@+id/tvContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ivBackgroundPhoto"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="3dp"
+            android:text="@string/contact_information"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            android:textStyle="bold" />
 
     </RelativeLayout>
 </ScrollView>

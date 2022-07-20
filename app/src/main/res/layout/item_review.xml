@@ -18,10 +18,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="11dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_toEndOf="@+id/ivReviewerPhoto"
             android:textSize="20sp"
-            tools:text="Darcy McLellan" />
+            tools:text="Darcy M." />
 
         <TextView
             android:id="@+id/tvReview"
@@ -29,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/tvReviewer"
             android:layout_marginHorizontal="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="18dp"
             tools:layout_editor_absoluteX="81dp"
             tools:layout_editor_absoluteY="62dp"
             tools:text="love this place to pieces!" />
@@ -45,6 +46,22 @@
             android:numStars="5"
             android:scaleX=".75"
             android:scaleY=".75" />
+
+        <ImageView
+            android:id="@+id/ivReviewerPhoto"
+            android:layout_width="53dp"
+            android:layout_height="46dp"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/tvTimePosted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            tools:text="3 months ago" />
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>
