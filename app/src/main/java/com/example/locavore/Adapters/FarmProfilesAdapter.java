@@ -1,6 +1,7 @@
 package com.example.locavore.Adapters;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +12,14 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.locavore.FarmsDiffCallback;
+import com.example.locavore.Fragments.FarmProfileFragment;
 import com.example.locavore.Fragments.FeedFragment;
 import com.example.locavore.R;
 
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +37,7 @@ import com.parse.SaveCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.parceler.Parcels;
 
 import java.util.HashMap;
 import java.util.List;
@@ -124,52 +129,54 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
                 btnFollow.setBackgroundColor(context.getResources().getColor(R.color.dark_yellow));
             }
 
-            btnFollow.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ParseUser user = ParseUser.getCurrentUser();
-                    try {
-                        // initializing params for cloudcode call
-                        HashMap<String, String> params = new HashMap();
-                        params.put("objectId", farm.getUser().getObjectId());
-                        params.put("followerId", user.getObjectId());
+            btnFollow.setOnClickListener(v -> {
+                ParseUser user = ParseUser.getCurrentUser();
+                try {
+                    // initializing params for cloudcode call
+                    HashMap<String, String> params = new HashMap();
+                    params.put("objectId", farm.getUser().getObjectId());
+                    params.put("followerId", user.getObjectId());
 
-                        int pos = checkUserFollowingFarm(farm.getUser().getObjectId(), user.getJSONArray(User.KEY_FARMS_FOLLOWING));
-                        if(pos == -1) {
-                            user.add(User.KEY_FARMS_FOLLOWING, farm.getUser().getObjectId());
-                            btnFollow.setText(R.string.following);
-                            btnFollow.setBackgroundColor(context.getResources().getColor(R.color.dark_yellow));
-                            params.put("following", "true");
-                        } else {
-                            JSONArray farms = user.getJSONArray(User.KEY_FARMS_FOLLOWING);
-                            assert farms != null;
-                            farms.remove(pos);
-                            user.put(User.KEY_FARMS_FOLLOWING, farms);
-                            btnFollow.setText(R.string.follow);
-                            btnFollow.setBackgroundColor(context.getResources().getColor(R.color.light_yellow));
-                            params.put("following", "false");
-                        }
-                        ParseCloud.callFunctionInBackground("updateFollowers", params, (FunctionCallback<ParseObject>) (obj, e) -> {
-                            if (e == null) {
-                                Log.i(TAG, "non error");
-                            }else{
-                                Log.i(TAG, "error" + e.getMessage());
-                            }
-                        });
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    int pos = checkUserFollowingFarm(farm.getUser().getObjectId(), user.getJSONArray(User.KEY_FARMS_FOLLOWING));
+                    if(pos == -1) {
+                        user.add(User.KEY_FARMS_FOLLOWING, farm.getUser().getObjectId());
+                        btnFollow.setText(R.string.following);
+                        btnFollow.setBackgroundColor(context.getResources().getColor(R.color.dark_yellow));
+                        params.put("following", "true");
+                    } else {
+                        JSONArray farms = user.getJSONArray(User.KEY_FARMS_FOLLOWING);
+                        assert farms != null;
+                        farms.remove(pos);
+                        user.put(User.KEY_FARMS_FOLLOWING, farms);
+                        btnFollow.setText(R.string.follow);
+                        btnFollow.setBackgroundColor(context.getResources().getColor(R.color.light_yellow));
+                        params.put("following", "false");
                     }
-                    user.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e != null) {
-                                Log.i(TAG, "Something has happened", e);
-                            } else {
-                                Log.i(TAG, "Save successful");
-                            }
+                    ParseCloud.callFunctionInBackground("updateFollowers", params, (FunctionCallback<ParseObject>) (obj, e) -> {
+                        if (e == null) {
+                            Log.i(TAG, "non error");
+                        }else{
+                            Log.i(TAG, "error" + e.getMessage());
                         }
                     });
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+                user.saveInBackground(e -> {
+                    if (e != null) {
+                        Log.i(TAG, "Something has happened", e);
+                    } else {
+                        Log.i(TAG, "Save successful");
+                    }
+                });
+            });
+
+            itemView.setOnClickListener(v -> {
+                Fragment fragment = new FarmProfileFragment();
+                Bundle args = new Bundle();
+                args.putParcelable(User.FARM_USER_TYPE, Parcels.wrap(farm));
+                fragment.setArguments(args);
+                ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).addToBackStack(null).commit();
             });
 
         }
