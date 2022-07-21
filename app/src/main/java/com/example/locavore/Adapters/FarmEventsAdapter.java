@@ -41,6 +41,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import org.json.JSONException;
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
@@ -88,7 +89,11 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = mFilteredEvents.get(position);
-        holder.bind(event);
+        try {
+            holder.bind(event);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -119,7 +124,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
             containerView = itemView;
         }
 
-        public void bind(Event event) {
+        public void bind(Event event) throws JSONException {
 
             containerView.setOnTouchListener(new View.OnTouchListener() {
                 private GestureDetector gestureDetector = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
@@ -160,9 +165,9 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                 }
             });
 
-            if(event.getPhoto() != null) {
+            if(event.getPhotos() != null) {
                 Glide.with(mContext)
-                        .load(event.getPhoto().getUrl())
+                        .load(event.getPhotos().getJSONObject(0).getString("url"))
                         .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
                         .into(ivEventPhoto);
             } else {

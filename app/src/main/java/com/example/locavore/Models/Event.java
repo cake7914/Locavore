@@ -5,6 +5,10 @@ import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 
+import org.json.JSONArray;
+
+import java.util.List;
+
 @ParseClassName("Event")
 public class Event extends ParseObject implements Comparable<Event> {
 
@@ -12,7 +16,7 @@ public class Event extends ParseObject implements Comparable<Event> {
     public static final String KEY_DESCRIPTION = "description";
     public static final String KEY_FARM = "farm";
     public static final String KEY_LOCATION = "location";
-    public static final String KEY_PHOTO = "photo";
+    public static final String KEY_PHOTOS = "photos";
     public static final String KEY_LOCATION_STR = "locationString";
     public static final String KEY_START_DATE = "startDate";
     public static final String KEY_END_DATE = "endDate";
@@ -53,8 +57,8 @@ public class Event extends ParseObject implements Comparable<Event> {
         put(KEY_LOCATION, location);
     }
 
-    public ParseFile getPhoto() { return getParseFile(KEY_PHOTO); }
-    public void setPhoto(ParseFile photo) { put(KEY_PHOTO, photo); }
+    public JSONArray getPhotos() { return getJSONArray(KEY_PHOTOS); }
+    public void setPhotos(JSONArray photos) { put(KEY_PHOTOS, photos); }
 
     public String getLocationString() {
         return getString(KEY_LOCATION_STR);

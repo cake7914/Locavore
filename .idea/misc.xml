@@ -21,13 +21,14 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.115911865234375" />
         <entry key="app/src/main/res/layout/activity_signup.xml" value="0.19630192502532928" />
         <entry key="app/src/main/res/layout/activity_splash_screen.xml" value="0.28028411865234376" />
-        <entry key="app/src/main/res/layout/fragment_create_event_dialog.xml" value="0.3319137573242189" />
-        <entry key="app/src/main/res/layout/fragment_event_details.xml" value="0.34807739257812503" />
+        <entry key="app/src/main/res/layout/fragment_create_event_dialog.xml" value="0.3209869384765626" />
+        <entry key="app/src/main/res/layout/fragment_event_details.xml" value="0.2795623779296875" />
         <entry key="app/src/main/res/layout/fragment_farm_profile.xml" value="0.3018020629882813" />
         <entry key="app/src/main/res/layout/fragment_feed.xml" value="0.3351449275362319" />
         <entry key="app/src/main/res/layout/fragment_locavore_profile.xml" value="0.22310994466145834" />
         <entry key="app/src/main/res/layout/fragment_map.xml" value="0.23536173502604163" />
         <entry key="app/src/main/res/layout/fragment_orders.xml" value="0.1894630192502533" />
+        <entry key="app/src/main/res/layout/item_event_photo.xml" value="0.16151274550773087" />
         <entry key="app/src/main/res/layout/item_farm_event.xml" value="0.2152267456054687" />
         <entry key="app/src/main/res/layout/item_farm_profile.xml" value="0.3351449275362319" />
         <entry key="app/src/main/res/layout/item_map_profile.xml" value="0.38755493164062504" />

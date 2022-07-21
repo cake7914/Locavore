@@ -44,6 +44,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="5dp"
                 android:layout_marginTop="40dp"
+                android:textAlignment="center"
+                android:textSize="16sp"
                 tools:text="Our beautiful 4-acre corn maze is themed each year; this year, travel through outer space as you solve puzzles!" />
 
             <TextView
@@ -63,16 +65,20 @@
                 android:layout_below="@+id/tvEventDescription"
                 android:layout_marginStart="5dp"
                 android:layout_marginTop="10dp"
+                android:drawableStart="@drawable/ic_baseline_map_24"
+                android:textSize="16sp"
                 tools:text="250 Church St, New Haven CT, 06751" />
 
             <TextView
                 android:id="@+id/tvDates"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/tvLocation"
+                android:layout_below="@+id/tvTime"
                 android:layout_marginStart="5dp"
-                android:layout_marginTop="11dp"
-                tools:text="August 15 - November 15" />
+                android:layout_marginTop="10dp"
+                android:drawableStart="@drawable/ic_baseline_date_range_24"
+                android:textSize="16sp"
+                tools:text="M, W, F, August 15 - November 15" />
 
             <ImageButton
                 android:id="@+id/btnLikeEvent2"
@@ -89,22 +95,24 @@
                 tools:visibility="visible" />
 
             <TextView
-                android:id="@+id/tvDaysOfWeek"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/tvDates"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="10dp"
-                tools:text="Mon, Wed, Fri" />
-
-            <TextView
                 android:id="@+id/tvTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/tvDaysOfWeek"
+                android:layout_below="@+id/tvLocation"
                 android:layout_marginStart="5dp"
                 android:layout_marginTop="10dp"
+                android:drawableStart="@drawable/ic_baseline_access_time_24"
+                android:textSize="16sp"
                 tools:text="9:00am - 5:00pm" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPhotos"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tvDates"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="2dp" />
+
         </RelativeLayout>
 
     </androidx.cardview.widget.CardView>
