@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import com.example.locavore.Models.User;
 
 import java.util.List;
+import java.util.Objects;
 
 public class FarmsDiffCallback extends DiffUtil.Callback{
 
@@ -28,11 +29,11 @@ public class FarmsDiffCallback extends DiffUtil.Callback{
 
     @Override // same id
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        return mOldFarms.get(oldItemPosition) == mNewFarms.get(newItemPosition);
+        return Objects.equals(mOldFarms.get(oldItemPosition).getId(), mNewFarms.get(newItemPosition).getId());
     }
 
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-        return mOldFarms.get(oldItemPosition).getName().equals(mNewFarms.get(newItemPosition).getName());
+        return mOldFarms.get(oldItemPosition) == mNewFarms.get(newItemPosition);
     }
 }

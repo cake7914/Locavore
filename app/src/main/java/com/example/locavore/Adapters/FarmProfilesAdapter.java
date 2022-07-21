@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.example.locavore.FarmsDiffCallback;
 import com.example.locavore.Fragments.FarmProfileFragment;
 import com.example.locavore.Fragments.FeedFragment;
+import com.example.locavore.Models.Event;
 import com.example.locavore.R;
 
 
@@ -39,37 +42,46 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.parceler.Parcels;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapter.ViewHolder> {
-    private Context context;
+public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapter.ViewHolder> implements Filterable {
+    private Context mContext;
     private List<User> mFarms;
+    private List<User> mFilteredFarms;
+    private FarmsFilter mFilter = new FarmsFilter();
     public static final String TAG = "FarmProfilesAdapter";
 
     public FarmProfilesAdapter(Context context, List<User> farms) {
-        this.context = context;
-        this.mFarms = farms;
+        this.mContext = context;
+        this.mFarms = new ArrayList<>(farms);
+        this.mFilteredFarms = new ArrayList<>(farms);
     }
 
-    public void updateList(List <User> newFarms) {
-        FarmsDiffCallback diffCallback = new FarmsDiffCallback(mFarms, newFarms);
+    public void updateList(List <User> newFarms, boolean filtered) {
+        FarmsDiffCallback diffCallback = new FarmsDiffCallback(mFilteredFarms, newFarms);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-        mFarms.clear();
-        mFarms.addAll(newFarms);
+
+        if(!filtered) {
+            mFarms.clear();
+            mFarms.addAll(newFarms);
+        }
+        mFilteredFarms.clear();
+        mFilteredFarms.addAll(newFarms);
         diffResult.dispatchUpdatesTo(this);
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_farm_profile, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.item_farm_profile, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        User farm = mFarms.get(position);
+        User farm = mFilteredFarms.get(position);
         try {
             holder.bind(farm);
         } catch (JSONException e) {
@@ -79,20 +91,8 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
 
     @Override
     public int getItemCount() {
-        return mFarms.size();
+        return mFilteredFarms.size();
     }
-
-    public void clear() {
-        int size = mFarms.size();
-        mFarms.clear();
-        notifyItemRangeRemoved(0, size);
-    }
-
-    public void addAll(List<User> newFarms) {
-        mFarms.addAll(newFarms);
-        notifyItemRangeInserted(mFarms.size() - newFarms.size(), newFarms.size());
-    }
-
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -116,17 +116,17 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
             }
 
             if(farm.getUser().getString(User.KEY_PROFILE_PHOTO) != null) {
-                Glide.with(context).load(farm.getUser().getString(User.KEY_PROFILE_PHOTO)).circleCrop().into(ivProfileImage);
+                Glide.with(mContext).load(farm.getUser().getString(User.KEY_PROFILE_PHOTO)).circleCrop().into(ivProfileImage);
             } else {
                 ivProfileImage.setImageBitmap(null);
             }
 
             if(checkUserFollowingFarm(farm.getUser().getObjectId(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) == -1) {
                 btnFollow.setText(R.string.follow);
-                btnFollow.setBackgroundColor(context.getResources().getColor(R.color.light_yellow));
+                btnFollow.setBackgroundColor(mContext.getResources().getColor(R.color.light_yellow));
             } else {
                 btnFollow.setText(R.string.following);
-                btnFollow.setBackgroundColor(context.getResources().getColor(R.color.dark_yellow));
+                btnFollow.setBackgroundColor(mContext.getResources().getColor(R.color.dark_yellow));
             }
 
             btnFollow.setOnClickListener(v -> {
@@ -141,7 +141,7 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
                     if(pos == -1) {
                         user.add(User.KEY_FARMS_FOLLOWING, farm.getUser().getObjectId());
                         btnFollow.setText(R.string.following);
-                        btnFollow.setBackgroundColor(context.getResources().getColor(R.color.dark_yellow));
+                        btnFollow.setBackgroundColor(mContext.getResources().getColor(R.color.dark_yellow));
                         params.put("following", "true");
                     } else {
                         JSONArray farms = user.getJSONArray(User.KEY_FARMS_FOLLOWING);
@@ -149,7 +149,7 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
                         farms.remove(pos);
                         user.put(User.KEY_FARMS_FOLLOWING, farms);
                         btnFollow.setText(R.string.follow);
-                        btnFollow.setBackgroundColor(context.getResources().getColor(R.color.light_yellow));
+                        btnFollow.setBackgroundColor(mContext.getResources().getColor(R.color.light_yellow));
                         params.put("following", "false");
                     }
                     ParseCloud.callFunctionInBackground("updateFollowers", params, (FunctionCallback<ParseObject>) (obj, e) -> {
@@ -176,9 +176,8 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
                 Bundle args = new Bundle();
                 args.putParcelable(User.FARM_USER_TYPE, Parcels.wrap(farm));
                 fragment.setArguments(args);
-                ((AppCompatActivity) context).getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).addToBackStack(null).commit();
+                ((AppCompatActivity) mContext).getSupportFragmentManager().beginTransaction().replace(R.id.flContainer, fragment).addToBackStack(null).commit();
             });
-
         }
     }
 
@@ -193,4 +192,40 @@ public class FarmProfilesAdapter extends RecyclerView.Adapter<FarmProfilesAdapte
         return -1;
     }
 
+    public Filter getFilter() {
+        return mFilter;
+    }
+
+    private class FarmsFilter extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults results = new FilterResults();
+
+            // base case: reset to all data
+            if(constraint.length() == 0){
+                results.values = mFarms;
+                results.count = mFarms.size();
+                return results;
+            }
+
+            String query = constraint.toString().toLowerCase();
+            List<User> filteredFarms = new ArrayList<>();
+
+            for (int i = 0; i < mFarms.size(); i++) {
+                if (mFarms.get(i).getName().toLowerCase().contains(query)) {
+                    filteredFarms.add(mFarms.get(i));
+                }
+            }
+
+            results.values = filteredFarms;
+            results.count = filteredFarms.size();
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            updateList((ArrayList<User>) results.values, true);
+        }
+    }
 }

@@ -1,29 +1,33 @@
 package com.example.locavore.Fragments;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.example.locavore.Adapters.FarmEventsAdapter;
 import com.example.locavore.Adapters.FarmProfilesAdapter;
@@ -32,13 +36,6 @@ import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
 import com.parse.ParseException;
-import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,7 +54,6 @@ public class FeedFragment extends Fragment implements DataManager.UpdateResponse
     private List<User> mFarms = new ArrayList<>(dataManager.mFarms);
     private List<Event> mEvents = new ArrayList<>(dataManager.mEvents);
 
-
     public FeedFragment() {
         // Required empty public constructor
     }
@@ -66,6 +62,7 @@ public class FeedFragment extends Fragment implements DataManager.UpdateResponse
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_feed, container, false);
     }
 
@@ -88,6 +85,36 @@ public class FeedFragment extends Fragment implements DataManager.UpdateResponse
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         toolbar.inflateMenu(R.menu.menu_feed);
 
+        Menu menu = toolbar.getMenu();
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                eventsAdapter.getFilter().filter("");
+                profilesAdapter.getFilter().filter("");
+                return true;
+            }
+        });
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                eventsAdapter.getFilter().filter(query);
+                profilesAdapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return true;
+            }
+        });
+
         locationManager = (LocationManager) getContext().getSystemService(getContext().LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
@@ -102,7 +129,7 @@ public class FeedFragment extends Fragment implements DataManager.UpdateResponse
 
     @Override
     public void onUpdate(List<User> farms, List<Event> events) {
-        eventsAdapter.updateList(events);
-        profilesAdapter.updateList(farms);
+        eventsAdapter.updateList(events, false);
+        profilesAdapter.updateList(farms, false);
     }
 }

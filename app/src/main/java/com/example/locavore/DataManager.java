@@ -72,7 +72,10 @@ public class DataManager {
     }
 
     public void getFarms(Location currentLocation, int radius) throws ParseException, IOException {
-        mLocation = currentLocation;
+        if(currentLocation != null) {
+            mLocation = currentLocation;
+        }
+
         if (mFarms.size() != 0) { // if we have saved farms, remove any & their events that are no longer relevant based on the user's location
             Log.i(TAG, "saved farms exist!");
 
@@ -80,7 +83,7 @@ public class DataManager {
                 Location farmLocation = new Location(NETWORK_PROVIDER);
                 farmLocation.setLatitude(mFarms.get(i).getCoordinates().latitude);
                 farmLocation.setLongitude(mFarms.get(i).getCoordinates().longitude);
-                if (currentLocation.distanceTo(farmLocation) > radius) {
+                if (mLocation.distanceTo(farmLocation) > radius) {
                     mFarms.remove(i);
                     mFarmIds.remove(i);
                 }
@@ -91,23 +94,23 @@ public class DataManager {
         // if we have no farms
         if(mFarms.size() == 0)
         {
-            queryFarms(User.FARM_USER_TYPE, currentLocation);
-            queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+            queryFarms(User.FARM_USER_TYPE, mLocation);
+            queryFarms(User.FARMERS_MARKET_USER_TYPE, mLocation);
         }
 
         // if the radius has increased, query the database.
         if(mRadius < radius) {
             mRadius = radius;
-            queryFarms(User.FARM_USER_TYPE, currentLocation);
-            queryFarms(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+            queryFarms(User.FARM_USER_TYPE, mLocation);
+            queryFarms(User.FARMERS_MARKET_USER_TYPE, mLocation);
         } else if(mRadius > radius){ //otherwise, just decrease mRadius
             mRadius = radius;
         }
 
         // only make the yelp request if necessary-- if we have very few saved farms in this radius
         if(mFarms.size() <= 5) {
-            yelpRequest(User.FARM_USER_TYPE, currentLocation);
-            yelpRequest(User.FARMERS_MARKET_USER_TYPE, currentLocation);
+            yelpRequest(User.FARM_USER_TYPE, mLocation);
+            yelpRequest(User.FARMERS_MARKET_USER_TYPE, mLocation);
         }
     }
 
@@ -128,6 +131,8 @@ public class DataManager {
 
         if(updateResponse != null)
             updateResponse.onUpdate(mFarms, mEvents);
+
+        Log.i(TAG, "completed update");
     }
 
     private void queryEvents(User farm, Location currentLocation) {
@@ -147,7 +152,7 @@ public class DataManager {
         }
     }
 
-    public void insertEvent(Event event) {
+    private void insertEvent(Event event) {
         if(mEvents.size() == 0) {
             mEvents.add(event);
         } else {

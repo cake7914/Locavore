@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -41,27 +43,38 @@ import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.ViewHolder> {
+public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.ViewHolder> implements Filterable {
     public static final String TAG = "FarmEventsAdapter";
     private static final double METERS_TO_MILE = 1609.34;
 
     private Context mContext;
     private List<Event> mEvents;
+    private List<Event> mFilteredEvents;
+    private EventsFilter mFilter = new EventsFilter();
     DataManager dataManager = DataManager.getInstance(null);
 
 
     public FarmEventsAdapter(Context context, List<Event> events) {
         this.mContext = context;
-        this.mEvents = events;
+        this.mEvents = new ArrayList<>(events);
+        this.mFilteredEvents = new ArrayList<>(events);
+
     }
 
-    public void updateList(List <Event> newEvents) {
-        EventsDiffCallback diffCallback = new EventsDiffCallback(mEvents, newEvents);
+    public void updateList(List <Event> newEvents, boolean filtered) {
+        EventsDiffCallback diffCallback = new EventsDiffCallback(mFilteredEvents, newEvents);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-        mEvents.clear();
-        mEvents.addAll(newEvents);
+
+        if(!filtered) {
+            mEvents.clear();
+            mEvents.addAll(newEvents);
+        }
+
+        mFilteredEvents.clear();
+        mFilteredEvents.addAll(newEvents);
         diffResult.dispatchUpdatesTo(this);
     }
 
@@ -74,24 +87,13 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Event event = mEvents.get(position);
+        Event event = mFilteredEvents.get(position);
         holder.bind(event);
     }
 
     @Override
     public int getItemCount() {
-        return mEvents.size();
-    }
-
-    public void clear() {
-        int size = mEvents.size();
-        mEvents.clear();
-        notifyItemRangeRemoved(0, size);
-    }
-
-    public void addAll(List<Event> newEvents) {
-        mEvents.addAll(newEvents);
-        notifyItemRangeInserted(mEvents.size() - newEvents.size(), newEvents.size());
+        return mFilteredEvents.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -284,4 +286,32 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
         }
     }
 
+    public Filter getFilter() {
+        return mFilter;
+    }
+
+    private class EventsFilter extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            String query = constraint.toString().toLowerCase();
+            FilterResults results = new FilterResults();
+            List<Event> filteredEvents = new ArrayList<>();
+
+            for (int i = 0; i < mEvents.size(); i++) {
+                if ((mEvents.get(i).getName().toLowerCase().contains(query)) || (mEvents.get(i).getFarm().toLowerCase().contains(query))) {
+                    filteredEvents.add(mEvents.get(i));
+                }
+            }
+
+            results.values = filteredEvents;
+            results.count = filteredEvents.size();
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            updateList((ArrayList<Event>) results.values, true);
+        }
+    }
 }
