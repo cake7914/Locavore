@@ -28,6 +28,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import org.json.JSONException;
 import org.parceler.Parcels;
 
 import java.util.List;
@@ -51,7 +52,11 @@ public class FarmProfileEventsAdapter extends RecyclerView.Adapter<FarmProfileEv
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Event event = mEvents.get(position);
-        holder.bind(event);
+        try {
+            holder.bind(event);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -91,12 +96,12 @@ public class FarmProfileEventsAdapter extends RecyclerView.Adapter<FarmProfileEv
             containerView = itemView;
         }
 
-        public void bind(Event event) {
+        public void bind(Event event) throws JSONException {
             tvEventName.setText(event.getName());
 
-            if(event.getPhoto() != null) {
+            if(event.getPhotos() != null) {
                 Glide.with(mContext)
-                        .load(event.getPhoto().getUrl())
+                        .load(event.getPhotos().getJSONObject(0).getString("url"))
                         .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))
                         .into(ivEventPhoto);
             } else {
