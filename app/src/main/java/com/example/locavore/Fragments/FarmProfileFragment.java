@@ -38,6 +38,7 @@ import com.example.locavore.R;
 import com.example.locavore.YelpService;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.FunctionCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseObject;
@@ -62,9 +63,9 @@ public class FarmProfileFragment extends Fragment {
 
     public static final String TAG = "FarmProfileFragment";
     public static final String BASE_URL = "https://api.yelp.com/v3/";
-    Button btnCreateEvent;
     Button btnLogout;
     Button btnFollow;
+    FloatingActionButton fabCreateEvent;
 
     TextView tvFarmName;
     TextView tvBio;
@@ -107,7 +108,7 @@ public class FarmProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        btnCreateEvent = view.findViewById(R.id.btnCreateEvent);
+        fabCreateEvent = view.findViewById(R.id.fabCreateEvent);
         btnLogout = view.findViewById(R.id.btnLogout);
         tvFarmName = view.findViewById(R.id.tvFarmName);
         tvPhoneNumber = view.findViewById(R.id.tvPhoneNumber);
@@ -134,11 +135,11 @@ public class FarmProfileFragment extends Fragment {
 
         if(getArguments() != null) { // this is a user viewing the farm
             farm = ((User)Parcels.unwrap(getArguments().getParcelable(User.FARM_USER_TYPE))).getUser();
-            btnCreateEvent.setVisibility(View.GONE);
+            fabCreateEvent.setVisibility(View.GONE);
             btnLogout.setVisibility(View.GONE);
         } else { // farmer viewing their own page
             farm = ParseUser.getCurrentUser();
-            btnCreateEvent.setOnClickListener(v -> {
+            fabCreateEvent.setOnClickListener(v -> {
                 showAlertDialog();
             });
 
