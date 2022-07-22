@@ -145,6 +145,60 @@ public class FarmProfileFragment extends Fragment {
             btnLogout.setVisibility(View.GONE);
             fabEditProfile.setVisibility(View.GONE);
             fabCreateEvent.setVisibility(View.GONE);
+
+            btnFollow.setVisibility(View.VISIBLE);
+            try {
+                if(checkUserFollowingFarm(farm.getObjectId(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) == -1) {
+                    btnFollow.setText(R.string.follow);
+                    btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.light_yellow));
+                } else {
+                    btnFollow.setText(R.string.following);
+                    btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_yellow));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            btnFollow.setOnClickListener(v -> {
+                ParseUser user = ParseUser.getCurrentUser();
+                try {
+                    // initializing params for cloudcode call
+                    HashMap<String, String> params = new HashMap();
+                    params.put("objectId", farm.getObjectId());
+                    params.put("followerId", user.getObjectId());
+
+                    int pos = checkUserFollowingFarm(farm.getObjectId(), user.getJSONArray(User.KEY_FARMS_FOLLOWING));
+                    if(pos == -1) {
+                        user.add(User.KEY_FARMS_FOLLOWING, farm.getObjectId());
+                        btnFollow.setText(R.string.following);
+                        btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_yellow));
+                        params.put("following", "true");
+                    } else {
+                        JSONArray farms = user.getJSONArray(User.KEY_FARMS_FOLLOWING);
+                        assert farms != null;
+                        farms.remove(pos);
+                        user.put(User.KEY_FARMS_FOLLOWING, farms);
+                        btnFollow.setText(R.string.follow);
+                        btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.light_yellow));
+                        params.put("following", "false");
+                    }
+                    ParseCloud.callFunctionInBackground("updateFollowers", params, (FunctionCallback<ParseObject>) (obj, e) -> {
+                        if (e == null) {
+                            Log.i(TAG, "non error");
+                        }else{
+                            Log.i(TAG, "error" + e.getMessage());
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                user.saveInBackground(e -> {
+                    if (e != null) {
+                        Log.i(TAG, "Something has happened", e);
+                    } else {
+                        Log.i(TAG, "Save successful");
+                    }
+                });
+            });
         } else { // farmer viewing their own page
             farm = ParseUser.getCurrentUser();
 
@@ -166,6 +220,7 @@ public class FarmProfileFragment extends Fragment {
                     Toast.makeText(getContext(), requireContext().getString(R.string.logout_success), Toast.LENGTH_SHORT).show();
                 }
             }));
+            btnFollow.setVisibility(View.GONE);
         }
 
         // parse events for this farm from data
@@ -222,60 +277,6 @@ public class FarmProfileFragment extends Fragment {
             }
             tagsAdapter.notifyItemRangeInserted(0, JSONtags.length());
         }
-
-        try {
-            if(checkUserFollowingFarm(farm.getObjectId(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) == -1) {
-                btnFollow.setText(R.string.follow);
-                btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.light_yellow));
-            } else {
-                btnFollow.setText(R.string.following);
-                btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_yellow));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        btnFollow.setOnClickListener(v -> {
-            ParseUser user = ParseUser.getCurrentUser();
-            try {
-                // initializing params for cloudcode call
-                HashMap<String, String> params = new HashMap();
-                params.put("objectId", farm.getObjectId());
-                params.put("followerId", user.getObjectId());
-
-                int pos = checkUserFollowingFarm(farm.getObjectId(), user.getJSONArray(User.KEY_FARMS_FOLLOWING));
-                if(pos == -1) {
-                    user.add(User.KEY_FARMS_FOLLOWING, farm.getObjectId());
-                    btnFollow.setText(R.string.following);
-                    btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_yellow));
-                    params.put("following", "true");
-                } else {
-                    JSONArray farms = user.getJSONArray(User.KEY_FARMS_FOLLOWING);
-                    assert farms != null;
-                    farms.remove(pos);
-                    user.put(User.KEY_FARMS_FOLLOWING, farms);
-                    btnFollow.setText(R.string.follow);
-                    btnFollow.setBackgroundColor(requireContext().getResources().getColor(R.color.light_yellow));
-                    params.put("following", "false");
-                }
-                ParseCloud.callFunctionInBackground("updateFollowers", params, (FunctionCallback<ParseObject>) (obj, e) -> {
-                    if (e == null) {
-                        Log.i(TAG, "non error");
-                    }else{
-                        Log.i(TAG, "error" + e.getMessage());
-                    }
-                });
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            user.saveInBackground(e -> {
-                if (e != null) {
-                    Log.i(TAG, "Something has happened", e);
-                } else {
-                    Log.i(TAG, "Save successful");
-                }
-            });
-        });
     }
 
     protected int checkUserFollowingFarm(String farmID, JSONArray farmsFollowing) throws JSONException {
@@ -295,17 +296,21 @@ public class FarmProfileFragment extends Fragment {
         createEventDialogFragment.show(fragmentManager, "create_event");
         fragmentManager.executePendingTransactions();
         createEventDialogFragment.getDialog().setOnDismissListener(dialogInterface -> {
-            // on dismiss,  update both feed fragment & events on the profile
+            // on dismiss, update both feed fragment & events on the profile
             ParseUser.getCurrentUser().fetchInBackground((farm, e) -> {
                 // get the events list from the farm
                 List<String> eventIds = farm.getList(User.KEY_EVENTS);
-                // query the last added event and add it to the list
-                ParseQuery<Event> eventQuery = ParseQuery.getQuery("Event");
-                eventQuery.getInBackground(eventIds.get(eventIds.size()-1), (event, e1) -> {
-                    mEvents.add(event);
-                    eventsAdapter.notifyItemInserted(mEvents.size()-1);
-                    dataManager.addEvent(event);
-                });
+                if(eventIds != null) {
+                    if(mEvents.isEmpty() || eventIds.get(eventIds.size()-1).equals(mEvents.get(mEvents.size()-1).getObjectId())) {
+                        // query the added event and add it to the list
+                        ParseQuery<Event> eventQuery = ParseQuery.getQuery("Event");
+                        eventQuery.getInBackground(eventIds.get(eventIds.size() - 1), (event, e1) -> {
+                            mEvents.add(event);
+                            eventsAdapter.notifyItemInserted(mEvents.size() - 1);
+                            dataManager.addEvent(event);
+                        });
+                    }
+                }
             });
         });
     }

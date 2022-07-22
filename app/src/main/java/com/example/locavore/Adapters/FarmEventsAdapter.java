@@ -304,7 +304,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
             List<Event> filteredEvents = new ArrayList<>();
 
             for (int i = 0; i < mEvents.size(); i++) {
-                if ((mEvents.get(i).getName().toLowerCase().contains(query)) || (mEvents.get(i).getFarm().toLowerCase().contains(query))) {
+                if ((mEvents.get(i).getName().toLowerCase().contains(query)) || (mEvents.get(i).getFarmName().toLowerCase().contains(query))) {
                     filteredEvents.add(mEvents.get(i));
                 }
             }

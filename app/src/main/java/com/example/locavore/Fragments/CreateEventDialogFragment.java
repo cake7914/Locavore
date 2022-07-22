@@ -132,6 +132,7 @@ public class CreateEventDialogFragment extends DialogFragment {
             ParseObject event = ParseObject.create("Event");
             event.put(Event.KEY_NAME, etEventName.getText().toString());
             event.put(Event.KEY_DESCRIPTION, etEventDescription.getText().toString());
+            event.put(Event.KEY_FARM_NAME, Objects.requireNonNull(ParseUser.getCurrentUser().getString(User.KEY_NAME)));
             event.put(Event.KEY_FARM, Objects.requireNonNull(ParseUser.getCurrentUser().getString(User.KEY_YELP_ID)));
             event.put(Event.KEY_LOCATION, Objects.requireNonNull(ParseUser.getCurrentUser().getParseGeoPoint(User.KEY_LOCATION)));
             event.put(Event.KEY_LOCATION_STR, Objects.requireNonNull(ParseUser.getCurrentUser().getString(User.KEY_ADDRESS)));
@@ -173,10 +174,11 @@ public class CreateEventDialogFragment extends DialogFragment {
                         Manifest.permission.READ_EXTERNAL_STORAGE,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE
                 }, 120);
+            } else {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent, "Open Gallery"), IMAGE_REQUEST);
             }
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            startActivityForResult(Intent.createChooser(intent, "Open Gallery"), IMAGE_REQUEST);
         });
 
         return alertDialogBuilder.create();

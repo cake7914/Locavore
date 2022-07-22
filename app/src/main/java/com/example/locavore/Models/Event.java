@@ -21,6 +21,7 @@ public class Event extends ParseObject implements Comparable<Event> {
     public static final String KEY_START_DATE = "startDate";
     public static final String KEY_END_DATE = "endDate";
     public static final String KEY_DAYS_OF_WEEK = "daysOfWeek";
+    public static final String KEY_FARM_NAME = "farmName";
     public int mWeight;
 
 
@@ -50,6 +51,13 @@ public class Event extends ParseObject implements Comparable<Event> {
         put(KEY_FARM, farm);
     }
 
+    public String getFarmName() {
+        return getString(KEY_FARM_NAME);
+    }
+    public void setFarmName(String farm) {
+        put(KEY_FARM_NAME, farm);
+    }
+
     public ParseGeoPoint getLocation() {
         return getParseGeoPoint(KEY_LOCATION);
     }
@@ -66,5 +74,6 @@ public class Event extends ParseObject implements Comparable<Event> {
     public void setLocationString(String locationString) {
         put(KEY_LOCATION_STR, locationString);
     }
+
 
 }
