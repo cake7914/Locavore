@@ -66,6 +66,7 @@ public class FarmProfileFragment extends Fragment {
     Button btnLogout;
     Button btnFollow;
     FloatingActionButton fabCreateEvent;
+    FloatingActionButton fabEditProfile;
 
     TextView tvFarmName;
     TextView tvBio;
@@ -110,6 +111,7 @@ public class FarmProfileFragment extends Fragment {
 
         fabCreateEvent = view.findViewById(R.id.fabCreateEvent);
         btnLogout = view.findViewById(R.id.btnLogout);
+        fabEditProfile = view.findViewById(R.id.fabEditProfile);
         tvFarmName = view.findViewById(R.id.tvFarmName);
         tvPhoneNumber = view.findViewById(R.id.tvPhoneNumber);
         ivBackgroundPhoto = view.findViewById(R.id.ivBackgroundPhoto);
@@ -210,6 +212,13 @@ public class FarmProfileFragment extends Fragment {
             }
             tagsAdapter.notifyItemRangeInserted(0, JSONtags.length());
         }
+
+        fabEditProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //show alert dialog
+            }
+        });
 
         try {
             if(checkUserFollowingFarm(farm.getObjectId(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) == -1) {

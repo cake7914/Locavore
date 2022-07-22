@@ -66,4 +66,5 @@
     <string name="contact_information">Contact Information</string>
     <string name="upload">Upload</string>
     <string name="upload_permissions">In order to upload photos, this app requires read permission for external files. Please enable these permissions in your device settings.</string>
+    <string name="x">X</string>
 </resources>

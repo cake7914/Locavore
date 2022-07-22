@@ -200,11 +200,20 @@
                 android:drawableStart="@android:drawable/ic_menu_upload"
                 android:text="@string/upload" />
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPhotos"
+                android:layout_width="236dp"
+                android:layout_height="127dp"
+                android:layout_marginStart="3dp"
+                android:layout_toEndOf="@+id/btnUpload" />
+
             <ImageView
                 android:id="@+id/ivPhoto"
                 android:layout_width="60dp"
                 android:layout_height="55dp"
-                android:layout_marginStart="1dp"
+                android:layout_below="@+id/btnUpload"
+                android:layout_marginStart="-149dp"
+                android:layout_marginTop="3dp"
                 android:layout_toEndOf="@+id/btnUpload"
                 tools:srcCompat="@tools:sample/avatars" />
 
@@ -213,8 +222,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="22dp"
+                android:layout_marginStart="-57dp"
+                android:layout_marginTop="114dp"
                 android:layout_toEndOf="@+id/ivPhoto"
                 tools:text="alksdh;f;aklsdjf;q" />
 
