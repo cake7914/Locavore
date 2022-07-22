@@ -143,12 +143,18 @@ public class FarmProfileFragment extends Fragment {
             farm = ((User)Parcels.unwrap(getArguments().getParcelable(User.FARM_USER_TYPE))).getUser();
             fabCreateEvent.setVisibility(View.GONE);
             btnLogout.setVisibility(View.GONE);
+            fabEditProfile.setVisibility(View.GONE);
+            fabCreateEvent.setVisibility(View.GONE);
         } else { // farmer viewing their own page
             farm = ParseUser.getCurrentUser();
+
+            fabCreateEvent.setVisibility(View.VISIBLE);
             fabCreateEvent.setOnClickListener(v -> showCreateEventAlertDialog());
 
             fabEditProfile.setOnClickListener(v -> showEditProfileAlertDialog());
+            fabEditProfile.setVisibility(View.VISIBLE);
 
+            btnLogout.setVisibility(View.VISIBLE);
             btnLogout.setOnClickListener(v -> ParseUser.logOutInBackground(e -> {
                 if (e != null) {
                     Log.e(TAG, "Issue with logout", e);

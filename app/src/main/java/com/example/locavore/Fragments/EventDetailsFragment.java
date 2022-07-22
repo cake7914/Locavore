@@ -1,4 +1,6 @@
 package com.example.locavore.Fragments;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 
 import com.example.locavore.Adapters.EventPhotosAdapter;
 import com.example.locavore.Models.Event;
+import com.example.locavore.Models.User;
 import com.example.locavore.Models.UserEvent;
 import com.example.locavore.R;
 import com.parse.ParseQuery;
@@ -86,6 +89,10 @@ public class EventDetailsFragment extends Fragment {
         tvEventName.setText(event.getName());
         tvEventDescription.setText(event.getDescription());
         tvEventLocation.setText(event.getLocationString());
+        tvEventLocation.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + event.getLocationString()));
+            startActivity(intent);
+        });
 
         LocalDateTime startDate = event.getDate(Event.KEY_START_DATE).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
         LocalDateTime endDate = event.getDate(Event.KEY_END_DATE).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
