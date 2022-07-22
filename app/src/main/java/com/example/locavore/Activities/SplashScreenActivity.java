@@ -84,9 +84,7 @@ public class SplashScreenActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if(grantResults[0] != PackageManager.PERMISSION_GRANTED && grantResults[1] != PackageManager.PERMISSION_GRANTED) { // neither permission granted
-            Toast.makeText(this, getString(R.string.location_permission), Toast.LENGTH_SHORT).show();
-            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
-            // instead of requesting permissions again, go to login and when the map loads if we don't have permissions, display alert
+            Toast.makeText(this, getString(R.string.location_permission), Toast.LENGTH_LONG).show();
         } else if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
             loadLocation();
         }

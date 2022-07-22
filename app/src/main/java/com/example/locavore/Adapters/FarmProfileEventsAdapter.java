@@ -32,6 +32,7 @@ import org.json.JSONException;
 import org.parceler.Parcels;
 
 import java.util.List;
+import java.util.Objects;
 
 public class FarmProfileEventsAdapter extends RecyclerView.Adapter<FarmProfileEventsAdapter.ViewHolder> {
     private Context mContext;
@@ -123,7 +124,7 @@ public class FarmProfileEventsAdapter extends RecyclerView.Adapter<FarmProfileEv
 
             // only display this information if this is a user viewing a farm's profile
             // if a farm is viewing it's own profile, provide edit functionality
-            if(!ParseUser.getCurrentUser().getString(User.KEY_YELP_ID).equals(event.getFarm())) {
+            if(!Objects.equals(ParseUser.getCurrentUser().getString(User.KEY_YELP_ID), event.getFarm())) {
                 // display depending on attended or not, and liked or not
                 ParseQuery<UserEvent> eventQuery = ParseQuery.getQuery("UserEvent");
                 eventQuery.whereEqualTo(UserEvent.KEY_USER_ID, ParseUser.getCurrentUser().getObjectId());

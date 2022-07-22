@@ -47,7 +47,7 @@
     <string name="short_password">Password must be > 10 characters long</string>
     <string name="misc_logout_error">An issue with logout has occurred</string>
     <string name="logout_success">Successful logout</string>
-    <string name="location_permission">This app requires location permission.</string>
+    <string name="location_permission">Please enable location permissions in your device settings order to use the app.</string>
     <string name="distance_calc">%.2f mi</string>
     <string name="start_date">Start Date</string>
     <string name="end_date">End Date</string>
@@ -65,7 +65,7 @@
     <string name="about_us">About Us</string>
     <string name="contact_information">Contact Information</string>
     <string name="upload">Upload</string>
-    <string name="upload_permissions">In order to upload photos, this app requires read permission for external files. Please enable these permissions in your device settings.</string>
+    <string name="upload_permissions">Please enable photo upload permissions in your device settings.</string>
     <string name="x">X</string>
     <string name="phone_number">Phone Number</string>
     <string name="address_cap">Address</string>
