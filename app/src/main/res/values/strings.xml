@@ -73,4 +73,9 @@
     <string name="profile_photo">Profile Photo</string>
     <string name="bio">Bio</string>
     <string name="tags">Tags</string>
+    <string name="empty_name">Please enter a name</string>
+    <string name="empty_email">Please enter an email address</string>
+    <string name="empty_bio">Please enter a short bio for the farm</string>
+    <string name="empty_address">Please enter an address for the farm</string>
+    <string name="invalid_radius">Please enter a number in miles between 5 and 25.</string>
 </resources>
