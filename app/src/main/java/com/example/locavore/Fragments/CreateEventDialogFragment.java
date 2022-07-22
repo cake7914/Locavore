@@ -81,14 +81,6 @@ public class CreateEventDialogFragment extends DialogFragment {
         // Required empty public constructor
     }
 
-    public static CreateEventDialogFragment newInstance(String title) {
-        CreateEventDialogFragment fragment = new CreateEventDialogFragment();
-        Bundle args = new Bundle();
-        args.putString("title", title);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     public void adjustDays(boolean checked, int id) {
         if (checked)
             eventDays[id] = 1;
@@ -130,11 +122,9 @@ public class CreateEventDialogFragment extends DialogFragment {
         cbFriday.setOnCheckedChangeListener((buttonView, isChecked) -> adjustDays(isChecked, 6));
         cbSaturday.setOnCheckedChangeListener((buttonView, isChecked) -> adjustDays(isChecked, 7));
 
-        assert getArguments() != null;
-        String title = getArguments().getString("title", "");
         AlertDialog.Builder alertDialogBuilder=  new AlertDialog.Builder(getActivity());
         alertDialogBuilder.setView(dialog);
-        alertDialogBuilder.setTitle(title);
+        alertDialogBuilder.setTitle("New Event");
 
         //alertDialogBuilder.setMessage("create a new event");
         alertDialogBuilder.setPositiveButton("Create", (dialog1, which) -> {
@@ -156,15 +146,16 @@ public class CreateEventDialogFragment extends DialogFragment {
             }
 
             event.saveInBackground(e -> {
-                // assign the event to the farm creating it
                 if(e != null) {
                     Log.e(TAG, "Error", e);
                 }
-                else {
+                else { // assign the event to the farm creating it
                     ParseUser user = ParseUser.getCurrentUser();
                     if (user != null) {
                         user.add(User.KEY_EVENTS, event.getObjectId());
-                        user.saveInBackground(e1 -> dialog1.dismiss());
+                        user.saveInBackground(e1 -> {
+                            dialog1.dismiss();
+                        });
                     }
                 }
             });
@@ -172,7 +163,7 @@ public class CreateEventDialogFragment extends DialogFragment {
 
         alertDialogBuilder.setNegativeButton("Cancel", (dialog12, which) -> {
             if (dialog12 != null) {
-                dialog12.dismiss();
+                dialog12.cancel();
             }
         });
 

@@ -3,6 +3,7 @@ package com.example.locavore.Fragments;
 import static com.example.locavore.BuildConfig.YELP_API_KEY;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,8 +41,11 @@ import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.FunctionCallback;
+import com.parse.GetCallback;
 import com.parse.ParseCloud;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import org.json.JSONArray;
@@ -141,9 +145,9 @@ public class FarmProfileFragment extends Fragment {
             btnLogout.setVisibility(View.GONE);
         } else { // farmer viewing their own page
             farm = ParseUser.getCurrentUser();
-            fabCreateEvent.setOnClickListener(v -> {
-                showAlertDialog();
-            });
+            fabCreateEvent.setOnClickListener(v -> showCreateEventAlertDialog());
+
+            fabEditProfile.setOnClickListener(v -> showEditProfileAlertDialog());
 
             btnLogout.setOnClickListener(v -> ParseUser.logOutInBackground(e -> {
                 if (e != null) {
@@ -213,13 +217,6 @@ public class FarmProfileFragment extends Fragment {
             tagsAdapter.notifyItemRangeInserted(0, JSONtags.length());
         }
 
-        fabEditProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //show alert dialog
-            }
-        });
-
         try {
             if(checkUserFollowingFarm(farm.getObjectId(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) == -1) {
                 btnFollow.setText(R.string.follow);
@@ -286,10 +283,41 @@ public class FarmProfileFragment extends Fragment {
         return -1;
     }
 
-    private void showAlertDialog() {
+    private void showCreateEventAlertDialog() {
         FragmentManager fragmentManager = getParentFragmentManager();
-        CreateEventDialogFragment alertDialog = CreateEventDialogFragment.newInstance("New Event");
-        alertDialog.show(fragmentManager, "fragment_alert");
+        CreateEventDialogFragment createEventDialogFragment = new CreateEventDialogFragment();
+        createEventDialogFragment.show(fragmentManager, "create_event");
+        fragmentManager.executePendingTransactions();
+        createEventDialogFragment.getDialog().setOnDismissListener(dialogInterface -> {
+            // on dismiss,  update both feed fragment & events on the profile
+            ParseUser.getCurrentUser().fetchInBackground((farm, e) -> {
+                // get the events list from the farm
+                List<String> eventIds = farm.getList(User.KEY_EVENTS);
+                // query the last added event and add it to the list
+                ParseQuery<Event> eventQuery = ParseQuery.getQuery("Event");
+                eventQuery.getInBackground(eventIds.get(eventIds.size()-1), (event, e1) -> {
+                    mEvents.add(event);
+                    eventsAdapter.notifyItemInserted(mEvents.size()-1);
+                    dataManager.addEvent(event);
+                });
+            });
+        });
+    }
+
+    private void showEditProfileAlertDialog() {
+        FragmentManager fragmentManager = getParentFragmentManager();
+        EditProfileDialogFragment editProfileDialogFragment = new EditProfileDialogFragment();
+        editProfileDialogFragment.show(fragmentManager, "edit_profile");
+        fragmentManager.executePendingTransactions();
+        editProfileDialogFragment.getDialog().setOnDismissListener(dialog -> {
+            // on dismiss, update everything in this fragment
+            ParseUser.getCurrentUser().fetchInBackground((farm, e) -> {
+                tvFarmName.setText(farm.getString(User.KEY_NAME));
+                tvBio.setText(farm.getString(User.KEY_BIO));
+                tvAddress.setText(farm.getString(User.KEY_ADDRESS));
+                tvPhoneNumber.setText(farm.getString(User.KEY_PHONE));
+            });
+        });
     }
 
     private void getFarmEvents(List<Event> allEvents, ParseUser farm) {

@@ -165,7 +165,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
                 }
             });
 
-            if(event.getPhotos() != null) {
+            if(event.getPhotos().length() != 0) {
                 Glide.with(mContext)
                         .load(event.getPhotos().getJSONObject(0).getString("url"))
                         .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))

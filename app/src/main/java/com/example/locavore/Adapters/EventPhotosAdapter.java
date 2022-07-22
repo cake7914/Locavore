@@ -53,7 +53,6 @@ public class EventPhotosAdapter extends RecyclerView.Adapter<EventPhotosAdapter.
 
         public void bind(String url) {
             Glide.with(mContext).load(url).centerCrop().into(ivPhoto);
-            ;
         }
     }
 

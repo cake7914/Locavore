@@ -99,7 +99,7 @@ public class FarmProfileEventsAdapter extends RecyclerView.Adapter<FarmProfileEv
         public void bind(Event event) throws JSONException {
             tvEventName.setText(event.getName());
 
-            if(event.getPhotos() != null) {
+            if(event.getPhotos().length() != 0) {
                 Glide.with(mContext)
                         .load(event.getPhotos().getJSONObject(0).getString("url"))
                         .transform(new MultiTransformation(new CenterCrop(), new RoundedCorners(50)))

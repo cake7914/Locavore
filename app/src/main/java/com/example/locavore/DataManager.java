@@ -131,8 +131,6 @@ public class DataManager {
 
         if(updateResponse != null)
             updateResponse.onUpdate(mFarms, mEvents);
-
-        Log.i(TAG, "completed update");
     }
 
     private void queryEvents(User farm, Location currentLocation) {
@@ -282,6 +280,12 @@ public class DataManager {
                 Log.i(TAG, "Failure " + t);
             }
         });
+    }
+
+    public void addEvent(Event event) {
+        insertEvent(event);
+        if(updateResponse != null)
+            updateResponse.onUpdate(mFarms, mEvents);
     }
 
     // populate the parse database with farm user
