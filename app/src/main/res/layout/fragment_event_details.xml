@@ -16,7 +16,7 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="375dp"
-        android:layout_height="400dp"
+        android:layout_height="475dp"
         android:layout_centerInParent="true"
         android:alpha="1"
         android:background="#E6E2E2"
@@ -24,15 +24,16 @@
         app:cardCornerRadius="25dp">
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:id="@+id/relativeLayout"
+            android:layout_width="375dp"
+            android:layout_height="475dp">
 
             <TextView
                 android:id="@+id/tvEventName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
                 android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
                 android:alpha="1"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -42,8 +43,9 @@
                 android:id="@+id/tvEventDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/tvEventName"
                 android:layout_marginHorizontal="5dp"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="8dp"
                 android:textAlignment="center"
                 android:textSize="16sp"
                 tools:text="Our beautiful 4-acre corn maze is themed each year; this year, travel through outer space as you solve puzzles!" />
@@ -53,9 +55,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignEnd="@id/btnLikeEvent2"
-                android:layout_alignParentBottom="true"
-                android:layout_marginEnd="42dp"
-                android:layout_marginBottom="11dp"
+                android:layout_alignBottom="@id/btnLikeEvent2"
+                android:layout_marginEnd="49dp"
+                android:layout_marginBottom="7dp"
                 tools:text="1.2k" />
 
             <TextView
@@ -109,10 +111,11 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvPhotos"
                 android:layout_width="350dp"
-                android:layout_height="wrap_content"
+                android:layout_height="200dp"
                 android:layout_below="@+id/tvDates"
                 android:layout_marginStart="10dp"
-                android:layout_marginTop="2dp" />
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="20dp" />
 
         </RelativeLayout>
 
