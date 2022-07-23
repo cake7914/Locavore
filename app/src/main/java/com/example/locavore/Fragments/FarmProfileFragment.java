@@ -311,6 +311,8 @@ public class FarmProfileFragment extends Fragment {
                         });
                     }
                 }
+                // dismiss the fragment itself
+                createEventDialogFragment.dismiss();
             });
         });
     }
@@ -327,6 +329,8 @@ public class FarmProfileFragment extends Fragment {
                 tvBio.setText(farm.getString(User.KEY_BIO));
                 tvAddress.setText(farm.getString(User.KEY_ADDRESS));
                 tvPhoneNumber.setText(farm.getString(User.KEY_PHONE));
+                // dismiss the fragment itself
+                editProfileDialogFragment.dismiss();
             });
         });
     }
