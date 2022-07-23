@@ -10,9 +10,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.locavore.Models.Event;
-import com.example.locavore.Models.FarmReviewsSearchResult;
 import com.example.locavore.Models.FarmSearchResult;
-import com.example.locavore.Models.Review;
 import com.example.locavore.Models.User;
 import com.example.locavore.Models.UserEvent;
 import com.example.locavore.Models.YelpCategory;
@@ -129,6 +127,10 @@ public class DataManager {
             }
         }
 
+        mergeSort(mEvents, mEvents.size());
+        for(int i = 0; i < mEvents.size(); i++)
+            Log.i(TAG, i + " " + mEvents.get(i).getName() + ": " + mEvents.get(i).mWeight);
+
         if(updateResponse != null)
             updateResponse.onUpdate(mFarms, mEvents);
     }
@@ -142,7 +144,7 @@ public class DataManager {
                     ParseQuery<Event> eventQuery = ParseQuery.getQuery("Event");
                     Event event = eventQuery.get(eventId);
                     event.mWeight = weightEvent(event, currentLocation, farm);
-                    insertEvent(event);
+                    mEvents.add(event);
                 } catch (JSONException | ParseException ex) {
                     ex.printStackTrace();
                 }
@@ -151,17 +153,57 @@ public class DataManager {
     }
 
     private void insertEvent(Event event) {
-        if(mEvents.size() == 0) {
-            mEvents.add(event);
-        } else {
-            for(int i = 0; i < mEvents.size(); i++) {
-                if(event.mWeight > mEvents.get(i).mWeight) { // add in front
+        if (mEvents.size() != 0) {
+            for (int i = 0; i < mEvents.size(); i++) {
+                if (event.mWeight > mEvents.get(i).mWeight) { // add in front
                     mEvents.add(i, event);
                     return;
                 }
-            } // case where event has the least weight & must be added last
-            mEvents.add(event);
+            }
         }
+        // at the end
+        mEvents.add(event);
+    }
+
+    public void addEvent(Event event) {
+        insertEvent(event);
+        if(updateResponse != null)
+            updateResponse.onUpdate(mFarms, mEvents);
+    }
+
+    public static void mergeSort(List<Event> events, int size) {
+        if(size < 2) {
+            return;
+        }
+
+        int mid = size / 2;
+        List<Event> left = new ArrayList<>(mid);
+        List<Event> right = new ArrayList<>(size-mid);
+
+        for (int i = 0; i < mid; i++) {
+            left.set(i, events.get(i));
+        }
+        for (int i = mid; i < size; i++) {
+            right.set(i - mid, events.get(i));
+        }
+        mergeSort(left, mid);
+        mergeSort(right, size - mid);
+
+        merge(events, left, right, mid, size - mid);
+    }
+
+    public static void merge(List<Event> events, List<Event> left, List<Event> right, int leftIndex, int rightIndex) {
+        int i = 0, j = 0, k = 0;
+        while (i < leftIndex && j < rightIndex) {
+            if (left.get(i).mWeight >= right.get(j).mWeight)
+                events.set(k++, left.get(i++));
+            else
+                events.set(k++, right.get(j++));
+        }
+        while (i < leftIndex)
+            events.set(k++, left.get(i++));
+        while (j < rightIndex)
+            events.set(k++, right.get(j++));
     }
 
     public int weightEvent(Event event, Location currentLocation, User farm) throws JSONException, ParseException {
@@ -242,7 +284,7 @@ public class DataManager {
         return -1;
     }
 
-    public void yelpRequest(String request, Location currentLocation) throws ParseException, IOException {
+    public void yelpRequest(String request, Location currentLocation) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -280,12 +322,6 @@ public class DataManager {
                 Log.i(TAG, "Failure " + t);
             }
         });
-    }
-
-    public void addEvent(Event event) {
-        insertEvent(event);
-        if(updateResponse != null)
-            updateResponse.onUpdate(mFarms, mEvents);
     }
 
     // populate the parse database with farm user
