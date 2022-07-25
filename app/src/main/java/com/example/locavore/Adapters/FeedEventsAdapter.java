@@ -5,7 +5,6 @@ import static android.location.LocationManager.NETWORK_PROVIDER;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -47,7 +46,7 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.ViewHolder> implements Filterable {
+public class FeedEventsAdapter extends RecyclerView.Adapter<FeedEventsAdapter.ViewHolder> implements Filterable {
     public static final String TAG = "FarmEventsAdapter";
     private static final double METERS_TO_MILE = 1609.34;
 
@@ -58,7 +57,7 @@ public class FarmEventsAdapter extends RecyclerView.Adapter<FarmEventsAdapter.Vi
     DataManager dataManager = DataManager.getInstance(null);
 
 
-    public FarmEventsAdapter(Context context, List<Event> events) {
+    public FeedEventsAdapter(Context context, List<Event> events) {
         this.mContext = context;
         this.mEvents = new ArrayList<>(events);
         this.mFilteredEvents = new ArrayList<>(events);

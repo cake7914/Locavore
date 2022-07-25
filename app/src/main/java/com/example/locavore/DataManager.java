@@ -181,10 +181,10 @@ public class DataManager {
         List<Event> right = new ArrayList<>(size-mid);
 
         for (int i = 0; i < mid; i++) {
-            left.set(i, events.get(i));
+            left.add(i, events.get(i));
         }
         for (int i = mid; i < size; i++) {
-            right.set(i - mid, events.get(i));
+            right.add(i - mid, events.get(i));
         }
         mergeSort(left, mid);
         mergeSort(right, size - mid);

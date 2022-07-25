@@ -1,13 +1,10 @@
 package com.example.locavore.Fragments;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -22,22 +19,19 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.locavore.Adapters.FarmEventsAdapter;
+import com.example.locavore.Adapters.FeedEventsAdapter;
 import com.example.locavore.Adapters.FarmProfilesAdapter;
 import com.example.locavore.DataManager;
 import com.example.locavore.Models.Event;
 import com.example.locavore.Models.User;
 import com.example.locavore.R;
-import com.parse.ParseException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +39,7 @@ public class FeedFragment extends Fragment implements DataManager.UpdateResponse
     public static final String TAG = "FeedFragment";
     private RecyclerView rvFarmProfiles;
     private RecyclerView rvFarmEvents;
-    private FarmEventsAdapter eventsAdapter;
+    private FeedEventsAdapter eventsAdapter;
     private FarmProfilesAdapter profilesAdapter;
     private Location location;
     private LocationManager locationManager;
@@ -73,7 +67,7 @@ public class FeedFragment extends Fragment implements DataManager.UpdateResponse
         super.onViewCreated(view, savedInstanceState);
 
         rvFarmEvents = view.findViewById(R.id.rvFarmEvents);
-        eventsAdapter = new FarmEventsAdapter(getContext(), mEvents);
+        eventsAdapter = new FeedEventsAdapter(getContext(), mEvents);
         rvFarmEvents.setAdapter(eventsAdapter);
         rvFarmEvents.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -110,8 +104,10 @@ public class FeedFragment extends Fragment implements DataManager.UpdateResponse
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                return true;
+            public boolean onQueryTextChange(String query) {
+                eventsAdapter.getFilter().filter(query);
+                profilesAdapter.getFilter().filter(query);
+                return false;
             }
         });
 

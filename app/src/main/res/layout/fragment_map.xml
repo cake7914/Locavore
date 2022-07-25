@@ -54,14 +54,14 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/btnIncreaseRadius"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="9dp"
-        android:layout_marginBottom="1dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="-79dp"
         android:background="#FFFFFF"
         android:textAlignment="center"
         android:textColor="#000000"
-        android:textSize="16sp"
+        android:textSize="20sp"
         android:textStyle="bold"
-        tools:text="25 miles" />
+        tools:text="25 mi" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvProfiles"

@@ -50,6 +50,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.ui.IconGenerator;
@@ -212,9 +213,9 @@ public class MapFragment extends Fragment implements MapProfilesAdapter.Expansio
         }
         map.setMyLocationEnabled(true);
         map.getUiSettings().setMyLocationButtonEnabled(true);
-        /*map.setMapStyle(
+        map.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
-                        getContext(), R.raw.style_json));*/
+                        requireContext(), R.raw.style_json));
 
         map.setOnMarkerClickListener(marker -> {
             // scroll the adapter to the farm that has been clicked on
