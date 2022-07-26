@@ -8,16 +8,15 @@
 
 ## Overview
 ### Description
-Locavore is an app that helps users find local farms and agritourism events. 
+Locavore helps consumers become "locavores" by finding farms and agritourism events within their designated radius.  
 
 ### App Evaluation
-[Evaluation of your app across the following attributes]
 - **Category:** Social
 - **Mobile:** To me, this app would work best on mobile rather than web because of the value of push notifications and the many different audiences who can be reached. 
 - **Story:** allow people to find local farms and have on farm experiences. 
-- **Market:** many available markets: the definition of agritourism events is very broad, and can be anything from horseback riding lessons to wine tastings at vineyards to corn mazes to sunflower festivals to pick-your-own to concerts/performances. These events all attract a wide variety of people, from young couples to families to the elderly to gen z and millenials. Farms of all shapes and sizes create their own unique charm, and have the capability of capturing the attention of a diverse array of audiences. This is an untapped market because farms mostly operate on word of mouth and thus unless well acquainted with an area, it can be hard for consumers to even know that agritourism events like these are taking place.
-- **Habit:** Users can always find new farms and events near them. They can also receive push notifications for events from liked farms, upcoming events they're attending, etc, to keep them engaged. Additionally, events can be added to their calendars.
-- **Scope:** All communities can benefit from an app like this: city folk can find events in the nearby countryside, and those who own the farms and live in those communities will benefit from the tourism and spending. 
+- **Market:** There are many available markets: the definition of agritourism events is very broad, and can be anything from horseback riding lessons to wine tastings at vineyards to corn mazes to sunflower festivals to pick-your-own produce to concerts/performances. These events all attract a wide variety of people, from young couples to families to the elderly to gen z and millenials. Farms of all shapes and sizes create their own unique charm, and have the capability of capturing the attention of a diverse array of audiences. This is an untapped market because farms mostly operate on word of mouth and thus unless well acquainted with an area, it can be hard for consumers to even know that agritourism events like these are taking place.
+- **Habit:** Users can always find new farms and events near them. They could also receive push notifications for events from liked farms, upcoming events they're attending, etc, to keep them engaged. Additionally, events could be added to their calendars.
+- **Scope:** All communities can benefit from an app like this: city folk can find events in the nearby countryside, and those who own the farms and live in those communities will benefit from the tourism and spending.
 
 ## Product Spec
 
@@ -32,8 +31,7 @@ Locavore is an app that helps users find local farms and agritourism events.
 
 **Your app integrates with at least one SDK (e.g. Google Maps SDK, Facebook SDK) or API (that you didn’t learn about in CodePath) – free SDKs and APIs only**
 * Google Maps
-* Yelp!
-* Google Calendar
+* Yelp
 
 **You can log in/log out of your app as a user**
 * Using Parse database
@@ -45,54 +43,53 @@ Locavore is an app that helps users find local farms and agritourism events.
 * Many views.
 
 **Your app uses at least one gesture (e.g. double tap to like, e.g. pinch to scale)**
-* User swipe left to archive event on profile (animates the view leaving the screen)
+* User can double tap to like an event. 
 
 **Your app incorporates at least one external library to add visual polish**
 * Glide, Lottie
 
 **Your app uses at least one animation (e.g. fade in/out, e.g. animating a view growing and shrinking)**
-* Fancy scrolling animation within profile
-* within map screen, scrolling of the recyclerview depending on farm clicked on (and details view expanding/collapsing as well)
+* within map screen, the recyclerview scrolls to the farm clicked on, and animates when that profile is collapsed.
 
 ### 1. User Stories (Required and Optional)
 
-**Required Must-have Stories**
+**Required Must-have Stories (Completed)**
 
 * use parse database for:
      * signup / login for farmers (includes farmers markets)
-     * signup / login for "locavores"... settings include: setting radius (for searches)?
+     * signup / login for "locavores"
 * home page including: 
     * farmer profile scroll view (horizontal recycler view) at the top
     * deals/sales/upcoming events from local farms (vertical recycler view)
     * user can click on event to see detail view on modal overlay
     * search bar where user can search local farms / filter tags
-* events that the user signs up for can be added to their google calendar 
-* map where locavores can see farms in their area (use google maps API)
+* map where locavores can see farms in their area (using the google maps API)
     * horizontal recycler view of farm profiles at the bottom
     * this scrolls to a farm and displays larger details view when a farm is clicked on the map
     * in the opposite direction, as the recycler view is scrolled through, zooms to different farms on the map
-    * users can tap to be brought to the farm profile
+    * users can tap to be brought to the farm's more detailed profile
 * farm profile
    * header fragment including profile picture, background picture, name, description, tags. 
    * header fragment collapses with cool scrolling animation as the user scrolls down
-   * farmer has edit buttons for this ^
+   * farmer can edit their profile information
    * horizontal recyclerview of events
-   * horizontal recyclerview of reviews (from Yelp! API)
-   * floating action button in the bottom right corner in farmer view, to add events
-   * event creation screen --> if farmers' market rather than farm then some fields are different
+   * horizontal recyclerview of reviews taken from Yelp API
+   * farmers can create new events--> complete with photos, times, dates, description.
 * user profile 
-   * profile photo, name, settings, vertical recycler view of events (past + upcoming) that I've attended / will be attending
-   * user can swipe left to archive an event
    * logout button
-* farms are "favoritable (or followable?)" by user
-* push notifications with events from favorited(followed) farms (or just events that user "may like"?)
+   * user can follow farms
+   * user can mark events as attended, liked, disliked.
 
-**Optional Nice-to-have Stories**
-*  favorited farms events show up at the top of user's home feed
+**Ideas for Future Features**
 *  user can post reviews on farm profile
 *  user can place an order to the farmer based on current crops in stock via an orders screen
 *  user can view a "learn" tab in which various agriculture definitions can be found
-*  chat feature where user can ask the farm qs
+*  chat feature where user can ask the farm questions
+*  events that the user signs up for can be added to their google calendar 
+*  user profile:
+    *  profile photo, name, settings, vertical recycler view of events (past + upcoming) that I've attended / will be attending
+    *  user can swipe left to archive an event
+* push notifications with events from favorited(followed) farms (or just events that user "may like"?)
 
 ### 2. Screen Archetypes
 
@@ -111,17 +108,17 @@ Locavore is an app that helps users find local farms and agritourism events.
 
 * Home Tab (home screen)
 * Map tab (map screen)
-* Orders Tab (orders screen--> woud look different for farmer vs consumer)
-* User Profile Tab (profile screen--> looks different for farmer vs consumer)
+* Orders Tab (orders screen)
+* User Profile Tab (farmer profile screen OR user profile screen)
 
 **Flow Navigation** (Screen to Screen)
 
 * Farmer Signup / login
    * signup: set up profile
-   * home screen
+   * map screen
 * Consumer Signup / login
    * signup: set up profile
-   * home screen
+   * map screen
 
 ## Wireframes
 ![](feed_screen.jpeg)
@@ -184,7 +181,7 @@ Event
 |          |                  |                                 |
 |          |                  |                                 |
 
-Review -- Waiting on approval from Yelp devs to view the endpoints and json objects
+Review
 | Property | Type | Description |
 |----------|------|-------------|
 |          |      |             |
@@ -205,8 +202,6 @@ Example query:
     protected void queryEvents() {
         
     ParseQuery<Event> query = ParseQuery.getQuery(Event.class);    
-    query.include(Event.KEY_FARM);     
-    query.setLimit(20);
     query.addDescendingOrder("distance");
         
     query.findInBackground(new FindCallback<Event>() {
@@ -231,19 +226,16 @@ Example query:
     
 ### Networking
 ## Requests by Screen
-- Home Screen
+- Feed Screen
     - (Read/GET) Query all events within range
     - (Read/GET) Query all farmer profiles within range
 - Profile Screen
-    - (Read/GET) Query this user's information
-    - 
+    - (Read/GET) Query this user's information from Parse
+    - (Read/GET) Query this user's Yelp reviews if farmer.
 - Map Screen
     - Google Maps API: https://developers.google.com/maps/documentation/android-sdk/utility
     - (READ/GET) Query all farmer profiles within range
-- 
 
 - Yelp API: https://knowledge.yelp.com/
 - Google Maps API: https://developers.google.com/maps/documentation/android-sdk/utility
-- USDA Farmers' Market API: https://search.ams.usda.gov/farmersmarkets/v1/svcdesc.html
 - Parse Database: https://www.back4app.com/
-- Google Calendar API: https://developers.google.com/calendar/api
