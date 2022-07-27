@@ -301,7 +301,7 @@ public class FarmProfileFragment extends Fragment {
                 // get the events list from the farm
                 List<String> eventIds = farm.getList(User.KEY_EVENTS);
                 if(eventIds != null) {
-                    if(mEvents.isEmpty() || eventIds.get(eventIds.size()-1).equals(mEvents.get(mEvents.size()-1).getObjectId())) {
+                    if(mEvents.isEmpty() || !eventIds.get(eventIds.size()-1).equals(mEvents.get(mEvents.size()-1).getObjectId())) {
                         // query the added event and add it to the list
                         ParseQuery<Event> eventQuery = ParseQuery.getQuery("Event");
                         eventQuery.getInBackground(eventIds.get(eventIds.size() - 1), (event, e1) -> {

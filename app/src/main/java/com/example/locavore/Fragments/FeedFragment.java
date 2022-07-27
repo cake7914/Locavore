@@ -26,7 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.locavore.Adapters.FeedEventsAdapter;
+import com.example.locavore.Adapters.EventsAdapter;
 import com.example.locavore.Adapters.FarmProfilesAdapter;
 import com.example.locavore.DataManager;
 import com.example.locavore.Models.Event;
@@ -40,7 +40,7 @@ public class FeedFragment extends Fragment implements DataManager.UpdateResponse
     public static final String TAG = "FeedFragment";
     private RecyclerView rvFarmProfiles;
     private RecyclerView rvFarmEvents;
-    private FeedEventsAdapter eventsAdapter;
+    private EventsAdapter eventsAdapter;
     private FarmProfilesAdapter profilesAdapter;
     private Location location;
     private LocationManager locationManager;
@@ -68,7 +68,7 @@ public class FeedFragment extends Fragment implements DataManager.UpdateResponse
         super.onViewCreated(view, savedInstanceState);
 
         rvFarmEvents = view.findViewById(R.id.rvFarmEvents);
-        eventsAdapter = new FeedEventsAdapter(getContext(), mEvents);
+        eventsAdapter = new EventsAdapter(getContext(), mEvents);
         rvFarmEvents.setAdapter(eventsAdapter);
         rvFarmEvents.setLayoutManager(new LinearLayoutManager(getContext()));
 
