@@ -213,7 +213,7 @@ public class DataManager {
         Location eventLocation = new Location(NETWORK_PROVIDER);
         eventLocation.setLatitude(event.getLocation().getLatitude());
         eventLocation.setLongitude(event.getLocation().getLongitude());
-        weight -= (currentLocation.distanceTo(eventLocation) / METERS_TO_MILE);
+        weight -= (currentLocation.distanceTo(eventLocation) / METERS_TO_MILE) * 10;
 
         // if the user follows the farm, add a lot of weight
         if(checkUserFollowingFarm(event.getFarm(), ParseUser.getCurrentUser().getJSONArray(User.KEY_FARMS_FOLLOWING)) != -1) {
