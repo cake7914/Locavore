@@ -11,7 +11,7 @@
 Locavore helps consumers become "locavores" by finding farms and agritourism events within their designated radius.  
 
 ### Demo:
-<video src="https://youtu.be/YMuW5qZYyV8">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YMuW5qZYyV8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     
 ### App Evaluation
 - **Category:** Social
