@@ -10,8 +10,8 @@
 ### Description
 Locavore helps consumers become "locavores" by finding farms and agritourism events within their designated radius.  
 
-### Demo: (TBD)
-
+### Demo:
+![](LocavoreDemoFinal.mp4)
 ### App Evaluation
 - **Category:** Social
 - **Mobile:** To me, this app would work best on mobile rather than web because of the value of push notifications and the many different audiences who can be reached. 
